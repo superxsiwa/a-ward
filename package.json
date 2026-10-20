@@ -1,0 +1,20 @@
+{
+  "name": "a-ward",
+  "version": "1.0.0",
+  "description": "CCU Nursing Clinical Simulation & Decision Game for Mobile",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "nurse",
+    "ccu",
+    "simulation",
+    "game",
+    "clinical",
+    "mobile"
+  ],
+  "author": "SuperX & Antigravity",
+  "license": "ISC"
+}

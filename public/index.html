@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>A-WARD: CCU Nursing Clinical Decision Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070d19;
+      --card-bg: #0f1c34;
+      --card-border: rgba(56, 189, 248, 0.25);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.4);
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --amber: #f59e0b;
+      --purple: #a855f7;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --header-h: 56px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: #030712;
+      color: var(--text);
+      font-family: 'Prompt', -apple-system, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Mobile Container Simulator */
+    .app-viewport {
+      width: 100%;
+      max-width: 440px;
+      height: 100vh;
+      max-height: 920px;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 20px rgba(56, 189, 248, 0.15);
+      border-radius: 0px;
+      overflow: hidden;
+    }
+
+    @media (min-width: 480px) {
+      .app-viewport {
+        border-radius: 32px;
+        height: 94vh;
+        border: 2px solid rgba(56, 189, 248, 0.3);
+      }
+    }
+
+    /* Top Patient Monitor Bar */
+    .patient-vitals-monitor {
+      background: linear-gradient(180deg, #020617, #0b1329);
+      border-bottom: 2px solid rgba(56, 189, 248, 0.25);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 20;
+    }
+
+    .monitor-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .bed-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .patient-condition-badge {
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .cond-stable {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .cond-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      animation: pulseWarning 1.5s infinite;
+    }
+    .cond-critical {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      animation: pulseCritical 0.8s infinite;
+    }
+
+    @keyframes pulseCritical {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.04); opacity: 0.8; box-shadow: 0 0 10px rgba(244, 63, 94, 0.5); }
+    }
+
+    /* Live Digital Vitals Grid */
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: #020817;
+      padding: 6px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(30, 41, 59, 0.8);
+    }
+
+    .vital-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .vital-label {
+      font-size: 9.5px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vital-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .val-hr { color: #22c55e; }
+    .val-bp { color: #38bdf8; }
+    .val-spo2 { color: #06b6d4; }
+    .val-temp { color: #f59e0b; }
+
+    /* EKG Wave Line Animation Canvas */
+    .ekg-canvas-container {
+      width: 100%;
+      height: 28px;
+      background: #010409;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    canvas#ekgCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Main Game Stage Area */
+    .game-stage-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Case Info Card */
+    .case-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .case-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--cyan);
+    }
+
+    .step-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .scenario-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      line-height: 1.35;
+    }
+
+    .scenario-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.55;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.1);
+    }
+
+    /* Dialogue Simulation Bubble */
+    .npc-dialogue-box {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin: 4px 0;
+    }
+
+    .npc-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      border: 2px solid var(--cyan);
+    }
+
+    .npc-bubble {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 14px;
+      border-top-left-radius: 4px;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: #e2e8f0;
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .npc-name {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 2px;
+    }
+
+    /* Decision Options Box */
+    .choices-container {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 4px;
+    }
+
+    .choice-btn {
+      background: #132242;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #f1f5f9;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-family: 'Prompt', sans-serif;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .choice-btn:hover {
+      background: #193161;
+      border-color: var(--cyan);
+      transform: translateY(-1px);
+    }
+
+    .choice-btn:active {
+      transform: scale(0.98);
+    }
+
+    .choice-letter {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--cyan);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+
+    .choice-btn.selected-correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: #34d399 !important;
+      color: #a7f3d0 !important;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+    }
+    .choice-btn.selected-correct .choice-letter {
+      background: #10b981;
+      color: white;
+    }
+
+    .choice-btn.selected-wrong {
+      background: rgba(244, 63, 94, 0.25) !important;
+      border-color: #fb7185 !important;
+      color: #fecdd3 !important;
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.3);
+    }
+    .choice-btn.selected-wrong .choice-letter {
+      background: #f43f5e;
+      color: white;
+    }
+
+    /* Result Feedback Sheet */
+    .feedback-panel {
+      display: none;
+      background: #0f172a;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 6px;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(12px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .feedback-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .fb-correct { color: #34d399; }
+    .fb-wrong { color: #fb7185; }
+
+    .feedback-rationale {
+      font-size: 12.5px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .btn-next-step {
+      width: 100%;
+      background: linear-gradient(135deg, #0284c7, #38bdf8);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+
+    /* Bottom Control / Score Bar */
+    .bottom-status-bar {
+      background: #020617;
+      border-top: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    /* Fullscreen Game Over / Victory Modal */
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .modal-content-box {
+      background: #0f1d38;
+      border: 1px solid var(--cyan);
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-viewport">
+    
+    <!-- Top Patient Vitals Monitor -->
+    <header class="patient-vitals-monitor">
+      <div class="monitor-top-row">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="bed-badge">🛏️ เตียง 02 CCU</span>
+          <span style="font-size: 11.5px; color: #cbd5e1; font-weight: 600;" id="patientNameHeader">นายสุรชัย วงศ์วาน (68 ปี)</span>
+        </div>
+        <span class="patient-condition-badge cond-warning" id="patientCondBadge">⚠️ เฝ้าระวังใกล้ชิด</span>
+      </div>
+
+      <!-- Vitals Values -->
+      <div class="vitals-grid">
+        <div class="vital-item">
+          <span class="vital-label">HR (bpm)</span>
+          <span class="vital-value val-hr" id="vitHR">88</span>
+        </div>
+        <div class="vital-item">
+          <span class="vital-label">NIBP (mmHg)</span>
+          <span class="vital-value val-bp" id="vitBP">115/72</span>
+        </div>
+        <div class="vital-item">
+          <span class="vital-label">SpO2 (%)</span>
+          <span class="vital-value val-spo2" id="vitSpO2">98%</span>
+        </div>
+        <div class="vital-item">
+          <span class="vital-label">MAP (mmHg)</span>
+          <span class="vital-value val-temp" id="vitMAP">86</span>
+        </div>
+      </div>
+
+      <!-- Live ECG Canvas Wave -->
+      <div class="ekg-canvas-container">
+        <canvas id="ekgCanvas" width="380" height="28"></canvas>
+      </div>
+    </header>
+
+    <!-- Main Game Play Area -->
+    <main class="game-stage-container" id="gameStage">
+      
+      <!-- Scenario Stage Card -->
+      <div class="case-card">
+        <div class="step-indicator" id="stepIndicator">
+          <span>🩺 ขั้นตอนที่ 1/5: รับเวร & ประเมินแรกรับ</span>
+        </div>
+        <h2 class="scenario-title" id="scenarioTitle">
+          รับผู้ป่วย Post-PCI หลังแทงสายสวนหลอดเลือดหัวใจ (Femoral Sheath)
+        </h2>
+        <div class="scenario-desc" id="scenarioDesc">
+          ผู้ป่วยชาย 68 ปี Dx: Acute STEMI Anterior wall ทำ Emergency PCI ใส่ Stent ที่ LAD มาถึง CCU ยังมี Arterial Sheath คาอยู่ที่ขาหนีบด้านขวา บ่นปวดตึงบริเวณแผลเล็กน้อย
+        </div>
+      </div>
+
+      <!-- Dialogue Simulation -->
+      <div class="npc-dialogue-box">
+        <div class="npc-avatar">👩‍⚕️</div>
+        <div class="npc-bubble">
+          <div class="npc-name">พว. วรรณา (Charge Nurse CCU):</div>
+          <span id="npcDialogueText">"น้องคะ คนไข้เพิ่งขึ้นมาจาก Cath Lab สดๆ ร้อนๆ สิ่งแรกที่ต้องประเมินและระวังที่สุดตามขั้นตอนของ CCU คืออะไรจ๊ะ?"</span>
+        </div>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div class="choices-container" id="choicesContainer">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Feedback / Clinical Rationale Sheet -->
+      <div class="feedback-panel" id="feedbackPanel">
+        <div class="feedback-title" id="feedbackTitle">
+          <!-- Success or Error Icon & Title -->
+        </div>
+        <div class="feedback-rationale" id="feedbackRationale">
+          <!-- Explanation from clinical perspective -->
+        </div>
+        <button class="btn-next-step" id="btnNextStep" onclick="nextStageStep()">
+          <span>ต่อไปยังสถานการณ์ถัดไป ➔</span>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- Bottom Status & Safety Score Bar -->
+    <footer class="bottom-status-bar">
+      <div class="stat-badge" style="color: #38bdf8;">
+        <span>🛡️ ความปลอดภัยคนไข้:</span>
+        <span id="safetyScoreText" style="font-weight: 700;">100%</span>
+      </div>
+      <div class="stat-badge" style="color: #f59e0b;">
+        <span>⭐ EXP:</span>
+        <span id="nurseExpText" style="font-weight: 700;">0</span>
+      </div>
+    </footer>
+
+    <!-- Result / Mission Complete Modal -->
+    <div class="modal-overlay" id="resultModal">
+      <div class="modal-content-box">
+        <div style="font-size: 48px; margin-bottom: 8px;" id="modalIcon">🏆</div>
+        <h2 style="font-size: 18px; color: #fff; margin-bottom: 6px;" id="modalTitle">จบรอบจำลองสถานการณ์ CCU!</h2>
+        <div style="font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 16px;" id="modalBody">
+          คุณผ่านเคสการจัดการภาวะวิกฤตหลอดเลือดหัวใจสำเร็จ!
+        </div>
+        <div style="background: rgba(2, 6, 23, 0.6); padding: 10px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(56, 189, 248, 0.2);">
+          <div style="font-size: 12px; color: var(--muted);">คะแนนการตัดสินใจทางการพยาบาล</div>
+          <div style="font-size: 24px; font-weight: 700; color: #38bdf8;" id="finalScoreText">100 / 100</div>
+        </div>
+        <button class="btn-next-step" onclick="restartCase()">
+          <span>🔄 เล่นจำลองเคสใหม่อีกครั้ง</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ==========================================
+    // CCU CASE SCENARIO DATA (ลำดับขั้นตอนจำลองเคสจริง)
+    // ==========================================
+    const ccuCaseData = {
+      patient: {
+        name: "นายสุรชัย วงศ์วาน",
+        age: 68,
+        bed: "เตียง 02 CCU",
+        dx: "Acute STEMI Anterior post PCI c Stent LAD (Day 1)",
+      },
+      steps: [
+        {
+          id: 1,
+          stageTitle: "ขั้นตอนที่ 1/5: รับเวร & ตรวจประเมินแรกรับ (Initial Assessment)",
+          scenarioDesc: "ผู้ป่วยชาย 68 ปี หลังทำ Emergency PCI ใส่ Stent ที่ LAD เพิ่งขึ้นมาถึง CCU มี Arterial Sheath คาที่ขาหนีบขวา สัญญาณชีพแรกรับ BP 115/72, HR 88 regular, SpO2 98%",
+          npcSpeech: "\"น้องคะ คนไข้เพิ่งขึ้นมาจาก Cath Lab มีสาย Sheath คาที่ขาหนีบ ขั้นตอนแรกสุดที่ต้องลงมือตรวจเพื่อความปลอดภัยทันทีคืออะไร?\"",
+          vitals: { hr: 88, bp: "115/72", spo2: "98%", map: 86, condClass: "cond-stable", condText: "🟢 สัญญาณชีพคงตัว" },
+          choices: [
+            {
+              letter: "A",
+              text: "ตรวจคลำชีพจรหลังเท้า (Dorsalis pedis) อุณหภูมิปลายเท้า และดูแผลที่ขาหนีบขวา",
+              isCorrect: true,
+              rationale: "ถูกต้องยอดเยี่ยม! ต้องตรวจ Neurovascular sign ปลายเท้าเทียบ 2 ข้าง และคลำแผลหา Hematoma/Bleed ทันที เพื่อประเมินภาวะขาดเลือดและเลือดออกหลังทำหัตถการ"
+            },
+            {
+              letter: "B",
+              text: "จัดท่านอนยกหัวเตียงสูง 60 องศาทันที เพื่อให้คนไข้หายใจสะดวก",
+              isCorrect: false,
+              rationale: "ผิดร้ายแรง! คนไข้ที่คาสาย Sheath ที่ขาหนีบ ต้องนอนราบห้ามงอขาหนีบเด็ดขาด (Bed rest flat 0-30 องศา) การยกหัวสูงจะทำให้เกิด Hematoma และ Sheath หักงอได้!"
+            },
+            {
+              letter: "C",
+              text: "ถอด EKG Monitor ออกก่อน เพื่อพาคนไข้ลุกไปเข้าห้องน้ำปัสสาวะ",
+              isCorrect: false,
+              rationale: "อันตรายมาก! คนไข้ Acute STEMI หลัง PCI ห้ามลุกจากเตียงเด็ดขาด และต้องติด EKG Monitor ตลอดเวลาเพื่อระวัง Re-occlusion และ Arrhythmia"
+            }
+          ]
+        },
+        {
+          id: 2,
+          stageTitle: "ขั้นตอนที่ 2/5: สัญญาณเตือนวิกฤต (Clinical Deterioration)",
+          scenarioDesc: "ผ่านไป 1 ชั่วโมง คนไข้มีอาการกระสับกระส่าย บ่นปวดหน่วงบริเวณบั้นเอวและหลังด้านขวาอย่างรุนแรง หน้าซีด เหงื่อแตก ตรวจดูผ้าก๊อซแผลที่ขาหนีบไม่มีเลือดซึมออกมาภายนอก",
+          npcSpeech: "\"น้อง! ดูมอนิเตอร์เร็ว! ความดันตกลงมาเหลือ 85/50 คนไข้บ่นปวดหลังมาก แต่แผลภายนอกไม่มีเลือดไหล น้องสงสัยภาวะอะไรและจะทำอย่างไรก่อน?!\"",
+          vitals: { hr: 118, bp: "85/50", spo2: "95%", map: 58, condClass: "cond-critical", condText: "🚨 วิกฤต: BP Drop & Tachycardia" },
+          choices: [
+            {
+              letter: "A",
+              text: "ให้ยานอนหลับ หรือยาพาราแก้ปวด แล้วสังเกตอาการต่ออีก 1 ชั่วโมง",
+              isCorrect: false,
+              rationale: "อันตรายถึงชีวิต! การที่ BP drop ร่วมกับปวดหลังรุนแรงหลังแทงสาย Femoral เป็นอาการคลาสสิกของ 'Retroperitoneal Hemorrhage' (เลือดออกหลังเยื่อบุช่องท้อง) ห้ามชะล่าใจ!"
+            },
+            {
+              letter: "B",
+              text: "คลำหน้าท้องส่วนล่างข้างขวา เปิด IV สารน้ำโหลดทันที และรีบรายงานแพทย์เจ้าของไข้ด่วน",
+              isCorrect: true,
+              rationale: "เฉียบขาดมาก! Retroperitoneal Bleed เลือดจะออกซ่อนในช่องท้องด้านหลัง แผลภายนอกจะไม่เห็นเลือด ต้องคลำท้อง ตรวจสอบภาวะ Hypovolemic shock เปิดสารน้ำ และตามแพทย์ทันที!"
+            },
+            {
+              letter: "C",
+              text: "สั่งปลดสาย Arterial Sheath ออกเองทันทีเพื่อหาต้นเหตุของอาการปวด",
+              isCorrect: false,
+              rationale: "ผิดเด็ดขาด! ขณะที่คนไข้กำลัง Shock ความดันตก ห้ามปลด Sheath เองโดยไม่มีแพทย์และอุปกรณ์ช่วยฟื้นคืนชีพพร้อม"
+            }
+          ]
+        },
+        {
+          id: 3,
+          stageTitle: "ขั้นตอนที่ 3/5: การปฏิบัติการพยาบาล & บริหารยา (Intervention & Medication)",
+          scenarioDesc: "แพทย์สั่งการรักษาด่วน: โหลด 0.9% NSS 500 ml IV stat, เจาะ Hct ด่วน, สั่งจอง PRC 2 units และให้เริ่มยา Levophed (Norepinephrine) IV drip เพื่อรักษา MAP > 65 mmHg",
+          npcSpeech: "\"น้องเตรียมยา Levophed ขึ้นมาแล้ว ข้อควรระวังสูงสุดในการบริหารยา Levophed ในวอร์ด CCU คืออะไรคะ?\"",
+          vitals: { hr: 104, bp: "94/58", spo2: "96%", map: 64, condClass: "cond-warning", condText: "⚠️ เฝ้าระวัง Titrate ยา" },
+          choices: [
+            {
+              letter: "A",
+              text: "ต่อสายยาเข้าทางเส้นเลือดดำส่วนปลาย (Peripheral IV) ขนาดเบอร์ 24 หลังมือ",
+              isCorrect: false,
+              rationale: "ผิดมหันต์! Levophed เป็นยาลดการขยายตัวของหลอดเลือดอย่างรุนแรง (Potent vasoconstrictor) หากรั่วออกนอกเส้นเลือด (Extravasation) จะทำให้เนื้อเยื่อเน่าตาย (Tissue necrosis) ต้องให้ทาง Central Line เท่านั้น หรือเส้นใหญ่ที่สุดชั่วคราว"
+            },
+            {
+              letter: "B",
+              text: "ต่อเข้า Infusion Pump ทาง Central line และวัดความดันโลหิตซ้ำทุก 5-15 นาทีเพื่อ Titrate ยา",
+              isCorrect: true,
+              rationale: "ถูกต้องตามมาตรฐาน CCU! ต้องใช้ Infusion Pump เพื่อควบคุมอัตราเป๊ะๆ ให้ทาง Central venous catheter และ Titrate ตามเป้าหมาย MAP > 65 mmHg"
+            },
+            {
+              letter: "C",
+              text: "ปล่อยหยดแบบ Free flow มือบีบ เพื่อให้ความดันขึ้นมาแตะ 140/90 ทันที",
+              isCorrect: false,
+              rationale: "ห้ามเด็ดขาด! การปล่อย Free flow อาจทำให้เกิดภาวะ Severe Hypertension และหัวใจขาดเลือดรุนแรงขึ้นทันที"
+            }
+          ]
+        },
+        {
+          id: 4,
+          stageTitle: "ขั้นตอนที่ 4/5: การติดตามผลเลือด & ปรับยาต้านการแข็งตัวของเลือด (Lab & Heparin Monitoring)",
+          scenarioDesc: "คนไข้ได้ Heparin drip อยู่เดิม ผลเลือดฉุกเฉินส่งกลับมา: aPTT = 140 วินาที (ค่าควบคุม 30 วินาที, Target therapeutic: 60-85 วินาที) และ Hct ดรอปจาก 42% เหลือ 31%",
+          npcSpeech: "\"น้องคะ ค่า aPTT ออกมาสูงถึง 140 วินาที ขณะที่คนไข้มีภาวะสงสัยเลือดออกหลังช่องท้อง การจัดการ Heparin ในขั้นนี้ที่ถูกต้องคือ?\"",
+          vitals: { hr: 96, bp: "102/65", spo2: "97%", map: 72, condClass: "cond-warning", condText: "⚠️ ผลแล็บ aPTT สูงเกินเป้าหมาย" },
+          choices: [
+            {
+              letter: "A",
+              text: "ปรับเพิ่มเรท Heparin ขึ้นอีก เพื่อป้องกันไม่ให้ Stent ในหลอดเลือดหัวใจตัน",
+              isCorrect: false,
+              rationale: "อันตรายถึงชีวิต! aPTT 140 วินาทีคือเลือดไม่แข็งตัวอย่างรุนแรง (Over-anticoagulated) และคนไข้กำลังมี Active Bleeding การเพิ่ม Heparin จะทำให้คนไข้เสียเลือดจนหัวใจหยุดเต้น!"
+            },
+            {
+              letter: "B",
+              text: "หยุด (Hold) Heparin ทันที รายงานแพทย์ และเตรียมยา Protamine sulfate ตามแผน",
+              isCorrect: true,
+              rationale: "ยอดเยี่ยมมาก! เมื่อมี Active bleeding และ aPTT เกินเป้าหมาย ต้อง Hold Heparin ทันที และรายงานแพทย์พิจารณาให้ Antidote (Protamine sulfate) เพื่อหยุดเลือด"
+            },
+            {
+              letter: "C",
+              text: "คงเรท Heparin เท่าเดิมไว้ก่อน แล้วรอเจาะเลือด aPTT ซ้ำในอีก 6 ชั่วโมงข้างหน้า",
+              isCorrect: false,
+              rationale: "ล่าช้าเกินไป! ระดับ aPTT สูงมากร่วมกับ Hct ดรอปลง 11% เป็นภาวะเร่งด่วนที่ต้องตัดสินใจหยุดยาทันที"
+            }
+          ]
+        },
+        {
+          id: 5,
+          stageTitle: "ขั้นตอนที่ 5/5: การส่งเวรอย่างปลอดภัย (ISBAR Clinical Handover)",
+          scenarioDesc: "หลังแพทย์ทำหัตถการเย็บซ่อมจุดเลือดออกและให้ PRC 2 units สัญญาณชีพคนไข้เริ่มคงที่ (BP 112/68, HR 82) ถึงเวลาเปลี่ยนเวรบ่าย ต้องส่งเวรต่อให้พยาบาลเวรต่อไป",
+          npcSpeech: "\"ถึงเวลาส่งเวรแล้วจ้ะ การส่งเวรด้วยเทคนิค ISBAR สำหรับเคสวิกฤตินี้ ข้อใดสื่อสารได้ถูกต้อง ครบถ้วน และปลอดภัยที่สุด?\"",
+          vitals: { hr: 82, bp: "112/68", spo2: "99%", map: 78, condClass: "cond-stable", condText: "🟢 พ้นวิกฤต สัญญาณชีพคงที่" },
+          choices: [
+            {
+              letter: "A",
+              text: "ส่งเวรแค่ว่า 'เตียง 2 คนไข้โอเคแล้ว ไม่มีอะไรน่าห่วง ฝากดูหยดน้ำเกลือต่อด้วยนะ'",
+              isCorrect: false,
+              rationale: "ผิดหลักความปลอดภัย! ขาดข้อมูลสำคัญอย่างยิ่ง เวรถัดไปจะไม่ทราบเลยว่าคนไข้เพิ่งผ่านภาวะ Retroperitoneal Bleed และได้รับเลือดมา"
+            },
+            {
+              letter: "B",
+              text: "ส่งเวร ISBAR: ระบุตัวตน, เตียง, เคส STEMI post-PCI, ภาวะแทรกซ้อนเลือดออกที่ผ่านมา, ยาที่ Hold ไว้, ผลเลือดล่าสุด และจุดที่ต้องติดตาม (Neurovascular & Hct ซ้ำ 2 ชม.)",
+              isCorrect: true,
+              rationale: "สมบูรณ์แบบที่สุด! การส่งเวรครบตามโครงสร้าง ISBAR ช่วยป้องกันความคลาดเคลื่อนและทำให้พยาบาลเวรถัดไปเฝ้าระวังจุดเสี่ยงได้อย่างถูกต้อง"
+            },
+            {
+              letter: "C",
+              text: "ให้พยาบาลเวรถัดไปมาเปิดอ่านจากแฟ้มประวัติคนไข้เอาเอง เพราะพยาบาลเวรเช้าต้องรีบกลับบ้าน",
+              isCorrect: false,
+              rationale: "ผิดจริยธรรมและความปลอดภัยทางการพยาบาล! เคสวิกฤติต้องมีการ Bedside Handover ต่อหน้าเตียงเสมอ"
+            }
+          ]
+        }
+      ]
+    };
+
+    // Game Runtime State
+    let currentStepIdx = 0;
+    let safetyScore = 100;
+    let nurseExp = 0;
+    let answeredCurrentStep = false;
+
+    // Initialize Game
+    function initGame() {
+      currentStepIdx = 0;
+      safetyScore = 100;
+      nurseExp = 0;
+      answeredCurrentStep = false;
+      renderStep(currentStepIdx);
+      initEkgWave();
+    }
+
+    function renderStep(idx) {
+      const step = ccuCaseData.steps[idx];
+      answeredCurrentStep = false;
+
+      // Update Header Vitals
+      document.getElementById('vitHR').textContent = step.vitals.hr;
+      document.getElementById('vitBP').textContent = step.vitals.bp;
+      document.getElementById('vitSpO2').textContent = step.vitals.spo2;
+      document.getElementById('vitMAP').textContent = step.vitals.map;
+
+      const condBadge = document.getElementById('patientCondBadge');
+      condBadge.className = `patient-condition-badge ${step.vitals.condClass}`;
+      condBadge.textContent = step.vitals.condText;
+
+      // Update Scenario Card
+      document.getElementById('stepIndicator').textContent = `🩺 ${step.stageTitle}`;
+      document.getElementById('scenarioTitle').textContent = step.stageTitle.split(':')[1]?.trim() || step.stageTitle;
+      document.getElementById('scenarioDesc').textContent = step.scenarioDesc;
+      document.getElementById('npcDialogueText').textContent = step.npcSpeech;
+
+      // Render Choices
+      const container = document.getElementById('choicesContainer');
+      container.innerHTML = step.choices.map((choice, cIdx) => `
+        <button class="choice-btn" id="choiceBtn_${cIdx}" onclick="makeDecision(${cIdx})">
+          <span class="choice-letter">${choice.letter}</span>
+          <span style="flex: 1; line-height: 1.4;">${choice.text}</span>
+        </button>
+      `).join('');
+
+      // Hide Feedback Panel
+      document.getElementById('feedbackPanel').style.display = 'none';
+
+      // Scroll to top of stage
+      document.getElementById('gameStage').scrollTop = 0;
+    }
+
+    function makeDecision(choiceIdx) {
+      if (answeredCurrentStep) return;
+      answeredCurrentStep = true;
+
+      const step = ccuCaseData.steps[currentStepIdx];
+      const selected = step.choices[choiceIdx];
+      const chosenBtn = document.getElementById(`choiceBtn_${choiceIdx}`);
+
+      const fbPanel = document.getElementById('feedbackPanel');
+      const fbTitle = document.getElementById('feedbackTitle');
+      const fbRationale = document.getElementById('feedbackRationale');
+      const btnNext = document.getElementById('btnNextStep');
+
+      // Disable all buttons
+      step.choices.forEach((_, idx) => {
+        const btn = document.getElementById(`choiceBtn_${idx}`);
+        if (btn) btn.style.pointerEvents = 'none';
+      });
+
+      if (selected.isCorrect) {
+        chosenBtn.classList.add('selected-correct');
+        fbTitle.className = 'feedback-title fb-correct';
+        fbTitle.innerHTML = '✅ การตัดสินใจถูกต้องตามมาตรฐานการพยาบาล! (+50 EXP)';
+        fbRationale.textContent = selected.rationale;
+        nurseExp += 50;
+      } else {
+        chosenBtn.classList.add('selected-wrong');
+        // Highlight correct one
+        const correctIdx = step.choices.findIndex(c => c.isCorrect);
+        const correctBtn = document.getElementById(`choiceBtn_${correctIdx}`);
+        if (correctBtn) correctBtn.classList.add('selected-correct');
+
+        fbTitle.className = 'feedback-title fb-wrong';
+        fbTitle.innerHTML = '⚠️ เกิดความเสี่ยงต่อคนไข้! (-20% ความปลอดภัย)';
+        fbRationale.textContent = selected.rationale;
+        safetyScore = Math.max(0, safetyScore - 20);
+      }
+
+      // Update Bottom Score Bar
+      document.getElementById('safetyScoreText').textContent = `${safetyScore}%`;
+      document.getElementById('nurseExpText').textContent = nurseExp;
+
+      // Show Feedback
+      fbPanel.style.display = 'block';
+
+      // Next button text
+      if (currentStepIdx === ccuCaseData.steps.length - 1) {
+        btnNext.innerHTML = '<span>🏆 ดูผลการประเมินเคส CCU ➔</span>';
+      } else {
+        btnNext.innerHTML = '<span>ต่อไปยังขั้นตอนถัดไป ➔</span>';
+      }
+    }
+
+    function nextStageStep() {
+      if (currentStepIdx < ccuCaseData.steps.length - 1) {
+        currentStepIdx++;
+        renderStep(currentStepIdx);
+      } else {
+        showFinalModal();
+      }
+    }
+
+    function showFinalModal() {
+      const modal = document.getElementById('resultModal');
+      const modalIcon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      const finalScore = document.getElementById('finalScoreText');
+
+      finalScore.textContent = `${safetyScore} / 100`;
+
+      if (safetyScore >= 80) {
+        modalIcon.textContent = '🌟';
+        modalTitle.textContent = 'ยอดเยี่ยม! คุณคือสุดยอดพยาบาล CCU';
+        modalBody.textContent = `คุณสามารถประเมินและช่วยชีวิตคนไข้ภาวะแทรกซ้อนหลอดเลือดหัวใจได้อย่างแม่นยำ ปฏิบัติตามมาตรฐานอย่างปลอดภัย ได้รับคะแนนสะสม ${nurseExp} EXP`;
+      } else if (safetyScore >= 60) {
+        modalIcon.textContent = '🩺';
+        modalTitle.textContent = 'ผ่านเกณฑ์ปลอดภัยในระดับปานกลาง';
+        modalBody.textContent = `คนไข้ปลอดภัยดี แต่ยังมีจุดตัดสินใจที่อาจก่อให้เกิดความล่าช้าหรือความเสี่ยง แนะนำให้ทบทวนข้อผิดพลาดและฝึกซ้ำเพื่อความคล่องแคล่ว`;
+      } else {
+        modalIcon.textContent = '⚠️';
+        modalTitle.textContent = 'คนไข้เกิดภาวะแทรกซ้อนรุนแรง';
+        modalBody.textContent = `คะแนนความปลอดภัยต่ำกว่าเกณฑ์ (${safetyScore}%) เกิดความคลาดเคลื่อนในการดูแลแผลและการบริหารยา แนะนำให้กดเริ่มเล่นใหม่เพื่อเรียนรู้แนวทางที่ถูกต้อง`;
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    function restartCase() {
+      document.getElementById('resultModal').style.display = 'none';
+      initGame();
+    }
+
+    // ==========================================
+    // Realtime Animated EKG Canvas Generator
+    // ==========================================
+    function initEkgWave() {
+      const canvas = document.getElementById('ekgCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let x = 0;
+      let points = [];
+      const width = canvas.width;
+      const height = canvas.height;
+      const midY = height / 2;
+
+      function draw() {
+        ctx.fillStyle = 'rgba(1, 4, 9, 0.2)';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 1.8;
+        ctx.shadowColor = '#22c55e';
+        ctx.shadowBlur = 4;
+
+        ctx.beginPath();
+        let y = midY;
+
+        // Simulate QRS Complex periodically
+        const cycle = x % 70;
+        if (cycle > 20 && cycle < 24) y = midY - 3; // P wave
+        else if (cycle === 28) y = midY + 4; // Q
+        else if (cycle === 30) y = midY - 18; // R peak
+        else if (cycle === 32) y = midY + 8; // S
+        else if (cycle > 38 && cycle < 46) y = midY - 5; // T wave
+        else y = midY + (Math.random() * 1.5 - 0.75); // Baseline noise
+
+        ctx.moveTo(x - 2, midY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        x = (x + 2) % width;
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    // Start on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      initGame();
+    });
+  </script>
+</body>
+</html>
