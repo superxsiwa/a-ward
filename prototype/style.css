@@ -978,10 +978,10 @@ button { font-family: inherit; }
     gap: 16px 14px;
   }
   
-  /* Roster / Calendar Layout */
+  /* Roster / Calendar Layout - เรียงแนวตั้ง */
   .day-shifts {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 12px;
   }
   .day-shift-card.my-shift {
