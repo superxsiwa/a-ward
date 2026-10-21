@@ -7,8 +7,6 @@
 (function () {
   'use strict';
 
-  const BEDS = ccuBeds;
-  const MAX_STARS = BEDS.length * 3;
   const SAVE_KEY = 'award_ccu_8beds_progress_v3'; // same key as previous prototype → keeps old progress
   const SET_KEY = 'award_settings_v1';
   const RANKS = [
@@ -26,6 +24,10 @@
   const ROSTER_KEY = 'award_ccu_roster_schedule_v1';
   const ROSTER_PROGRESS_KEY = 'award_ccu_roster_days_progress_v1';
   const STATS_KEY = 'award_ccu_player_stats_v1';
+  const CUSTOM_BEDS_KEY = 'award_ccu_custom_beds_v1';
+
+  let BEDS = load(CUSTOM_BEDS_KEY, null) || ccuBeds;
+  const MAX_STARS = () => BEDS.length * 3;
 
   let progress = load(SAVE_KEY, {});
   let settings = Object.assign({ sound: true, haptics: true }, load(SET_KEY, {}));
@@ -476,6 +478,7 @@
     if (ui.tab === 'roster') renderRoster();
     else if (ui.tab === 'ward') renderWard();
     else if (ui.tab === 'progress') renderProgress();
+    else if (ui.tab === 'cases') renderCaseManager();
     else renderSettings();
     el.view.scrollTop = 0;
   }
@@ -667,6 +670,9 @@
             <div class="desk"><span>🖥️</span><span>👩‍⚕️</span><span>📋</span></div>
             <div class="st-info"><b>เคาน์เตอร์พยาบาล</b><small>ผ่านแล้ว ${passedCount()}/${BEDS.length} เตียง</small>
               <div class="dots">${BEDS.map((b) => `<i class="${progress[b.bedNum] && progress[b.bedNum].passed ? 'on' : ''}"></i>`).join('')}</div>
+              <button class="station-office-btn" data-act="open-case-mgmt">
+                <span>📁</span> ห้องจัดการเคส CCU ▶
+              </button>
             </div>
           </div>
           ${cards.slice(4).join('')}
@@ -772,12 +778,248 @@
           <div class="setting"><div class="s-t"><b>🔊 เสียงเอฟเฟกต์</b><small>เสียงตอนหยิบ วาง และผ่านด่าน</small></div>${sw('sound', settings.sound)}</div>
           <div class="setting"><div class="s-t"><b>📳 การสั่น</b><small>สั่นเบาๆ เมื่อตอบถูก/ผิด (มือถือ)</small></div>${sw('haptics', settings.haptics)}</div>
         </div>
+
+        <div class="card" style="border-color:#bae6fd;background:#f0f9ff">
+          <div class="s-t">
+            <b style="font:700 15px var(--font-display);color:#0369a1">📁 จัดการเคสหัตถการ (Case Manager)</b>
+            <small class="hint" style="display:block;margin-top:2px">เพิ่ม ลบ หรือแก้ไขเคสหัตถการในวอร์ด และนำเข้า/ส่งออกเคส</small>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="btn btn-sm btn-primary" data-act="open-case-mgmt">${icon('sliders')}<span>เปิดตัวจัดการเคส</span></button>
+            <button class="btn btn-sm btn-outline" data-act="export-cases">${icon('share')}<span>ส่งออก JSON</span></button>
+          </div>
+        </div>
+
         <div class="card">
           <div class="s-t"><b style="font:600 14px var(--font-display)">ล้างความก้าวหน้า</b><small class="hint" style="display:block;margin-top:2px">ดาวและเตียงที่ผ่านแล้วจะถูกรีเซ็ตทั้งหมด</small></div>
           <button class="btn btn-danger btn-sm" data-act="reset-all">ล้างข้อมูลทั้งหมด</button>
         </div>
         <p class="about">A-WARD CCU · Prototype<br>ข้อมูลทั้งหมดเก็บในเครื่องของคุณ เล่นออฟไลน์ได้</p>
       </section>`;
+  }
+
+  /* =======================================================================
+     CASE MANAGEMENT & BUILDER (ADMIN / TEACHER MODE)
+     ======================================================================= */
+  function renderCaseManager() {
+    el.view.innerHTML = `
+      <section class="page">
+        <div class="case-mgmt-header">
+          <div>
+            <h2 class="page-h" style="margin:0">จัดการเคสหัตถการ CCU</h2>
+            <small class="hint">มีเคสในระบบทั้งหมด ${BEDS.length} เคส</small>
+          </div>
+          <button class="btn btn-sm btn-gold" data-act="create-new-case">
+            ${icon('plus')}<span>เพิ่มเคสใหม่</span>
+          </button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn btn-sm btn-ghost" data-act="tab" data-tab="ward">◀ กลับวอร์ด</button>
+          <button class="btn btn-sm btn-outline" data-act="import-cases">📥 นำเข้าไฟล์ JSON</button>
+          <button class="btn btn-sm btn-outline" data-act="reset-default-cases">🔄 คืนค่าเคสตั้งต้น</button>
+        </div>
+
+        <div class="list">
+          ${BEDS.map((b, i) => `
+            <div class="case-item-card">
+              <div class="case-item-top">
+                <div class="case-item-title">
+                  <span style="font-size:18px">🛏️</span>
+                  <b>เตียง ${String(b.bedNum).padStart(2, '0')}: ${b.caseTitle}</b>
+                </div>
+                <span class="status-badge s-${b.status}">${b.statusText}</span>
+              </div>
+              <div class="case-item-meta">
+                <b>ผู้ป่วย:</b> ${b.patientName} (${b.patientAge || 60} ปี) · <b>โรค:</b> ${b.dxBadge}<br>
+                <b>แพทย์:</b> ${b.doctorName} · <b>จำนวนขั้นตอน:</b> ${(b.stageData && b.stageData.length) || 6} ขั้นตอน
+              </div>
+              <div class="case-item-actions">
+                <button class="btn btn-sm btn-ghost" data-act="open-bed" data-i="${i}" title="ทดสอบเล่น">
+                  ${icon('play')}<span>ทดสอบ</span>
+                </button>
+                <button class="btn btn-sm btn-primary" data-act="edit-case" data-i="${i}">
+                  ${icon('edit')}<span>แก้ไข</span>
+                </button>
+                ${BEDS.length > 1 ? `
+                  <button class="btn btn-sm btn-danger" data-act="delete-case" data-i="${i}">
+                    ${icon('trash')}<span>ลบ</span>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `;
+  }
+
+  function openCaseEditor(idx) {
+    const isEdit = idx >= 0;
+    const b = isEdit ? BEDS[idx] : {
+      bedNum: BEDS.length + 1,
+      bedCode: `เตียง ${String(BEDS.length + 1).padStart(2, '0')} CCU`,
+      patientName: 'นายใจดี มีสุข (65 ปี)',
+      patientAge: 65,
+      caseTitle: 'หัตถการจำลองใหม่ CCU',
+      dxBadge: 'Cardiogenic Assessment',
+      status: 'alert',
+      statusText: 'เฝ้าระวังอาการ',
+      doctorName: 'นพ. วิทยา (แพทย์ประจำบ้าน CCU)',
+      doctorAvatar: '👨‍⚕️',
+      stageData: []
+    };
+
+    openModal(`
+      <div style="text-align:left;max-height:75vh;overflow-y:auto;padding-right:4px">
+        <h2 style="font:700 17px var(--font-display);margin-top:0">${isEdit ? '✏️ แก้ไขเคสหัตถการ' : '➕ เพิ่มเคสหัตถการใหม่'}</h2>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+          <div class="form-row">
+            <div class="form-group">
+              <label>หมายเลขเตียง</label>
+              <input class="form-input" id="ed-bedNum" type="number" value="${b.bedNum}">
+            </div>
+            <div class="form-group">
+              <label>สถานะเตียง</label>
+              <select class="form-input" id="ed-status">
+                <option value="alert" ${b.status === 'alert' ? 'selected' : ''}>Alert (เฝ้าระวัง)</option>
+                <option value="critical" ${b.status === 'critical' ? 'selected' : ''}>Critical (วิกฤต)</option>
+                <option value="stable" ${b.status === 'stable' ? 'selected' : ''}>Stable (คงที่)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>ชื่อเคสหัตถการ</label>
+            <input class="form-input" id="ed-caseTitle" value="${b.caseTitle}">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>ชื่อคนไข้ (และอายุ)</label>
+              <input class="form-input" id="ed-patientName" value="${b.patientName}">
+            </div>
+            <div class="form-group">
+              <label>ป้ายการวินิจฉัยโรค</label>
+              <input class="form-input" id="ed-dxBadge" value="${b.dxBadge}">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>ชื่อแพทย์ผู้สั่งการ</label>
+              <input class="form-input" id="ed-doctorName" value="${b.doctorName}">
+            </div>
+            <div class="form-group">
+              <label>ข้อความสถานะ</label>
+              <input class="form-input" id="ed-statusText" value="${b.statusText}">
+            </div>
+          </div>
+
+          <div class="hint" style="background:#f8fafc;padding:8px 10px;border-radius:10px;border:1px solid #e2e8f0">
+            ℹ️ เคสใหม่จะได้รับชุดขั้นตอนพื้นฐาน 6 ขั้นตอนของ CCU โดยอัตโนมัติ ซึ่งสามารถนำไปใช้ฝึกการพยาบาลได้ทันที
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top:16px;display:flex;gap:8px">
+          <button class="btn btn-primary" data-act="save-case" data-i="${idx}">💾 บันทึกเคส</button>
+          <button class="btn btn-ghost" data-act="modal-close">ยกเลิก</button>
+        </div>
+      </div>
+    `);
+  }
+
+  function saveCaseFromForm(idx) {
+    const isEdit = idx >= 0;
+    const bedNum = parseInt($('#ed-bedNum').value, 10) || (BEDS.length + 1);
+    const caseTitle = $('#ed-caseTitle').value.trim() || 'เคสหัตถการใหม่';
+    const patientName = $('#ed-patientName').value.trim() || 'ผู้ป่วย CCU';
+    const dxBadge = $('#ed-dxBadge').value.trim() || 'CCU Patient';
+    const doctorName = $('#ed-doctorName').value.trim() || 'แพทย์ CCU';
+    const status = $('#ed-status').value;
+    const statusText = $('#ed-statusText').value.trim() || 'ดูแลตามแผนการรักษา';
+
+    if (isEdit) {
+      const b = BEDS[idx];
+      b.bedNum = bedNum;
+      b.bedCode = `เตียง ${String(bedNum).padStart(2, '0')} CCU`;
+      b.caseTitle = caseTitle;
+      b.patientName = patientName;
+      b.dxBadge = dxBadge;
+      b.doctorName = doctorName;
+      b.status = status;
+      b.statusText = statusText;
+    } else {
+      // สร้างเคสใหม่ คัดลอกเทมเพลต 6 ขั้นตอนมาจากเตียง 1 เป็นฐาน
+      const templateStages = JSON.parse(JSON.stringify(ccuBeds[0].stageData));
+      BEDS.push({
+        bedNum,
+        bedCode: `เตียง ${String(bedNum).padStart(2, '0')} CCU`,
+        patientName,
+        patientAge: 65,
+        caseTitle,
+        dxBadge,
+        status,
+        statusText,
+        doctorName,
+        doctorAvatar: '👨‍⚕️',
+        stageData: templateStages
+      });
+    }
+
+    save(CUSTOM_BEDS_KEY, BEDS);
+    closeModal();
+    renderCaseManager();
+    toast('บันทึกข้อมูลเคสเรียบร้อยแล้ว ✨');
+  }
+
+  function deleteCase(idx) {
+    if (BEDS.length <= 1) {
+      toast('ต้องมีเคสอย่างน้อย 1 เคสในระบบ');
+      return;
+    }
+    confirmDialog('ยืนยันการลบเคสนี้?', `เคส "${BEDS[idx].caseTitle}" จะถูกนำออกจากวอร์ด CCU`, 'ลบเคส', `delete-case-confirm-${idx}`);
+  }
+
+  function exportCasesAsJson() {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(BEDS, null, 2));
+    const dlAnchor = document.createElement('a');
+    dlAnchor.setAttribute('href', dataStr);
+    dlAnchor.setAttribute('download', `award_ccu_cases_${new Date().toISOString().slice(0, 10)}.json`);
+    dlAnchor.click();
+    toast('ดาวน์โหลดไฟล์ JSON เรียบร้อย 📤');
+  }
+
+  function importCasesJson() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (Array.isArray(imported) && imported.length > 0 && imported[0].caseTitle) {
+            BEDS = imported;
+            save(CUSTOM_BEDS_KEY, BEDS);
+            renderCaseManager();
+            toast(`นำเข้าเคสสำเร็จทั้งหมด ${imported.length} เคส 🎉`);
+          } else {
+            toast('รูปแบบไฟล์ JSON ไม่ถูกต้อง');
+          }
+        } catch (err) {
+          toast('เกิดข้อผิดพลาดในการอ่านไฟล์ JSON');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  function resetDefaultCases() {
+    confirmDialog('คืนค่าเคสตั้งต้น?', 'เคสทั้งหมดจะถูกรีเซ็ตกลับเป็น 8 เตียงมาตรฐานของ CCU', 'คืนค่าเริ่มต้น', 'reset-default-cases-confirm');
   }
 
   /* =======================================================================
@@ -1237,6 +1479,46 @@
         SFX.pick();
         renderWard();
         break;
+      case 'open-case-mgmt':
+        ui.tab = 'cases';
+        SFX.pick();
+        renderTabs();
+        break;
+      case 'create-new-case':
+        SFX.pick();
+        openCaseEditor(-1);
+        break;
+      case 'edit-case':
+        SFX.pick();
+        openCaseEditor(+node.dataset.i);
+        break;
+      case 'delete-case':
+        SFX.pick();
+        deleteCase(+node.dataset.i);
+        break;
+      case 'save-case':
+        SFX.pick();
+        saveCaseFromForm(+node.dataset.i);
+        break;
+      case 'export-cases':
+        SFX.pick();
+        exportCasesAsJson();
+        break;
+      case 'import-cases':
+        SFX.pick();
+        importCasesJson();
+        break;
+      case 'reset-default-cases':
+        SFX.pick();
+        resetDefaultCases();
+        break;
+      case 'reset-default-cases-confirm':
+        BEDS = ccuBeds;
+        save(CUSTOM_BEDS_KEY, null);
+        closeModal();
+        renderCaseManager();
+        toast('คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄');
+        break;
       case 'randomize-shifts':
         generateMonthSchedule(ui.calYear, ui.calMonth);
         SFX.pick();
@@ -1270,7 +1552,21 @@
       case 'win-ward': closeModal(); renderTabs(); break;
       case 'win-next': { const n = nextTarget(); closeModal(); openBed(n); break; }
       case 'win-replay': { const i = G.bedIdx; closeModal(); openBed(i); break; }
-      default: break;
+      default:
+        if (name && name.startsWith('delete-case-confirm-')) {
+          const idx = parseInt(name.replace('delete-case-confirm-', ''), 10);
+          BEDS.splice(idx, 1);
+          // ปรับหมายเลขเตียงให้เรียงลำดับใหม่
+          BEDS.forEach((b, k) => {
+            b.bedNum = k + 1;
+            b.bedCode = `เตียง ${String(k + 1).padStart(2, '0')} CCU`;
+          });
+          save(CUSTOM_BEDS_KEY, BEDS);
+          closeModal();
+          renderCaseManager();
+          toast('ลบเคสเรียบร้อยแล้ว 🗑️');
+        }
+        break;
     }
   }
 
