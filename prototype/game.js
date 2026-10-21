@@ -838,8 +838,11 @@
                 <button class="btn btn-sm btn-ghost" data-act="open-bed" data-i="${i}" title="ทดสอบเล่น">
                   ${icon('play')}<span>ทดสอบ</span>
                 </button>
+                <button class="btn btn-sm btn-gold" data-act="manage-steps" data-i="${i}" title="จัดการ 6 ขั้นตอนและคำตอบ">
+                  <span>📝</span><span>จัดการขั้นตอน & คำตอบ</span>
+                </button>
                 <button class="btn btn-sm btn-primary" data-act="edit-case" data-i="${i}">
-                  ${icon('edit')}<span>แก้ไข</span>
+                  ${icon('edit')}<span>ข้อมูลเคส</span>
                 </button>
                 ${BEDS.length > 1 ? `
                   <button class="btn btn-sm btn-danger" data-act="delete-case" data-i="${i}">
@@ -1020,6 +1023,367 @@
 
   function resetDefaultCases() {
     confirmDialog('คืนค่าเคสตั้งต้น?', 'เคสทั้งหมดจะถูกรีเซ็ตกลับเป็น 8 เตียงมาตรฐานของ CCU', 'คืนค่าเริ่มต้น', 'reset-default-cases-confirm');
+  }
+
+  /* =======================================================================
+     STEP & ANSWER BUILDER (เพิ่ม ลบ แก้ไข ขั้นตอน & คำตอบ)
+     ======================================================================= */
+  let activeEditBedIdx = null;
+  let activeEditStepIdx = 0;
+
+  function openStepManager(bedIdx, stepIdx = 0) {
+    activeEditBedIdx = bedIdx;
+    activeEditStepIdx = stepIdx;
+    const b = BEDS[bedIdx];
+    const stages = b.stageData || [];
+    const st = stages[stepIdx] || stages[0];
+
+    // ตรวจสอบ mechanic ปัจจุบัน
+    const isChoices = !!st.choices1toN;
+    const isTrays = !!st.traysTask;
+    const isUnordered = !!st.unorderedDropTask;
+    const isSeq = !!st.sequenceTask && !st.choices1toN;
+
+    let answersEditorHtml = '';
+
+    if (isChoices) {
+      const opts = st.choices1toN.options || [];
+      answersEditorHtml = `
+        <div class="form-group" style="margin-top:8px">
+          <label>โจทย์คำถามย่อย (Prompt)</label>
+          <input class="form-input" id="st-prompt" value="${st.choices1toN.prompt || ''}">
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font:700 12px var(--font-display);color:var(--ink-2)">รายการตัวเลือก & เฉลยคำตอบ</label>
+            <button class="btn btn-sm btn-ghost" data-act="step-add-item" style="padding:2px 8px;font-size:11px">➕ เพิ่มตัวเลือก</button>
+          </div>
+          <div id="qa-items-list">
+            ${opts.map((opt, oi) => `
+              <div class="qa-item-row" data-item-idx="${oi}">
+                <input class="form-input" type="text" data-field="text" value="${opt.text}" placeholder="ข้อความตัวเลือก">
+                <label class="qa-cb-wrap">
+                  <input type="checkbox" data-field="correct" ${opt.correct ? 'checked' : ''}>
+                  <span>ถูก</span>
+                </label>
+                <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (isTrays) {
+      const tsk = st.traysTask;
+      const pool = tsk.pool || [];
+      const trays = tsk.trays || [];
+      answersEditorHtml = `
+        <div class="form-group" style="margin-top:8px">
+          <label>โจทย์คำสั่งจัดถาด (Prompt)</label>
+          <input class="form-input" id="st-prompt" value="${tsk.prompt || ''}">
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font:700 12px var(--font-display);color:var(--ink-2)">รายการอุปกรณ์ & ถาดเฉลยที่ถูกต้อง</label>
+            <button class="btn btn-sm btn-ghost" data-act="step-add-item" style="padding:2px 8px;font-size:11px">➕ เพิ่มอุปกรณ์</button>
+          </div>
+          <div id="qa-items-list">
+            ${pool.map((it, oi) => {
+              // หาว่าไอเทมนี้เฉลยอยู่ในถาดไหน
+              let targetTrayId = trays[0] ? trays[0].id : '';
+              trays.forEach((tr) => {
+                if ((tr.expectedIds && tr.expectedIds.includes(it.id)) || (tr.expectedOrder && tr.expectedOrder.includes(it.id))) {
+                  targetTrayId = tr.id;
+                }
+              });
+              return `
+                <div class="qa-item-row" data-item-idx="${oi}">
+                  <input class="form-input" type="text" data-field="text" value="${it.text}" placeholder="ชื่ออุปกรณ์">
+                  <select class="form-input" data-field="tray">
+                    ${trays.map((tr) => `
+                      <option value="${tr.id}" ${tr.id === targetTrayId ? 'selected' : ''}>
+                        ${tr.name.split(':')[0].replace(/^[🟩🟦]\s*/, '')}
+                      </option>
+                    `).join('')}
+                  </select>
+                  <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else if (isUnordered) {
+      const tsk = st.unorderedDropTask;
+      const pool = tsk.pool || [];
+      const expected = tsk.expectedIds || [];
+      answersEditorHtml = `
+        <div class="form-group" style="margin-top:8px">
+          <label>โจทย์คำสั่งการพยาบาล (Prompt)</label>
+          <input class="form-input" id="st-prompt" value="${tsk.prompt || ''}">
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font:700 12px var(--font-display);color:var(--ink-2)">การ์ดปฏิบัติการพยาบาล & เฉลยที่ต้องทำ</label>
+            <button class="btn btn-sm btn-ghost" data-act="step-add-item" style="padding:2px 8px;font-size:11px">➕ เพิ่มการ์ด</button>
+          </div>
+          <div id="qa-items-list">
+            ${pool.map((it, oi) => {
+              const isCorrect = expected.includes(it.id);
+              return `
+                <div class="qa-item-row" data-item-idx="${oi}">
+                  <input class="form-input" type="text" data-field="text" value="${it.text}" placeholder="ข้อความการพยาบาล">
+                  <label class="qa-cb-wrap">
+                    <input type="checkbox" data-field="correct" ${isCorrect ? 'checked' : ''}>
+                    <span>ข้อที่ถูก</span>
+                  </label>
+                  <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      // Sequence Task (เรียงลำดับ)
+      const tsk = st.sequenceTask;
+      const pool = tsk ? (tsk.pool || []) : [];
+      const order = tsk ? (tsk.correctOrder || []) : [];
+      answersEditorHtml = `
+        <div class="form-group" style="margin-top:8px">
+          <label>โจทย์คำสั่งเรียงลำดับ (Prompt)</label>
+          <input class="form-input" id="st-prompt" value="${(tsk && tsk.prompt) || ''}">
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font:700 12px var(--font-display);color:var(--ink-2)">การ์ดขั้นตอน & ลำดับเฉลยที่ถูกต้อง (1 ถึง N)</label>
+            <button class="btn btn-sm btn-ghost" data-act="step-add-item" style="padding:2px 8px;font-size:11px">➕ เพิ่มขั้นตอน</button>
+          </div>
+          <div id="qa-items-list">
+            ${pool.map((it, oi) => {
+              const seqIdx = order.indexOf(it.id) + 1;
+              return `
+                <div class="qa-item-row" data-item-idx="${oi}">
+                  <span style="font:700 11px var(--font-display);color:#0284c7">#${oi + 1}</span>
+                  <input class="form-input" type="text" data-field="text" value="${it.text}" placeholder="ข้อความขั้นตอน">
+                  <div class="qa-cb-wrap">
+                    <span>ลำดับ:</span>
+                    <input class="form-input" type="number" data-field="order" value="${seqIdx > 0 ? seqIdx : oi + 1}" style="width:50px;min-height:36px;padding:4px;text-align:center">
+                  </div>
+                  <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    openModal(`
+      <div style="text-align:left;max-height:80vh;overflow-y:auto;padding-right:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2 style="font:700 16px var(--font-display);margin:0">📝 จัดการ 6 ขั้นตอน & คำตอบ</h2>
+          <span style="font-size:11px;color:var(--ink-3)">${b.bedCode}</span>
+        </div>
+        <p class="hint" style="margin:2px 0 8px">เลือกขั้นตอนด้านล่างเพื่อแก้ไขโจทย์ ตัวเลือก และเฉลยคำตอบ</p>
+
+        <!-- แถบเลือกขั้นตอน 1 ถึง 6 -->
+        <div class="step-nav-bar">
+          ${stages.map((s, idx) => `
+            <button class="step-nav-pill ${idx === stepIdx ? 'on' : ''}" data-act="step-switch-tab" data-sidx="${idx}">
+              ขั้นที่ ${idx + 1}
+            </button>
+          `).join('')}
+        </div>
+
+        <!-- ฟอร์มแก้ไขรายละเอียดขั้นตอน -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="form-row">
+            <div class="form-group">
+              <label>ชื่อขั้นตอน</label>
+              <input class="form-input" id="st-name" value="${st.name || ''}">
+            </div>
+            <div class="form-group">
+              <label>รูปแบบกลไก (Mechanic)</label>
+              <input class="form-input" id="st-mech" value="${st.mechanic || ''}" readonly style="background:#f1f5f9;color:#64748b">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>คำพูดแพทย์ / โจทย์สถานการณ์</label>
+            <input class="form-input" id="st-docSpeech" value="${(st.doctorSpeech || '').replace(/^💬\s*"?|"?$/g, '')}">
+          </div>
+
+          <div class="form-group">
+            <label>เอกสารความรู้ทางการแพทย์ (Reading Summary)</label>
+            <textarea class="form-input form-textarea" id="st-reading">${st.reading || ''}</textarea>
+          </div>
+
+          <!-- กล่องจัดการตัวเลือก/อุปกรณ์/คำตอบ -->
+          <div style="background:#fff;border:1.5px solid #bae6fd;border-radius:14px;padding:10px;margin-top:4px">
+            <b style="font:700 13px var(--font-display);color:#0369a1;display:block;margin-bottom:4px">⚙️ คำตอบและตัวเลือกในขั้นนี้</b>
+            ${answersEditorHtml}
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-primary" data-act="save-step-data">💾 บันทึกคำตอบขั้นตอนนี้</button>
+          <button class="btn btn-ghost" data-act="modal-close">ปิด</button>
+        </div>
+      </div>
+    `);
+  }
+
+  function saveCurrentStepFromForm() {
+    if (activeEditBedIdx === null) return;
+    const b = BEDS[activeEditBedIdx];
+    const st = b.stageData[activeEditStepIdx];
+    if (!st) return;
+
+    // อัปเดตข้อมูลทั่วไปของขั้นตอน
+    st.name = $('#st-name').value.trim() || st.name;
+    const speechVal = $('#st-docSpeech').value.trim();
+    st.doctorSpeech = speechVal ? `💬 "${speechVal}"` : st.doctorSpeech;
+    st.reading = $('#st-reading').value.trim() || st.reading;
+
+    const promptVal = $('#st-prompt') ? $('#st-prompt').value.trim() : '';
+
+    // อ่านรายการคำตอบจาก #qa-items-list
+    const itemRows = document.querySelectorAll('#qa-items-list .qa-item-row');
+
+    if (st.choices1toN) {
+      st.choices1toN.prompt = promptVal || st.choices1toN.prompt;
+      const newOpts = [];
+      itemRows.forEach((row, i) => {
+        const text = row.querySelector('[data-field="text"]').value.trim();
+        const correct = row.querySelector('[data-field="correct"]').checked;
+        if (text) {
+          newOpts.push({ id: `c_${Date.now()}_${i}`, text, correct });
+        }
+      });
+      if (newOpts.length) st.choices1toN.options = newOpts;
+    } else if (st.traysTask) {
+      st.traysTask.prompt = promptVal || st.traysTask.prompt;
+      const newPool = [];
+      const trayMap = {};
+      st.traysTask.trays.forEach((tr) => { trayMap[tr.id] = []; });
+
+      itemRows.forEach((row, i) => {
+        const text = row.querySelector('[data-field="text"]').value.trim();
+        const trayId = row.querySelector('[data-field="tray"]').value;
+        if (text) {
+          const itemId = `it_${Date.now()}_${i}`;
+          newPool.push({ id: itemId, text });
+          if (trayMap[trayId]) trayMap[trayId].push(itemId);
+        }
+      });
+
+      if (newPool.length) {
+        st.traysTask.pool = newPool;
+        st.traysTask.trays.forEach((tr) => {
+          if (st.traysTask.ordered) tr.expectedOrder = trayMap[tr.id] || [];
+          else tr.expectedIds = trayMap[tr.id] || [];
+        });
+      }
+    } else if (st.unorderedDropTask) {
+      st.unorderedDropTask.prompt = promptVal || st.unorderedDropTask.prompt;
+      const newPool = [];
+      const newExpected = [];
+
+      itemRows.forEach((row, i) => {
+        const text = row.querySelector('[data-field="text"]').value.trim();
+        const correct = row.querySelector('[data-field="correct"]').checked;
+        if (text) {
+          const itemId = `u_${Date.now()}_${i}`;
+          newPool.push({ id: itemId, text });
+          if (correct) newExpected.push(itemId);
+        }
+      });
+
+      if (newPool.length) {
+        st.unorderedDropTask.pool = newPool;
+        st.unorderedDropTask.expectedIds = newExpected.length ? newExpected : [newPool[0].id];
+      }
+    } else if (st.sequenceTask) {
+      st.sequenceTask.prompt = promptVal || st.sequenceTask.prompt;
+      const tempItems = [];
+
+      itemRows.forEach((row, i) => {
+        const text = row.querySelector('[data-field="text"]').value.trim();
+        const orderNum = parseInt(row.querySelector('[data-field="order"]').value, 10) || (i + 1);
+        if (text) {
+          tempItems.push({ id: `s_${Date.now()}_${i}`, text, orderNum });
+        }
+      });
+
+      if (tempItems.length) {
+        st.sequenceTask.pool = tempItems.map(({ id, text }) => ({ id, text }));
+        // เรียงลำดับคำตอบตาม orderNum
+        tempItems.sort((a, b) => a.orderNum - b.orderNum);
+        st.sequenceTask.correctOrder = tempItems.map((item) => item.id);
+      }
+    }
+
+    save(CUSTOM_BEDS_KEY, BEDS);
+    toast('บันทึกขั้นตอนและคำตอบเรียบร้อยแล้ว ✨');
+    openStepManager(activeEditBedIdx, activeEditStepIdx);
+  }
+
+  function addStepItemRow() {
+    const list = $('#qa-items-list');
+    if (!list) return;
+    const b = BEDS[activeEditBedIdx];
+    const st = b.stageData[activeEditStepIdx];
+    const oi = list.children.length;
+
+    const row = document.createElement('div');
+    row.className = 'qa-item-row';
+    row.dataset.itemIdx = oi;
+
+    if (st.choices1toN || st.unorderedDropTask) {
+      row.innerHTML = `
+        <input class="form-input" type="text" data-field="text" value="" placeholder="ข้อความตัวเลือกใหม่">
+        <label class="qa-cb-wrap">
+          <input type="checkbox" data-field="correct" checked>
+          <span>ถูก</span>
+        </label>
+        <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+      `;
+    } else if (st.traysTask) {
+      const trays = st.traysTask.trays || [];
+      row.innerHTML = `
+        <input class="form-input" type="text" data-field="text" value="" placeholder="ชื่ออุปกรณ์ใหม่">
+        <select class="form-input" data-field="tray">
+          ${trays.map((tr) => `
+            <option value="${tr.id}">${tr.name.split(':')[0].replace(/^[🟩🟦]\s*/, '')}</option>
+          `).join('')}
+        </select>
+        <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+      `;
+    } else {
+      row.innerHTML = `
+        <span style="font:700 11px var(--font-display);color:#0284c7">#${oi + 1}</span>
+        <input class="form-input" type="text" data-field="text" value="" placeholder="ข้อความขั้นตอนใหม่">
+        <div class="qa-cb-wrap">
+          <span>ลำดับ:</span>
+          <input class="form-input" type="number" data-field="order" value="${oi + 1}" style="width:50px;min-height:36px;padding:4px;text-align:center">
+        </div>
+        <button class="icon-btn" data-act="step-remove-item" data-oi="${oi}" style="width:28px;height:28px;color:#ef4444" title="ลบ">✕</button>
+      `;
+    }
+
+    list.appendChild(row);
+    row.querySelector('input[type="text"]').focus();
+  }
+
+  function removeStepItemRow(oi) {
+    const list = $('#qa-items-list');
+    if (!list) return;
+    if (list.children.length <= 1) {
+      toast('ต้องมีตัวเลือกอย่างน้อย 1 ข้อ');
+      return;
+    }
+    const row = list.querySelector(`[data-item-idx="${oi}"]`) || list.children[oi];
+    if (row) row.remove();
   }
 
   /* =======================================================================
@@ -1491,6 +1855,26 @@
       case 'edit-case':
         SFX.pick();
         openCaseEditor(+node.dataset.i);
+        break;
+      case 'manage-steps':
+        SFX.pick();
+        openStepManager(+node.dataset.i, 0);
+        break;
+      case 'step-switch-tab':
+        SFX.pick();
+        openStepManager(activeEditBedIdx, +node.dataset.sidx);
+        break;
+      case 'save-step-data':
+        SFX.pick();
+        saveCurrentStepFromForm();
+        break;
+      case 'step-add-item':
+        SFX.pick();
+        addStepItemRow();
+        break;
+      case 'step-remove-item':
+        SFX.pick();
+        removeStepItemRow(+node.dataset.oi);
         break;
       case 'delete-case':
         SFX.pick();
