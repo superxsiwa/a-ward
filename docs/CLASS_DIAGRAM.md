@@ -1,10 +1,13 @@
 # แผนภาพคลาส (Class Diagram)
-## โครงการ: A-WARD (CCU Nursing Simulation Game)
+## โครงการ: A-WARD CCU (CCU Nursing Simulation Game)
 
 ---
 
 ### 1. คำอธิบายสถาปัตยกรรมเชิงคลาส (Architecture Overview)
-สถาปัตยกรรมของ A-WARD ถูกออกแบบตามหลัก Object-Oriented Design และ Separation of Concerns เพื่อให้การจัดการจำลองสถานการณ์ทางคลินิก (Clinical Simulation State), การแสดงผลสัญญาณชีพ (Vitals & Canvas Engine), และตัวขับเคลื่อนเคสการตัดสินใจ (Case Scenario Engine) มีความเป็นโมดูลาร์สูง
+โครงสร้างโปรแกรมถูกออกแบบแบบ Object-Oriented และ Data-Driven Architecture ประกอบด้วย:
+- **Core Entities:** ข้อมูลเตียงคนไข้ (`CCUBed`), สัญญาณชีพ (`VitalSigns`), ขั้นตอนหัตถการ (`StageData`), และภารกิจ Drag & Drop (`SequenceTask`, `TraysTask`, `UnorderedTask`)
+- **Shift & Progression Models:** ข้อมูลเวรประจำวัน (`Shift`), ปฏิทินเวร (`RosterSchedule`), และเป้าหมายสะสมดาว (`MilestoneGoal`)
+- **Game Engine & UI State:** ตัวควบคุมลอจิกแอป (`GameEngine`), ระบบเสียงสังเคราะห์ Web Audio (`SFXEngine`), และตัวบันทึกข้อมูลเบราว์เซอร์ (`LocalStorageManager`)
 
 ---
 
@@ -12,13 +15,20 @@
 
 ```mermaid
 classDiagram
-    %% Entities / Models
-    class Patient {
-        +String name
-        +int age
-        +String bed
-        +String diagnosis
-        +getDemographics() String
+    %% Core Bed & Patient Models
+    class CCUBed {
+        +int bedNum
+        +String bedCode
+        +String patientName
+        +int patientAge
+        +String caseTitle
+        +String dxBadge
+        +String status
+        +String statusText
+        +String doctorName
+        +String doctorAvatar
+        +List~StageData~ stageData
+        +getStayInfo() String
     }
 
     class VitalSigns {
@@ -26,108 +36,152 @@ classDiagram
         +String bp
         +String spo2
         +int map
-        +String condClass
-        +String condText
-        +calculateMAP(int systolic, int diastolic) int
-        +isHypotensive() boolean
+        +isAlarm() boolean
     }
 
-    class Choice {
-        +String letter
-        +String text
-        +boolean isCorrect
-        +String rationale
-    }
-
-    class SimulationStep {
-        +int id
-        +String stageTitle
-        +String scenarioDesc
-        +String npcSpeech
+    class StageData {
+        +String id
+        +String name
+        +String mechanic
+        +String docSpeech
         +VitalSigns vitals
-        +List~Choice~ choices
-        +getCorrectChoice() Choice
+        +ChoicesTask choices1toN
+        +SequenceTask sequenceTask
+        +TraysTask traysTask
+        +UnorderedTask unorderedDropTask
     }
 
-    class CCUCaseScenario {
-        +Patient patient
-        +List~SimulationStep~ steps
-        +int totalSteps
-        +getStep(int index) SimulationStep
+    class Tray {
+        +String id
+        +String name
+        +String type
+        +List~String~ expectedIds
+        +List~String~ expectedOrder
     }
 
-    %% Controllers / Engines
-    class GameController {
+    class TraysTask {
+        +List~TrayItem~ pool
+        +List~Tray~ trays
+        +boolean ordered
+    }
+
+    class SequenceTask {
+        +List~SequenceItem~ pool
+        +List~String~ correctOrder
+        +List~String~ placeholders
+    }
+
+    class UnorderedTask {
+        +List~UnorderedItem~ pool
+        +List~String~ expectedIds
+    }
+
+    %% Shift Roster Models
+    class Shift {
+        +String id
+        +String name
+        +String time
+        +String icon
+        +String chargeNurse
+        +String badgeClass
+        +List~int~ bedIndices
+    }
+
+    class RosterSchedule {
+        +int year
+        +int month
+        +Map~int, String~ dailyShifts
+        +generateMonthSchedule(int year, int month) Map
+        +getShiftForDay(int day) Shift
+        +isDayPlayable(int day) boolean
+        +isDayLocked(int day) boolean
+        +isDayCompleted(int day) boolean
+    }
+
+    %% Milestone & Progress Models
+    class MilestoneGoal {
+        +String id
+        +String title
+        +String icon
+        +String unit
+        +List~float~ tiers
+        +String desc
+        +getValue() float
+        +getStars() int
+        +getNextTarget() float
+        +getProgressPercent() float
+    }
+
+    class PlayerStats {
+        +int totalCompletedCases
+        +int totalPlaySeconds
+        +int perfectCases
+        +int shiftsCompleted
+        +int trayItemsSorted
+        +int stepsWithoutMistake
+        +int emergencyCasesDone
+        +int replayedCases
+    }
+
+    %% Controllers & Engines
+    class GameEngine {
+        -String currentTab
+        -int currentBedIdx
         -int currentStepIdx
-        -int safetyScore
-        -int nurseExp
-        -boolean answeredCurrentStep
-        -CCUCaseScenario currentCase
-        +initGame() void
-        +renderStep(int idx) void
-        +makeDecision(int choiceIdx) void
-        +nextStageStep() void
-        +restartCase() void
-        +calculateFinalResult() EvaluationResult
+        -int mistakesCount
+        -Set~String~ doneSteps
+        -Object stepState
+        +renderRoster() void
+        +renderWard() void
+        +renderProgress() void
+        +renderSettings() void
+        +openBed(int bedIdx) void
+        +loadStep(int stepIdx) void
+        +checkStep() void
+        +finishCase() void
     }
 
-    class MonitorEngine {
-        -HTMLCanvasElement canvas
-        -CanvasRenderingContext2D ctx
-        -float currentX
-        -float currentY
-        -int animationFrameId
-        +initEkgWave() void
-        +drawEkgSegment() void
-        +updateVitals(VitalSigns vitals) void
-        +setCriticalAlarm(boolean active) void
+    class SFXEngine {
+        -AudioContext ctx
+        +pick() void
+        +drop() void
+        +ok() void
+        +bad() void
+        +win() void
+        +star(int index) void
     }
 
-    class UIViewController {
-        +HTMLElement stageContainer
-        +HTMLElement feedbackPanel
-        +HTMLElement modalOverlay
-        +renderChoices(List~Choice~ choices) void
-        +showFeedback(boolean isCorrect, String title, String rationale) void
-        +updateScoreDisplay(int safetyScore, int exp) void
-        +showCompletionModal(EvaluationResult result) void
-        +hideModal() void
-    }
-
-    class EvaluationResult {
-        +int finalScore
-        +int totalExp
-        +String grade
-        +String clinicalCommentary
-        +boolean passedCriteria
+    class LocalStorageManager {
+        +load(String key, Object defaultVal) Object
+        +save(String key, Object val) void
+        +clearAll() void
     }
 
     %% Relationships
-    CCUCaseScenario "1" *-- "1" Patient : contains
-    CCUCaseScenario "1" *-- "5" SimulationStep : contains
-    SimulationStep "1" *-- "1" VitalSigns : defines
-    SimulationStep "1" *-- "3" Choice : contains
-
-    GameController "1" o-- "1" CCUCaseScenario : manages
-    GameController "1" --> "1" MonitorEngine : controls
-    GameController "1" --> "1" UIViewController : interacts
-    GameController ..> EvaluationResult : produces
-    UIViewController ..> EvaluationResult : renders
+    CCUBed *-- StageData
+    StageData *-- VitalSigns
+    StageData o-- TraysTask
+    StageData o-- SequenceTask
+    StageData o-- UnorderedTask
+    TraysTask *-- Tray
+    Shift o-- CCUBed
+    RosterSchedule o-- Shift
+    GameEngine o-- CCUBed
+    GameEngine o-- RosterSchedule
+    GameEngine o-- MilestoneGoal
+    GameEngine o-- PlayerStats
+    GameEngine o-- SFXEngine
+    GameEngine o-- LocalStorageManager
 ```
 
 ---
 
-### 3. คำอธิบายรายละเอียดคลาส (Class Specifications)
+### 3. คำอธิบายคลาสหลัก (Class Descriptions)
 
-#### 3.1 กลุ่ม Model / Data Entities
-- **`Patient`**: ข้อมูลประชากรศาสตร์ของผู้ป่วย เช่น ชื่อ นามสกุล อายุ เตียง และการวินิจฉัยโรคเบื้องต้น (เช่น STEMI Post-PCI)
-- **`VitalSigns`**: สัญญาณชีพของผู้ป่วยในแต่ละสถานะ (Heart Rate, NIBP, SpO2, Mean Arterial Pressure) พร้อมคลาส CSS กำกับระดับความรุนแรง (Stable, Warning, Critical)
-- **`Choice`**: ตัวเลือกการตัดสินใจ (A, B, C) พร้อมการระบุคำตอบที่ถูกต้อง และคำอธิบายเชิงคลินิก (Clinical Rationale)
-- **`SimulationStep`**: องค์ประกอบของแต่ละสถานการณ์จำลอง (คำอธิบายเหตุการณ์, บทพูดของ Charge Nurse, สัญญาณชีพ และตัวเลือก)
-- **`CCUCaseScenario`**: อ็อบเจกต์รวบรวมเคสผู้ป่วยและขั้นตอนทั้งหมดในสถานการณ์
-
-#### 3.2 กลุ่ม Controller & Engine
-- **`GameController`**: สมองหลักในการควบคุม Flow ของเกม จัดการ State ปัจจุบัน บันทึกคะแนน Patient Safety และคะแนน EXP ตรวจสอบคำตอบ และสลับขั้นตอน
-- **`MonitorEngine`**: ระบบเรนเดอร์สัญญาณชีพและคลื่นหัวใจ Canvas วาดรูปคลื่น P-QRS-T แบบไดนามิกตามรอบ Loop ความถี่สูง
-- **`UIViewController`**: จัดการ DOM ในหน้าเว็บ ปรับปรุงข้อความ สไตล์ปุ่ม การเปิด/ปิด Feedback Panel และ Result Modal
-- **`EvaluationResult`**: อ็อบเจกต์สรุปผลลัพธ์การประเมินทักษะทางการพยาบาลเมื่อจบเคส
+1. **`CCUBed`**: ข้อมูลเตียงคนไข้ CCU ทั้ง 8 เตียง รายละเอียดโรค แพทย์ผู้ดูแล และชุดข้อมูลหัตถการ 6 ขั้นตอน
+2. **`StageData`**: ขั้นตอนการทำหัตถการแต่ละขั้น บรรจุโจทย์ สัญญาณชีพ คำพูดแพทย์ และชนิดภารกิจ Drag & Drop
+3. **`TraysTask` / `SequenceTask` / `UnorderedTask`**: โครงสร้างภารกิจจัดเตรียมอุปกรณ์ลงถาดหลายใบ, เรียงลำดับเครื่องมือให้หมอ, และเลือกการพยาบาลที่ปลอดภัย
+4. **`Shift` / `RosterSchedule`**: ระบบตารางเวรหมุนเวียน (เช้า/บ่าย/ดึก/Off) ตรวจสอบเงื่อนไขการเล่นเรียงวัน และการล็อกเวร
+5. **`MilestoneGoal` / `PlayerStats`**: ระบบบันทึกสถิติ 20 เป้าหมาย คำนวณดาวและเปอร์เซ็นต์ของหลอดพลังความก้าวหน้า
+6. **`GameEngine`**: ตัวควบคุมหน้าจอและการโต้ตอบของผู้เล่น (Tabs, Modal, Feedback Sheet, Stepper)
+7. **`SFXEngine`**: สังเคราะห์คลื่นเสียง (Sine, Triangle wave) ด้วย Web Audio API สำหรับเสียง Pop, Click, Star, Confetti

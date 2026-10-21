@@ -1,189 +1,154 @@
-# แผนภาพลำดับขั้นตอน (Sequence Diagrams) สำหรับแต่ละ Use Case
-## โครงการ: A-WARD (CCU Nursing Simulation Game)
-
-เอกสารนี้แสดง Sequence Diagram ในการส่งสาร (Message Exchanges) ระหว่าง Actor, หน้าจอผู้ใช้ (UI View), ตัวจัดการเกม (Game Controller), ตัวจำลองสัญญาณชีพ (Vitals & ECG Monitor), และคลังข้อมูลสถานการณ์ (Case Scenario Engine)
+# แผนภาพลำดับขั้นตอน (Sequence Diagrams)
+## โครงการ: A-WARD CCU (CCU Nursing Simulation Game)
 
 ---
 
-### 1. Sequence Diagram: UC-01 (Start / Restart Case)
+### 1. คำอธิบายภาพรวม (Overview)
+เอกสารนี้แสดงการแลกเปลี่ยนข้อความ (Message Sequences) ระหว่างผู้เล่น (Nurse), หน้าจอแสดงผล (UI View), ตัวควบคุมเกม (GameEngine), แหล่งข้อมูลในเครื่อง (LocalStorage), และระบบเสียงสังเคราะห์ (SFXEngine) ตามหน้าจอจริงของ Prototype
+
+---
+
+### 2. Sequence Diagram 1: การเข้าดูตารางเวรและการตรวจเช็กเวรที่เล่นได้ (Roster Calendar Flow)
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Nurse as 👩‍⚕️ Nurse (User)
-    participant UI as 📱 UI View / App
-    participant Game as ⚙️ GameController
-    participant CaseData as 📦 ScenarioData
-    participant Monitor as 🩺 MonitorEngine
+    participant UI as 📱 Roster View
+    participant Engine as ⚙️ GameEngine
+    participant Roster as 📅 RosterSchedule
+    participant Storage as 💾 LocalStorage
+    participant SFX as 🔊 SFXEngine
 
-    Nurse ->> UI: เปิดเว็บแอป หรือกดปุ่ม "🔄 เล่นจำลองใหม่อีกครั้ง"
-    UI ->> Game: initGame() / restartCase()
-    Game ->> Game: รีเซ็ต state (step=0, score=100, exp=0)
-    Game ->> CaseData: getStep(0)
-    CaseData -->> Game: คืนข้อมูลขั้นตอนที่ 1 พร้อมค่า Vitals แรกรับ
-    Game ->> Monitor: initEkgWave() & updateVitals(hr=88, bp="115/72", map=86)
-    Monitor -->> UI: เริ่มวาดแอนิเมชัน ECG Lead II & แสดงค่าตัวเลข
-    Game ->> UI: renderStep(0) แสดงคำถามชอยส์ A/B/C & บทพูด NPC
-    UI -->> Nurse: แสดงหน้าจอขั้นตอนแรกรับ พร้อมมอนิเตอร์สัญญาณชีพ
-```
+    Nurse ->> UI: เปิดแอปพลิเคชัน (เริ่มต้นที่แท็บตารางเวร)
+    UI ->> Engine: renderRoster()
+    Engine ->> Storage: โหลดตารางเวร & วันที่ผ่านแล้ว (rosterDaysProgress)
+    Storage -->> Engine: ข้อมูลเวรประจำเดือน
+    Engine ->> Roster: getRosterUnlockedDay(year, month)
+    Roster -->> Engine: คืนค่า unlockedDay (วันปัจจุบันที่เข้าเวรได้)
+    Engine ->> UI: แสดงปฏิทินทั้งเดือน + ไฮไลต์วันที่มีสัญลักษณ์ '▶' สีทอง
+    UI -->> Nurse: ผู้เล่นเห็นปฏิทินเวรและเวรวันนี้
 
----
-
-### 2. Sequence Diagram: UC-02 (Monitor Vital Signs & Dynamic ECG)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Nurse as 👩‍⚕️ Nurse (User)
-    participant UI as 📱 Vitals HUD
-    participant Canvas as 📈 ECG Canvas
-    participant Loop as ⏱️ Animation Loop (requestAnimationFrame)
-
-    Loop ->> Loop: tick() คำนวณแกน x, y ตามสมการคลื่น EKG
-    Loop ->> Canvas: strokeLine(x1, y1, x2, y2)
-    Canvas -->> UI: แสดงเส้นคลื่น P-QRS-T เคลื่อนที่แบบ Real-time
-    Nurse ->> UI: กวาดสายตาตรวจค่า HR, BP, SpO2, MAP และแถบสถานะผู้ป่วย
-```
-
----
-
-### 3. Sequence Diagram: UC-03 (Assess Initial STEMI Post-PCI)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Nurse as 👩‍⚕️ Nurse
-    participant UI as 📱 Choices View
-    participant Game as ⚙️ GameController
-    participant Feedback as 📋 FeedbackPanel
-
-    Note over Nurse, UI: ขั้นตอนที่ 1/5: รับเวร & ประเมินแรกรับ
-    Nurse ->> UI: กดเลือก Choice A ("ตรวจคลำชีพจรหลังเท้า & ตรวจแผล")
-    UI ->> Game: makeDecision(choiceIdx=0)
-    Game ->> Game: ตรวจสอบ isCorrect (ผล: ถูกต้อง)
-    Game ->> Game: safetyScore ไม่ลด (100%), nurseExp += 100
-    Game ->> UI: อัปเดตปุ่มเป็นสีเขียว (Correct style) & ปิดการกดชอยส์อื่น
-    Game ->> Feedback: renderFeedback(title="ถูกต้องยอดเยี่ยม!", rationale="...")
-    Feedback -->> UI: ปรากฏกล่องคำอธิบายเชิงคลินิก + ปุ่ม "ต่อไปยังสถานการณ์ถัดไป ➔"
-    UI -->> Nurse: ผู้เล่นอ่าน Clinical Rationale เพื่อเสริมทักษะ
-    Nurse ->> UI: กดปุ่ม "ต่อไปยังสถานการณ์ถัดไป ➔"
-    UI ->> Game: nextStageStep()
-```
-
----
-
-### 4. Sequence Diagram: UC-04 (Manage Retroperitoneal Bleed Deterioration)
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Nurse as 👩‍⚕️ Nurse
-    participant UI as 📱 Screen
-    participant Game as ⚙️ GameController
-    participant Monitor as 🩺 MonitorEngine
-    participant Feedback as 📋 FeedbackPanel
-
-    Note over Game, Monitor: เปลี่ยนเข้าสู่ขั้นตอนที่ 2/5 (วิกฤตความดันตก)
-    Game ->> Monitor: updateVitals(hr=118, bp="85/50", map=58, "cond-critical")
-    Monitor -->> UI: กะพริบแจ้งเตือนสีแดง "🚨 วิกฤต: BP Drop & Tachycardia"
-    
-    alt กรณีเลือกผิด (เช่น กดชอยส์ A: ให้ยานอนหลับ/พารา)
-        Nurse ->> UI: กดเลือก Choice A
-        UI ->> Game: makeDecision(choiceIdx=0)
-        Game ->> Game: isCorrect=false -> หักคะแนน safetyScore -= 20
-        Game ->> UI: ไฮไลต์ปุ่มสีแดง (Wrong) & แสดงชอยส์ที่ถูกต้อง
-        Game ->> Feedback: renderFeedback(title="การตัดสินใจผิดพลาด!", rationale="อันตรายถึงชีวิต! ภาวะ Retroperitoneal Bleed...")
-        Feedback -->> UI: แสดงคำเตือนระดับวิกฤต
-    else กรณีเลือกถูก (กดชอยส์ B: โหลด IV + รายงานแพทย์ด่วน)
-        Nurse ->> UI: กดเลือก Choice B
-        UI ->> Game: makeDecision(choiceIdx=1)
-        Game ->> Game: isCorrect=true -> nurseExp += 100
-        Game ->> Feedback: renderFeedback(title="เฉียบขาดมาก!", rationale="ถูกต้อง เลือดออกด้านหลังเยื่อบุช่องท้องต้องรีบตามแพทย์...")
+    alt กรณีผู้เล่นกดวันที่ยังไม่ถึง (ข้ามวัน)
+        Nurse ->> UI: แตะวันที่ในอนาคต (isLocked = true)
+        UI ->> Engine: act('select-day', day)
+        Engine ->> SFX: bad()
+        Engine ->> UI: shake(node) + toast("ยังเข้าเวรนี้ไม่ได้")
+        UI -->> Nurse: แสดงข้อความเตือนและสั่นเตือน
+    else กรณีผู้เล่นกดวันปัจจุบันที่มี '▶'
+        Nurse ->> UI: แตะวันปัจจุบัน
+        UI ->> Engine: act('select-day', day)
+        Engine ->> SFX: pick()
+        Engine ->> UI: แสดงรายละเอียดเวร, หัวหน้าเวร และปุ่ม "เข้าวอร์ดเวรนี้"
     end
-    UI ->> Nurse: แสดงผลลัพธ์และคำอธิบายทางคลินิก
 ```
 
 ---
 
-### 5. Sequence Diagram: UC-05 (Administer Vasoactive Drug - Levophed)
+### 3. Sequence Diagram 2: การเข้าสู่วอร์ดและการกรองเตียงตามเวร (Shift to Ward Flow)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Nurse as 👩‍⚕️ Nurse
-    participant UI as 📱 Choices View
-    participant Game as ⚙️ GameController
-    participant Feedback as 📋 FeedbackPanel
+    actor Nurse as 👩‍⚕️ Nurse (User)
+    participant UI as 📱 UI View
+    participant Engine as ⚙️ GameEngine
+    participant SFX as 🔊 SFXEngine
 
-    Note over Nurse, UI: ขั้นตอนที่ 3/5: ข้อควรระวังการบริหารยา Levophed
-    Nurse ->> UI: กดเลือก Choice B ("ต่อ Infusion pump ทาง Central Line & วัด BP ซ้ำ")
-    UI ->> Game: makeDecision(choiceIdx=1)
-    Game ->> Game: ตรวจคำตอบ (ถูกต้อง) -> safetyScore คงที่, nurseExp += 100
-    Game ->> Feedback: renderFeedback(title="ถูกต้องตามมาตรฐาน CCU!", rationale="ต้องให้ทาง Central venous catheter เพื่อกัน Tissue Necrosis...")
-    Feedback -->> UI: แสดงเหตุผลเชิงเภสัชวิทยาคลินิก
-    UI -->> Nurse: ผู้เล่นได้รับองค์ความรู้ด้าน Extravasation & Titration
+    Nurse ->> UI: กดปุ่ม "เข้าวอร์ดเวรนี้" หรือ "เข้าวอร์ดทำหัตถการ ▶"
+    UI ->> Engine: act('go-ward-shift', shiftId)
+    Engine ->> SFX: pick()
+    Engine ->> Engine: กำหนด filterShift = shiftId, tab = 'ward'
+    Engine ->> UI: renderWard()
+    Note over UI: แสดงแถบ "ประจำการ: [ชื่อเวร]"<br>และไฮไลต์เฉพาะเตียงที่รับผิดชอบ<br>(หรี่เตียงอื่นเป็นสีเทา)
+    UI -->> Nurse: ผู้เล่นเห็นเตียงและคนไข้ที่ต้องดูแลในเวร
+    Nurse ->> UI: แตะที่เตียงคนไข้ที่ต้องการทำหัตถการ
+    UI ->> Engine: openBed(bedIndex)
+    Engine ->> UI: โหลดหน้าจอทำหัตถการ 6 ขั้นตอน (loadStep 0)
 ```
 
 ---
 
-### 6. Sequence Diagram: UC-06 (Manage Heparin & Coagulopathy)
+### 4. Sequence Diagram 3: การทำหัตถการและจัดถาดอุปกรณ์ (Procedure & Multi-tray Drag & Drop)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Nurse as 👩‍⚕️ Nurse
-    participant UI as 📱 Choices View
-    participant Game as ⚙️ GameController
-    participant Monitor as 🩺 MonitorEngine
-    participant Feedback as 📋 FeedbackPanel
+    actor Nurse as 👩‍⚕️ Nurse (User)
+    participant UI as 📱 Game Screen
+    participant Engine as ⚙️ GameEngine
+    participant SFX as 🔊 SFXEngine
 
-    Note over Game, Monitor: ขั้นตอนที่ 4/5: aPTT = 140s & Hct Drop จาก 42% -> 31%
-    Game ->> Monitor: updateVitals(hr=96, bp="102/65", map=72, "cond-warning")
-    Nurse ->> UI: กดเลือก Choice B ("หยุด Hold Heparin ทันที & เตรียม Protamine sulfate")
-    UI ->> Game: makeDecision(choiceIdx=1)
-    Game ->> Game: isCorrect=true -> nurseExp += 100
-    Game ->> Feedback: renderFeedback(title="ยอดเยี่ยมมาก!", rationale="เมื่อ aPTT เกินเป้าหมายร่วมกับมี Bleed ต้อง Hold ทันที...")
-    Feedback -->> UI: ปรากฏ Clinical Rationale
+    Note over UI: ขั้นที่ 2: เตรียมอุปกรณ์ทำหัตถการ (Trays Task)
+    Nurse ->> UI: ลากอุปกรณ์ปลอดเชื้อลงใน "ถาดปลอดเชื้อ" (Sterile Tray)
+    UI ->> Engine: moveItem(itemId, trayId)
+    Engine ->> SFX: drop()
+    UI -->> Nurse: ชิปอุปกรณ์ย้ายเข้าไปอยู่ในถาดปลอดเชื้อ
+
+    Nurse ->> UI: กดปุ่ม "ตรวจคำตอบ" (Check)
+    UI ->> Engine: checkStep()
+
+    alt มีข้อผิดพลาด (เช่น ใส่ของผิดถาด หรือลำดับผิด)
+        Engine ->> Engine: mistakes++
+        Engine ->> SFX: bad()
+        Engine ->> UI: ไฮไลต์ชิปเป็นสีแดง + แสดง Bottom Sheet สีแดงพร้อมคำแนะนำ
+        UI -->> Nurse: ผู้เล่นอ่านข้อผิดพลาดแล้วกด "ลองอีกครั้ง"
+    else ถูกต้องครบถ้วนตามหลักความปลอดภัย
+        Engine ->> Engine: done.add(step.id), บันทึก stepsWithoutMistake
+        Engine ->> SFX: ok()
+        Engine ->> UI: แสดง Bottom Sheet สีเขียว "ผ่านขั้นตอนนี้แล้ว" + ปุ่ม "ไปต่อ"
+        Nurse ->> UI: กดปุ่ม "ไปต่อ"
+        UI ->> Engine: nextStep() -> โหลดขั้นถัดไปจนครบ 6 ขั้น
+    end
 ```
 
 ---
 
-### 7. Sequence Diagram: UC-07 (Execute ISBAR Handover)
+### 5. Sequence Diagram 4: สำเร็จเคสและปลดล็อกวันถัดไปในตารางเวร (Case Finish & Shift Clearance)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Nurse as 👩‍⚕️ Nurse
-    participant UI as 📱 Handover View
-    participant Game as ⚙️ GameController
-    participant Modal as 🏆 ResultModal
+    actor Nurse as 👩‍⚕️ Nurse (User)
+    participant UI as 📱 Modal / View
+    participant Engine as ⚙️ GameEngine
+    participant Storage as 💾 LocalStorage
+    participant SFX as 🔊 SFXEngine
 
-    Note over Nurse, UI: ขั้นตอนที่ 5/5: ส่งเวรบ่ายตามหลัก ISBAR
-    Nurse ->> UI: กดเลือก Choice B (ส่งเวรครบทั้ง I-S-B-A-R)
-    UI ->> Game: makeDecision(choiceIdx=1)
-    Game ->> Game: isCorrect=true -> nurseExp += 100
-    Nurse ->> UI: กดปุ่ม "ดูผลการประเมินสรุป ➔"
-    UI ->> Game: nextStageStep() (ตรวจพบ currentStepIdx >= totalSteps)
-    Game ->> Modal: showEvaluationReport(safetyScore, nurseExp)
-    Modal -->> UI: แสดงหน้าต่าง Result Modal (ถ้วยรางวัล, เกรดประเมิน, คะแนนรวม)
-    UI -->> Nurse: พยาบาลเห็นผลลัพธ์การฝึกทักษะพร้อมตัวเลือก Replay
+    Note over Engine: ผ่านขั้นตอนที่ 6 (ISBAR Handover) สำเร็จ
+    Engine ->> Engine: finishCase()
+    Engine ->> Engine: คำนวณดาว (1-3 ดาว) ตามจำนวน mistakes
+    Engine ->> Storage: บันทึก progress[bedNum] = { passed: true, stars }
+    Engine ->> Storage: อัปเดต playerStats (ยอดหัตถการ, perfect cases)
+
+    opt กรณีทำเคสครบทุกเตียงในเวรประจำวัน
+        Engine ->> Storage: บันทึก rosterDaysProgress[dayKey] = { passed: true }
+        Note over Engine: ปลดล็อกวันถัดไปในตารางเวร!
+    end
+
+    Engine ->> SFX: win() & star() ทีละดวง
+    Engine ->> UI: openModal() แสดงริบบิ้นชัยชนะ + ดาวทอง + Confetti
+    UI -->> Nurse: ผู้เล่นรับชมสรุปผลสำเร็จและเลื่อนขั้นเลเวลพยาบาล
 ```
 
 ---
 
-### 8. Sequence Diagram: UC-08 & UC-09 (Clinical Feedback & Evaluation Scoring)
+### 6. Sequence Diagram 5: การติดตามเป้าหมาย 20 Milestones (Milestones Progress Tracking)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Nurse as 👩‍⚕️ Nurse
-    participant Game as ⚙️ GameController
-    participant Evaluator as 🧮 ScoreCalculator
-    participant Modal as 🏆 ResultModal
+    actor Nurse as 👩‍⚕️ Nurse (User)
+    participant UI as 📱 Progress View
+    participant Engine as ⚙️ GameEngine
+    participant Storage as 💾 LocalStorage
 
-    Game ->> Evaluator: computeFinalCompetency(safetyScore, nurseExp)
-    Evaluator ->> Evaluator: ตรวจสอบระดับเกรด (เช่น >= 90: พยาบาลชำนาญการ CCU)
-    Evaluator -->> Game: คืนค่า Evaluation Grade & Commentary
-    Game ->> Modal: populateReport(grade, score, exp, comment)
-    Modal -->> Nurse: นำเสนอคะแนนสมรรถนะการปฏิบัติการพยาบาลแบบองค์รวม
+    Nurse ->> UI: แตะแท็บ "ความก้าวหน้า" (Tabbar)
+    UI ->> Engine: renderProgress()
+    Engine ->> Storage: โหลด playerStats, rosterDaysProgress, progress
+    Storage -->> Engine: คืนค่าสถิติทั้งหมด
+    Engine ->> Engine: คำนวณเกณฑ์ดาวของ 20 Milestones (Tiers 1..3)
+    Engine ->> Engine: คำนวณเปอร์เซ็นต์หลอดพลังของแต่ละเป้าหมาย
+    Engine ->> UI: เรนเดอร์การ์ดเป้าหมาย 20 รายการ พร้อมแถบ Progress Bar สีฟ้า-ทอง
+    UI -->> Nurse: ผู้เล่นตรวจสอบชั่วโมงบิน CCU และเป้าหมายดาวที่สะสมได้
 ```
