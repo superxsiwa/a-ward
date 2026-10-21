@@ -316,3 +316,4 @@ erDiagram
 | `setting_id` | `INT` | PK | Primary Key ค่าเดียว (1) | `1` |
 | `sound_enabled` | `BOOLEAN` | - | เปิดเสียงเอฟเฟกต์ (SFX) | `true` |
 | `haptics_enabled`| `BOOLEAN` | - | เปิดระบบสั่นมือถือ (Haptics) | `true` |
+
