@@ -552,11 +552,6 @@
               <div class="day-roster-date">วัน${['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'][(firstDayIndex + selectedDay - 1) % 7]}ที่ ${selectedDay} ${THAI_MONTHS[m]} ${y + 543}</div>
               <div class="day-roster-sub">เวรของคุณวันนี้: <b>${myShift.icon} ${myShift.name}</b> ${isSelectedDone ? '<span class="status-badge s-passed">✓ ผ่านเวรนี้แล้ว</span>' : ''}</div>
             </div>
-            ${myShift.id !== 'off' ? `
-              <button class="btn btn-sm btn-gold" data-act="go-ward-shift" data-shift="${myShift.id}">
-                ${icon('bed')}<span>${isSelectedDone ? 'ทบทวนวอร์ด' : 'เข้าวอร์ดเวรนี้'}</span>
-              </button>
-            ` : ''}
           </div>
 
           <div class="day-shifts">
@@ -603,16 +598,15 @@
                               <span class="stay-tag">${stayInfo.stay}</span>
                             </div>
                           </div>
-                          <button class="btn btn-sm ${done ? 'btn-ghost' : 'btn-primary'}" data-act="open-bed" data-i="${idx}">
-                            ${icon(done ? 'check' : 'play')}<span>${done ? 'ทบทวน' : 'พยาบาล'}</span>
-                          </button>
                         </div>
                       `;
                     }).join('')}
                   </div>
-                  <button class="btn btn-sm ${isCurrent ? 'btn-primary' : 'btn-outline'} shift-action-btn" data-act="go-ward-shift" data-shift="${shift.id}">
-                    ${icon('bed')}<span>เข้าวอร์ดทำหัตถการ ${shift.name.split(' ')[0]} (${assignedBeds.length} เตียง) ▶</span>
-                  </button>
+                  ${isCurrent ? `
+                    <button class="btn btn-sm btn-gold shift-action-btn" data-act="go-ward-shift" data-shift="${shift.id}">
+                      ${icon('bed')}<span>${isSelectedDone ? 'ทบทวนวอร์ดเวรนี้' : 'เข้าวอร์ดเวรนี้'}</span>
+                    </button>
+                  ` : ''}
                 </div>
               `;
             }).join('')}
