@@ -21,7 +21,12 @@ const server = http.createServer((req, res) => {
   const cleanUrl = req.url.split('?')[0];
   let filePath;
 
-  if (cleanUrl === '/prototype' || cleanUrl === '/prototype/') {
+  if (cleanUrl === '/prototype') {
+    res.writeHead(301, { 'Location': '/prototype/' });
+    res.end();
+    return;
+  }
+  if (cleanUrl === '/prototype/') {
     filePath = path.join(PROTOTYPE_DIR, 'index.html');
   } else if (cleanUrl.startsWith('/prototype/')) {
     filePath = path.join(__dirname, cleanUrl);
