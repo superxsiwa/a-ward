@@ -63,12 +63,31 @@ button { font-family: inherit; }
   background: #f4faff;
   -webkit-user-select: none;
   user-select: none;
+  transition: max-width .2s ease;
 }
 
-@media (min-width: 520px) and (min-height: 760px) {
+@media (min-width: 768px) {
   .app {
-    height: min(900px, calc(100dvh - 32px));
-    border-radius: 38px;
+    max-width: 760px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app {
+    max-width: 980px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app {
+    max-width: 1100px;
+  }
+}
+
+@media (min-width: 520px) and (min-height: 700px) {
+  .app {
+    height: min(940px, calc(100dvh - 32px));
+    border-radius: 34px;
     box-shadow: var(--shadow-2), 0 0 0 10px rgba(255, 255, 255, .6);
   }
 }
@@ -565,9 +584,13 @@ button { font-family: inherit; }
 }
 .modal.show { opacity: 1; pointer-events: auto; }
 .modal-card {
-  position: relative; width: 100%; max-width: 360px; padding: 30px 18px 18px; overflow: hidden; text-align: center;
+  position: relative; width: 100%; max-width: 380px; padding: 30px 18px 18px; overflow: hidden; text-align: center;
   background: #fff; border: 3px solid var(--sky-300); border-bottom-width: 7px; border-radius: 30px;
   box-shadow: var(--shadow-2); animation: pop .45s cubic-bezier(.3, 1.4, .5, 1);
+}
+.modal-card.modal-card-lg {
+  max-width: 580px;
+  padding: 24px 20px 20px;
 }
 .win-ribbon {
   position: absolute; top: 0; left: 50%; transform: translateX(-50%); padding: 4px 22px; border-radius: 0 0 16px 16px;
@@ -855,4 +878,122 @@ button { font-family: inherit; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .ecg svg { animation: none; }
 }
+
+/* =========================================================================
+   RESPONSIVE DESIGN (Desktop, Tablet, Mobile)
+   ========================================================================= */
+
+/* --- Tablet Breakpoint (min-width: 640px) --- */
+@media (min-width: 640px) {
+  .topbar {
+    padding: calc(12px + var(--safe-top)) 18px 14px;
+    gap: 14px;
+  }
+  .who .rank {
+    font-size: 15px;
+  }
+  .dock {
+    padding: 10px 18px calc(12px + var(--safe-bottom));
+  }
+  .tab {
+    font-size: 12px;
+    min-height: 56px;
+  }
+  .tab .ic {
+    width: 26px; height: 26px;
+  }
+  
+  /* Ward Screen: 3 columns on tablet */
+  .bays {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 14px;
+  }
+  
+  /* Roster / Calendar Layout */
+  .day-shifts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .day-shift-card.my-shift {
+    grid-column: 1 / -1;
+  }
+
+  /* Progress & Milestones */
+  .progress-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .milestone-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .milestone-section .section-sub-h {
+    grid-column: 1 / -1;
+  }
+
+  /* Procedure Game: Trays side by side */
+  .trays {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+/* --- Desktop Breakpoint (min-width: 900px) --- */
+@media (min-width: 900px) {
+  /* Ward Screen: 4 columns on desktop for 8 beds (2 rows of 4) */
+  .bays {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px 16px;
+  }
+  .bed {
+    min-height: 210px;
+  }
+
+  /* Procedure Game Screen: Split 2 columns (Left: Patient monitor & Doctor prompt, Right: Tasks & Interactions) */
+  .game {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 18px;
+    align-items: start;
+    padding: 18px 20px 28px;
+  }
+  .stepper {
+    grid-column: 1 / -1;
+  }
+  .step-head {
+    grid-column: 1 / -1;
+  }
+  .case {
+    position: sticky;
+    top: 10px;
+  }
+  #task {
+    min-width: 0;
+  }
+  
+  /* Calendar & Roster Screen: Split view (Left: Calendar, Right: Day Shifts) */
+  .cal-layout-desktop {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  /* Case Management List */
+  .case-list-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Form dialogs: 2 column layout */
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+}
+
 

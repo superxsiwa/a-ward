@@ -536,83 +536,87 @@
           <p>ต้องเล่นผ่านเวรเรียงตามวัน (ช่องสีทองที่มีเครื่องหมาย <b style="color:#fde047">▶ เล่นวันนี้ได้</b>) ปฏิบัติงานให้ครบเพื่อก้าวสู่วันถัดไป</p>
         </div>
 
-        <div class="cal-month-bar">
-          <button class="cal-nav-btn" data-act="cal-prev" aria-label="เดือนก่อนหน้า">◀</button>
-          <div class="cal-month-title">${THAI_MONTHS[m]} ${y + 543}</div>
-          <button class="cal-nav-btn" data-act="cal-next" aria-label="เดือนถัดไป">▶</button>
-        </div>
+        <div class="cal-layout-desktop">
+          <div>
+            <div class="cal-month-bar">
+              <button class="cal-nav-btn" data-act="cal-prev" aria-label="เดือนก่อนหน้า">◀</button>
+              <div class="cal-month-title">${THAI_MONTHS[m]} ${y + 543}</div>
+              <button class="cal-nav-btn" data-act="cal-next" aria-label="เดือนถัดไป">▶</button>
+            </div>
 
-        <div class="cal-grid-card">
-          <div class="cal-weekdays">
-            <span class="sun">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="sat">ส</span>
-          </div>
-          <div class="cal-days-grid">${cellsHtml}</div>
-        </div>
-
-        <div class="day-roster-box">
-          <div class="day-roster-head">
-            <div>
-              <div class="day-roster-date">วัน${['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'][(firstDayIndex + selectedDay - 1) % 7]}ที่ ${selectedDay} ${THAI_MONTHS[m]} ${y + 543}</div>
-              <div class="day-roster-sub">เวรของคุณวันนี้: <b>${myShift.icon} ${myShift.name}</b> ${isSelectedDone ? '<span class="status-badge s-passed">✓ ผ่านเวรนี้แล้ว</span>' : ''}</div>
+            <div class="cal-grid-card">
+              <div class="cal-weekdays">
+                <span class="sun">อา</span><span>จ</span><span>อ</span><span>พ</span><span>พฤ</span><span>ศ</span><span class="sat">ส</span>
+              </div>
+              <div class="cal-days-grid">${cellsHtml}</div>
             </div>
           </div>
 
-          <div class="day-shifts">
-            ${myShift.id === 'off' ? `
-              <div class="card" style="text-align:center;padding:22px 14px;background:#f8fafc">
-                <div style="font-size:36px;margin-bottom:6px">☕🌴</div>
-                <b style="font:600 15px var(--font-display);color:var(--ink)">วันนี้เป็นวันหยุดของคุณ (Off)</b>
-                <p class="hint" style="margin-top:4px">พักผ่อนให้เต็มที่ หรือเลือกดูเคสหัตถการในวอร์ดเพื่อทบทวนความรู้ได้เสมอ</p>
-                <div style="margin-top:12px;display:flex;justify-content:center;gap:8px">
-                  <button class="btn btn-sm btn-outline" data-act="go-ward-all">${icon('bed')}<span>ดูวอร์ดทั้งหมด</span></button>
-                </div>
+          <div class="day-roster-box">
+            <div class="day-roster-head">
+              <div>
+                <div class="day-roster-date">วัน${['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'][(firstDayIndex + selectedDay - 1) % 7]}ที่ ${selectedDay} ${THAI_MONTHS[m]} ${y + 543}</div>
+                <div class="day-roster-sub">เวรของคุณวันนี้: <b>${myShift.icon} ${myShift.name}</b> ${isSelectedDone ? '<span class="status-badge s-passed">✓ ผ่านเวรนี้แล้ว</span>' : ''}</div>
               </div>
-            ` : ''}
+            </div>
 
-            ${SHIFTS.map((shift) => {
-              const isCurrent = shift.id === myShift.id;
-              const assignedBeds = shift.bedIndices.map((idx) => ({ bed: BEDS[idx], idx }));
-              const completedCount = assignedBeds.filter(({ bed }) => progress[bed.bedNum] && progress[bed.bedNum].passed).length;
-              return `
-                <div class="day-shift-card ${isCurrent ? 'my-shift' : ''}">
-                  <div class="day-shift-top">
-                    <div class="day-shift-title">
-                      <span>${shift.icon}</span>
-                      <b>${shift.name}</b>
-                      ${isCurrent ? '<span class="status-badge s-passed" style="font-size:9.5px;padding:2px 6px">เวรของคุณ</span>' : ''}
+            <div class="day-shifts">
+              ${myShift.id === 'off' ? `
+                <div class="card" style="text-align:center;padding:22px 14px;background:#f8fafc">
+                  <div style="font-size:36px;margin-bottom:6px">☕🌴</div>
+                  <b style="font:600 15px var(--font-display);color:var(--ink)">วันนี้เป็นวันหยุดของคุณ (Off)</b>
+                  <p class="hint" style="margin-top:4px">พักผ่อนให้เต็มที่ หรือเลือกดูเคสหัตถการในวอร์ดเพื่อทบทวนความรู้ได้เสมอ</p>
+                  <div style="margin-top:12px;display:flex;justify-content:center;gap:8px">
+                    <button class="btn btn-sm btn-outline" data-act="go-ward-all">${icon('bed')}<span>ดูวอร์ดทั้งหมด</span></button>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${SHIFTS.map((shift) => {
+                const isCurrent = shift.id === myShift.id;
+                const assignedBeds = shift.bedIndices.map((idx) => ({ bed: BEDS[idx], idx }));
+                const completedCount = assignedBeds.filter(({ bed }) => progress[bed.bedNum] && progress[bed.bedNum].passed).length;
+                return `
+                  <div class="day-shift-card ${isCurrent ? 'my-shift' : ''}">
+                    <div class="day-shift-top">
+                      <div class="day-shift-title">
+                        <span>${shift.icon}</span>
+                        <b>${shift.name}</b>
+                        ${isCurrent ? '<span class="status-badge s-passed" style="font-size:9.5px;padding:2px 6px">เวรของคุณ</span>' : ''}
+                      </div>
+                      <span class="day-shift-badge ${shift.badgeClass}">${shift.time}</span>
                     </div>
-                    <span class="day-shift-badge ${shift.badgeClass}">${shift.time}</span>
-                  </div>
-                  <div class="day-shift-meta">
-                    หัวหน้าเวร: <b>${shift.chargeNurse}</b> · คนไข้ในความรับผิดชอบ (${completedCount}/${assignedBeds.length} เคส)
-                  </div>
-                  <div class="assigned-beds-list">
-                    ${assignedBeds.map(({ bed, idx }) => {
-                      const rec = progress[bed.bedNum] || {};
-                      const done = !!rec.passed;
-                      const stayInfo = BED_STAY_INFO[bed.bedNum] || { stay: 'หอผู้ป่วย CCU' };
-                      return `
-                        <div class="assigned-bed-item ${done ? 'is-done' : ''}">
-                          <span class="assigned-bed-no">เตียง ${String(bed.bedNum).padStart(2, '0')}</span>
-                          <div style="flex:1;min-width:0">
-                            <div class="assigned-bed-title">${bed.caseTitle}</div>
-                            <div class="assigned-bed-sub">
-                              <span>${bed.patientName}</span>
-                              <span class="stay-tag">${stayInfo.stay}</span>
+                    <div class="day-shift-meta">
+                      หัวหน้าเวร: <b>${shift.chargeNurse}</b> · คนไข้ในความรับผิดชอบ (${completedCount}/${assignedBeds.length} เคส)
+                    </div>
+                    <div class="assigned-beds-list">
+                      ${assignedBeds.map(({ bed, idx }) => {
+                        const rec = progress[bed.bedNum] || {};
+                        const done = !!rec.passed;
+                        const stayInfo = BED_STAY_INFO[bed.bedNum] || { stay: 'หอผู้ป่วย CCU' };
+                        return `
+                          <div class="assigned-bed-item ${done ? 'is-done' : ''}">
+                            <span class="assigned-bed-no">เตียง ${String(bed.bedNum).padStart(2, '0')}</span>
+                            <div style="flex:1;min-width:0">
+                              <div class="assigned-bed-title">${bed.caseTitle}</div>
+                              <div class="assigned-bed-sub">
+                                <span>${bed.patientName}</span>
+                                <span class="stay-tag">${stayInfo.stay}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      `;
-                    }).join('')}
+                        `;
+                      }).join('')}
+                    </div>
+                    ${isCurrent ? `
+                      <button class="btn btn-sm btn-gold shift-action-btn" data-act="go-ward-shift" data-shift="${shift.id}">
+                        ${icon('bed')}<span>${isSelectedDone ? 'ทบทวนวอร์ดเวรนี้' : 'เข้าวอร์ดเวรนี้'}</span>
+                      </button>
+                    ` : ''}
                   </div>
-                  ${isCurrent ? `
-                    <button class="btn btn-sm btn-gold shift-action-btn" data-act="go-ward-shift" data-shift="${shift.id}">
-                      ${icon('bed')}<span>${isSelectedDone ? 'ทบทวนวอร์ดเวรนี้' : 'เข้าวอร์ดเวรนี้'}</span>
-                    </button>
-                  ` : ''}
-                </div>
-              `;
-            }).join('')}
+                `;
+              }).join('')}
+            </div>
           </div>
         </div>
       </section>`;
@@ -820,7 +824,7 @@
           <button class="btn btn-sm btn-outline" data-act="reset-default-cases">🔄 คืนค่าเคสตั้งต้น</button>
         </div>
 
-        <div class="list">
+        <div class="list case-list-grid">
           ${BEDS.map((b, i) => `
             <div class="case-item-card">
               <div class="case-item-top">
@@ -929,7 +933,7 @@
           <button class="btn btn-ghost" data-act="modal-close">ยกเลิก</button>
         </div>
       </div>
-    `);
+    `, 'modal-card-lg');
   }
 
   function saveCaseFromForm(idx) {
@@ -1230,7 +1234,7 @@
           <button class="btn btn-ghost" data-act="modal-close">ปิด</button>
         </div>
       </div>
-    `);
+    `, 'modal-card-lg');
   }
 
   function saveCurrentStepFromForm() {
@@ -1717,7 +1721,7 @@
   }
 
   /* ---------- finish / modal ---------- */
-  function openModal(html) { el.modal.innerHTML = `<div class="modal-card">${html}</div>`; el.modal.classList.add('show'); }
+  function openModal(html, cardClass = '') { el.modal.innerHTML = `<div class="modal-card ${cardClass}">${html}</div>`; el.modal.classList.add('show'); }
   function closeModal() { el.modal.classList.remove('show'); }
 
   function confetti(host) {
