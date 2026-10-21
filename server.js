@@ -4,6 +4,7 @@ const path = require('path');
 
 const PORT = process.env.PORT || 3030;
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const PROTOTYPE_DIR = path.join(__dirname, 'prototype');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -17,7 +18,16 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = path.join(PUBLIC_DIR, req.url === '/' ? 'index.html' : req.url.split('?')[0]);
+  const cleanUrl = req.url.split('?')[0];
+  let filePath;
+
+  if (cleanUrl === '/prototype' || cleanUrl === '/prototype/') {
+    filePath = path.join(PROTOTYPE_DIR, 'index.html');
+  } else if (cleanUrl.startsWith('/prototype/')) {
+    filePath = path.join(__dirname, cleanUrl);
+  } else {
+    filePath = path.join(PUBLIC_DIR, cleanUrl === '/' ? 'index.html' : cleanUrl);
+  }
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
