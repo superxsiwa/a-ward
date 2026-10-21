@@ -732,24 +732,72 @@ button { font-family: inherit; }
 .day-roster-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 1px; }
 
 /* Shifts in Day */
-.day-shifts { display: flex; flex-direction: column; gap: 10px; }
-.day-shift-card {
-  border: 2px solid #e2e8f0; border-radius: 16px; padding: 12px;
-  background: #f8fafc; transition: border-color .15s;
+.day-shifts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.day-shift-card.my-shift { border-color: #38bdf8; background: #fff; box-shadow: 0 4px 10px -4px rgba(2, 132, 199, .2); }
-.day-shift-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
-.day-shift-title { font: 700 13.5px var(--font-display); color: var(--ink); display: flex; align-items: center; gap: 6px; }
-.day-shift-badge { padding: 3px 9px; border-radius: 99px; font: 700 11px var(--font-display); }
+.day-shift-card {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 14px;
+  background: #f8fafc;
+  transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
+}
+.day-shift-card.my-shift {
+  border-color: #38bdf8;
+  background: #fff;
+  box-shadow: 0 4px 14px -4px rgba(2, 132, 199, .25);
+}
+.day-shift-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.day-shift-title {
+  font: 700 14px var(--font-display);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.day-shift-badge {
+  padding: 3px 9px;
+  border-radius: 99px;
+  font: 700 11px var(--font-display);
+  flex-shrink: 0;
+}
 .badge-morning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
 .badge-afternoon { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
 .badge-night { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
-.day-shift-meta { font-size: 11.5px; color: var(--ink-3); margin-bottom: 8px; }
+.day-shift-meta {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+  min-height: 20px;
+}
 
-.assigned-beds-list { display: flex; flex-direction: column; gap: 6px; }
+.assigned-beds-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
 .assigned-bed-item {
-  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-  background: #f0f9ff; border: 1.5px solid #bae6fd; border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  min-height: 48px;
+  background: #f0f9ff;
+  border: 1.5px solid #bae6fd;
+  border-radius: 12px;
+  box-sizing: border-box;
 }
 .assigned-bed-item.is-done { background: #ecfdf5; border-color: #86efac; }
 .assigned-bed-no {
@@ -757,15 +805,36 @@ button { font-family: inherit; }
   border-radius: 8px; padding: 3px 6px; border: 1px solid #bae6fd; flex: none;
 }
 .assigned-bed-item.is-done .assigned-bed-no { color: #059669; border-color: #86efac; }
-.assigned-bed-title { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+.assigned-bed-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .assigned-bed-sub { font-size: 10.5px; color: var(--ink-3); display: flex; align-items: center; gap: 4px; }
 .stay-tag {
   display: inline-block; padding: 1px 5px; border-radius: 4px;
   background: #fef3c7; color: #92400e; font-size: 9.5px; font-weight: 600;
 }
+.shift-action-btn-wrap {
+  margin-top: auto;
+  padding-top: 10px;
+  min-height: 48px;
+  display: flex;
+  align-items: flex-end;
+}
 .shift-action-btn {
-  margin-top: 10px; width: 100%; display: flex; align-items: center;
-  justify-content: center; gap: 6px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
 }
 
 /* Ward Shift Filter Banner */
@@ -912,11 +981,11 @@ button { font-family: inherit; }
   /* Roster / Calendar Layout */
   .day-shifts {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
   .day-shift-card.my-shift {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   /* Progress & Milestones */

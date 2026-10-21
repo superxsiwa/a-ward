@@ -608,11 +608,13 @@
                         `;
                       }).join('')}
                     </div>
-                    ${isCurrent ? `
-                      <button class="btn btn-sm btn-gold shift-action-btn" data-act="go-ward-shift" data-shift="${shift.id}">
-                        ${icon('bed')}<span>${isSelectedDone ? 'ทบทวนวอร์ดเวรนี้' : 'เข้าวอร์ดเวรนี้'}</span>
-                      </button>
-                    ` : ''}
+                    <div class="shift-action-btn-wrap">
+                      ${isCurrent ? `
+                        <button class="btn btn-sm btn-gold shift-action-btn" data-act="go-ward-shift" data-shift="${shift.id}">
+                          ${icon('bed')}<span>${isSelectedDone ? 'ทบทวนวอร์ดเวรนี้' : 'เข้าวอร์ดเวรนี้'}</span>
+                        </button>
+                      ` : ''}
+                    </div>
                   </div>
                 `;
               }).join('')}
