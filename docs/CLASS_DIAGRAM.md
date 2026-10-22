@@ -123,7 +123,7 @@ classDiagram
         +int replayedCases
     }
 
-    %% Controllers & Engines
+    %% Controllers, Engines & Patterns
     class GameEngine {
         -String currentTab
         -int currentBedIdx
@@ -131,14 +131,69 @@ classDiagram
         -int mistakesCount
         -Set~String~ doneSteps
         -Object stepState
+        -ProcedureStateMachine stateMachine
+        -EvaluationStrategyContext strategyContext
         +renderRoster() void
         +renderWard() void
+        +renderCaseManager() void
         +renderProgress() void
         +renderSettings() void
         +openBed(int bedIdx) void
         +loadStep(int stepIdx) void
         +checkStep() void
         +finishCase() void
+    }
+
+    %% Strategy Pattern for Evaluations
+    class EvaluationStrategy {
+        <<interface>>
+        +validate(Object userInput, StageData stage) ValidationResult
+    }
+    class SingleChoiceStrategy {
+        +validate(Object userInput, StageData stage) ValidationResult
+    }
+    class MultiSelectStrategy {
+        +validate(Object userInput, StageData stage) ValidationResult
+    }
+    class TraySortingStrategy {
+        +validate(Object userInput, StageData stage) ValidationResult
+    }
+    class SequenceOrderStrategy {
+        +validate(Object userInput, StageData stage) ValidationResult
+    }
+    class EvaluationStrategyContext {
+        -Map~String, EvaluationStrategy~ strategies
+        +evaluate(String mechanic, Object userInput, StageData stage) ValidationResult
+    }
+
+    %% State Machine Pattern
+    class ProcedureStateMachine {
+        -String currentState
+        +transitionTo(String nextState) boolean
+        +canCheck() boolean
+    }
+
+    %% Repository Pattern
+    class BedCaseRepository {
+        <<interface>>
+        +getAllCases() List~CCUBed~
+        +getCaseById(int bedNum) CCUBed
+        +saveCase(CCUBed bed) void
+        +deleteCase(int bedNum) void
+        +exportJson() String
+        +importJson(String jsonStr) boolean
+    }
+    class LocalStorageBedRepository {
+        -LocalStorageManager storage
+        +getAllCases() List~CCUBed~
+        +saveCase(CCUBed bed) void
+    }
+
+    %% Observer Event Bus
+    class GameEventBus {
+        -Map~String, List~Function~~ listeners
+        +subscribe(String event, Function callback) void
+        +emit(String event, Object data) void
     }
 
     class SFXEngine {
@@ -172,6 +227,15 @@ classDiagram
     GameEngine o-- PlayerStats
     GameEngine o-- SFXEngine
     GameEngine o-- LocalStorageManager
+    GameEngine o-- ProcedureStateMachine
+    GameEngine o-- EvaluationStrategyContext
+    GameEngine o-- BedCaseRepository
+    EvaluationStrategyContext o-- EvaluationStrategy
+    EvaluationStrategy <|.. SingleChoiceStrategy
+    EvaluationStrategy <|.. MultiSelectStrategy
+    EvaluationStrategy <|.. TraySortingStrategy
+    EvaluationStrategy <|.. SequenceOrderStrategy
+    BedCaseRepository <|.. LocalStorageBedRepository
 ```
 
 ---
@@ -184,4 +248,7 @@ classDiagram
 4. **`Shift` / `RosterSchedule`**: ระบบตารางเวรหมุนเวียน (เช้า/บ่าย/ดึก/Off) ตรวจสอบเงื่อนไขการเล่นเรียงวัน และการล็อกเวร
 5. **`MilestoneGoal` / `PlayerStats`**: ระบบบันทึกสถิติ 20 เป้าหมาย คำนวณดาวและเปอร์เซ็นต์ของหลอดพลังความก้าวหน้า
 6. **`GameEngine`**: ตัวควบคุมหน้าจอและการโต้ตอบของผู้เล่น (Tabs, Modal, Feedback Sheet, Stepper)
-7. **`SFXEngine`**: สังเคราะห์คลื่นเสียง (Sine, Triangle wave) ด้วย Web Audio API สำหรับเสียง Pop, Click, Star, Confetti
+7. **`EvaluationStrategyContext` & `EvaluationStrategy` (Strategy Pattern)**: สถาปัตยกรรมตรวจคำตอบแยกโมดูลตามกลไกข้อสอบ (Single Choice, Multi-select, Tray sorting, Sequence)
+8. **`ProcedureStateMachine` (State Pattern)**: ตัวควบคุมสถานะขั้นตอนหัตถการ (Reading ➔ Interacting ➔ Evaluating ➔ Completed)
+9. **`BedCaseRepository` (Repository Pattern)**: อินเทอร์เฟซเข้าถึงและบันทึกเคสคนไข้ รองรับทั้ง LocalStorage และ Cloud Backend ในอนาคต
+10. **`SFXEngine`**: สังเคราะห์คลื่นเสียง (Sine, Triangle wave) ด้วย Web Audio API สำหรับเสียง Pop, Click, Star, Confetti

@@ -39,7 +39,12 @@ flowchart LR
         UC14(["UC-14: ตรวจคำตอบและรับผลสะท้อนทันที<br>(Instant Check & Clinical Feedback)"])
         UC15(["UC-15: รับสรุปคะแนนดาวและเฉลิมฉลอง<br>(Complete Case & Win Star Ribbon)"])
 
-        %% Module 5: Milestones & Settings
+        %% Module 5: Case & Step Management
+        UC18(["UC-18: จัดการเพิ่ม ลบ แก้ไขเคสคนไข้<br>(Case CRUD Management)"])
+        UC19(["UC-19: จัดการ 6 ขั้นตอน ตัวเลือก และคำตอบ<br>(Step & Answer Builder)"])
+        UC20(["UC-20: ส่งออกและนำเข้าข้อมูลเคส JSON<br>(Export & Import Cases JSON)"])
+
+        %% Module 6: Milestones & Settings
         UC16(["UC-16: ติดตามความก้าวหน้าและ 20 Milestones<br>(Track 20 Nursing Goals & Milestones)"])
         UC17(["UC-17: ปรับแต่งเสียงและการสั่น / รีเซ็ตข้อมูล<br>(Configure Audio/Haptics & Reset Progress)"])
     end
@@ -51,8 +56,13 @@ flowchart LR
     Nurse --> UC4
     Nurse --> UC5
     Nurse --> UC7
+    Nurse --> UC18
     Nurse --> UC16
     Nurse --> UC17
+
+    %% Relationships
+    UC18 -.->|<<include>>| UC19
+    UC18 -.->|<<include>>| UC20
 
     %% Relationships
     UC4 -.->|<<include>>| UC6
@@ -91,3 +101,6 @@ flowchart LR
 | **UC-15** | Complete Case & Win Star Ribbon | สรุปคะแนน 1-3 ดาว ปลดล็อกวันถัดไปในตารางเวร พร้อมเอฟเฟกต์ Confetti |
 | **UC-16** | Track 20 Nursing Goals & Milestones | ตรวจสอบหลอดพลังและสะสมดาวจาก 20 เป้าหมาย (ชั่วโมงบิน, ยอดหัตถการ, ความแม่นยำ) |
 | **UC-17** | Configure Settings & Reset | เปิด-ปิดเสียง SFX, ระบบสั่น Haptic หรือล้างข้อมูลความก้าวหน้าทั้งหมด |
+| **UC-18** | Case CRUD Management | บริหารจัดการเคสคนไข้ในวอร์ด เพิ่มเคสใหม่ แก้ไขข้อมูลผู้ป่วย และลบเคส |
+| **UC-19** | Step & Answer Builder | กำหนดชื่อขั้นตอน โจทย์แพทย์ สรุปความรู้ และจัดการตัวเลือกคำตอบ พร้อมสลับกลไก (Single choice, Checkbox, Trays, Sequence) |
+| **UC-20** | Export & Import Cases JSON | สำรองข้อมูลเคสทั้งหมดออกเป็นไฟล์ JSON และนำเข้าไฟล์เคสกลับสู่ระบบ |
