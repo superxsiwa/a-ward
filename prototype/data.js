@@ -140,13 +140,13 @@
               { id: "tr2", name: "🟦 ถาดอุปกรณ์ข้างเตียง (Non-Sterile Tray)", sterile: false, expectedIds: ["e5", "e6", "e7"] }
             ],
             pool: [
-              { id: "e1", text: "ชุดสาย Triple-Lumen CVC & Guidewire", img: "./assets/equipment/iv_bag.png" },
-              { id: "e5", text: "ขวดยาชา 1% Lidocaine & หลอดดูดยา", img: "./assets/equipment/medicine_bottle.png" },
-              { id: "e2", text: "ผ้าเจาะกลางและชุดกาวน์ปราศจากเชื้อ", img: "./assets/equipment/first_aid_kit.png" },
-              { id: "e6", text: "ถุงน้ำเกลือ 0.9% NSS & ชุดสาย IV", img: "./assets/equipment/iv_bag.png" },
-              { id: "e3", text: "เข็มเย็บแผล ไหม Nylon & กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
-              { id: "e7", text: "เครื่องตรวจวัดคลื่นหัวใจ/ชีพจรพกพา", img: "./assets/equipment/pulse_oximeter.png" },
-              { id: "e4", text: "กระบอกฉีดยา Syringe & เข็ม Introducer", img: "./assets/equipment/syringe.png" }
+              { id: "e1", text: "สาย CVC", img: "./assets/equipment/iv_bag.png" },
+              { id: "e5", text: "ขวดยาชา", img: "./assets/equipment/medicine_bottle.png" },
+              { id: "e2", text: "ผ้าเจาะกลาง", img: "./assets/equipment/first_aid_kit.png" },
+              { id: "e6", text: "ถุงน้ำเกลือ", img: "./assets/equipment/iv_bag.png" },
+              { id: "e3", text: "กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "e7", text: "เครื่องวัดชีพจร", img: "./assets/equipment/pulse_oximeter.png" },
+              { id: "e4", text: "เข็มฉีดยา", img: "./assets/equipment/syringe.png" }
             ]
           }
         },
@@ -264,13 +264,13 @@
               { id: "etr2", name: "🟦 ถาดยาและอุปกรณ์ยึดตรึง (Med & Fix Tray)", sterile: false, expectedIds: ["et5", "et6", "et7"] }
             ],
             pool: [
-              { id: "et1", text: "ไฟฉายส่องตรวจ & Laryngoscope ส่องกล่องเสียง", img: "./assets/equipment/penlight.png" },
-              { id: "et5", text: "ขวดยานำสลบ & หลอดเข็มฉีดยา", img: "./assets/equipment/syringe.png" },
-              { id: "et2", text: "ท่อช่วยหายใจ ET-Tube & หน้ากากออกซิเจน", img: "./assets/equipment/oxygen_mask.png" },
-              { id: "et6", text: "หูฟังแพทย์ Stethoscope ฟังเสียงปอด 2 ข้าง", img: "./assets/equipment/stethoscope.png" },
-              { id: "et3", text: "ลวดนำร่อง Stylet & กรรไกร/คีมคีบ Magill", img: "./assets/equipment/scissors_forceps.png" },
-              { id: "et7", text: "เครื่องตรวจวัดคลื่นหัวใจ/ชีพจรพกพา", img: "./assets/equipment/pulse_oximeter.png" },
-              { id: "et4", text: "เครื่องตรวจพกพา & สายดูดเสมหะ Suction", img: "./assets/equipment/otoscope.png" }
+              { id: "et1", text: "ไฟฉายส่องตรวจ", img: "./assets/equipment/penlight.png" },
+              { id: "et5", text: "เข็มฉีดยานำสลบ", img: "./assets/equipment/syringe.png" },
+              { id: "et2", text: "หน้ากากออกซิเจน", img: "./assets/equipment/oxygen_mask.png" },
+              { id: "et6", text: "หูฟังแพทย์", img: "./assets/equipment/stethoscope.png" },
+              { id: "et3", text: "กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "et7", text: "เครื่องวัดชีพจร", img: "./assets/equipment/pulse_oximeter.png" },
+              { id: "et4", text: "เครื่องตรวจพกพา", img: "./assets/equipment/otoscope.png" }
             ]
           }
         },
@@ -388,13 +388,13 @@
               { id: "ftr2", name: "🟦 ถาดยาฉุกเฉินและอุปกรณ์ข้างเตียง (Bedside Tray)", sterile: false, expectedIds: ["fe5", "fe6", "fe7"] }
             ],
             pool: [
-              { id: "fe1", text: "ถุงมือสเตอไรด์ & กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
-              { id: "fe5", text: "ยาฉุกเฉิน Atropine & หลอดเข็มฉีดยา", img: "./assets/equipment/syringe.png" },
-              { id: "fe2", text: "ผ้าก๊อซปราศจากเชื้อหนาพิเศษ สำหรับกดแผล", img: "./assets/equipment/first_aid_kit.png" },
-              { id: "fe6", text: "เครื่องวัดความดันโลหิตแบบดิจิทัล (เฝ้าระวัง Shock)", img: "./assets/equipment/bp_monitor.png" },
-              { id: "fe3", text: "ใบมีดตัดไหม ยึดสาย Sheath", img: "./assets/equipment/scissors_forceps.png" },
-              { id: "fe7", text: "เครื่องตรวจวัดคลื่นหัวใจ/ชีพจรพกพา", img: "./assets/equipment/pulse_oximeter.png" },
-              { id: "fe4", text: "น้ำยาฆ่าเชื้อ 2% Chlorhexidine & เซ็ตล้างแผล", img: "./assets/equipment/first_aid_kit.png" }
+              { id: "fe1", text: "กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "fe5", text: "เข็มฉีดยา", img: "./assets/equipment/syringe.png" },
+              { id: "fe2", text: "กล่องชุดทำแผล", img: "./assets/equipment/first_aid_kit.png" },
+              { id: "fe6", text: "เครื่องวัดความดัน", img: "./assets/equipment/bp_monitor.png" },
+              { id: "fe3", text: "ใบมีดตัดไหม", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "fe7", text: "เครื่องวัดออกซิเจนชีพจร", img: "./assets/equipment/pulse_oximeter.png" },
+              { id: "fe4", text: "น้ำยาฆ่าเชื้อล้างแผล", img: "./assets/equipment/first_aid_kit.png" }
             ]
           }
         },

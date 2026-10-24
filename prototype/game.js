@@ -1508,8 +1508,14 @@
   const chipHtml = (id, extra = '') => {
     const S = G.S;
     const it = S.items[id];
-    const imgHtml = it.img ? `<img src="${it.img}" class="chip-img" alt="" />` : '';
-    return `<div class="chip ${S.picked === id ? 'is-picked' : ''} ${S.wrong.has(id) ? 'is-wrong' : ''}" data-chip="${id}" role="button" tabindex="0">${extra}<span class="grip"></span>${imgHtml}<span>${it.text}</span></div>`;
+    if (it.img) {
+      return `<div class="chip chip-iconic ${S.picked === id ? 'is-picked' : ''} ${S.wrong.has(id) ? 'is-wrong' : ''}" data-chip="${id}" role="button" tabindex="0">
+        ${extra}
+        <img src="${it.img}" class="chip-img-large" alt="${it.text}" />
+        <span class="chip-label-short">${it.text}</span>
+      </div>`;
+    }
+    return `<div class="chip ${S.picked === id ? 'is-picked' : ''} ${S.wrong.has(id) ? 'is-wrong' : ''}" data-chip="${id}" role="button" tabindex="0">${extra}<span class="grip"></span><span>${it.text}</span></div>`;
   };
   const poolHtml = (hint) => {
     const S = G.S;

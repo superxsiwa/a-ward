@@ -531,9 +531,46 @@ button { font-family: inherit; }
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   transition: transform .12s, box-shadow .12s, background .12s, border-color .12s;
 }
-.chip-img {
-  width: 28px; height: 28px; object-fit: contain; flex: none; border-radius: 6px;
-  background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px;
+/* Iconic chip card for equipment */
+.chip.chip-iconic {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 76px;
+  min-height: 76px;
+  padding: 6px 4px;
+  text-align: center;
+}
+.chip-img-large {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  flex: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .08));
+}
+.chip-label-short {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 68px;
+}
+.tray-body .chip.chip-iconic {
+  width: 72px;
+  min-height: 72px;
+  display: inline-flex;
+}
+.tray-body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 96px;
+  padding: 10px;
 }
 .chip:hover { border-color: var(--sky-400); }
 .chip:focus-visible { outline: 3px solid #facc15; outline-offset: 2px; }
