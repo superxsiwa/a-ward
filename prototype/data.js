@@ -140,13 +140,13 @@
               { id: "tr2", name: "🟦 ถาดอุปกรณ์ข้างเตียง (Non-Sterile Tray)", sterile: false, expectedIds: ["e5", "e6", "e7"] }
             ],
             pool: [
-              { id: "e1", text: "🪡 ชุดสาย Triple-Lumen CVC & Guidewire" },
-              { id: "e5", text: "🧴 ขวดยาชา 1% Lidocaine (พยาบาลถือให้ดูด)" },
-              { id: "e2", text: "🧤 ผ้าเจาะกลางปราศจากเชื้อ (Sterile Drape)" },
-              { id: "e6", text: "💧 ขวด 0.9% NSS & ชุดสาย IV ที่ไล่สายแล้ว" },
-              { id: "e3", text: "🔪 เข็มเย็บแผล + ไหม Nylon 3-0 & ใบมีดเบอร์ 11" },
-              { id: "e7", text: "📡 เครื่อง Ultrasound ส่องหลอดเลือด" },
-              { id: "e4", text: "💉 Syringe 5ml, 10ml และเข็ม Introducer" }
+              { id: "e1", text: "ชุดสาย Triple-Lumen CVC & Guidewire", img: "./assets/equipment/iv_bag.png" },
+              { id: "e5", text: "ขวดยาชา 1% Lidocaine & หลอดดูดยา", img: "./assets/equipment/medicine_bottle.png" },
+              { id: "e2", text: "ผ้าเจาะกลางและชุดกาวน์ปราศจากเชื้อ", img: "./assets/equipment/first_aid_kit.png" },
+              { id: "e6", text: "ถุงน้ำเกลือ 0.9% NSS & ชุดสาย IV", img: "./assets/equipment/iv_bag.png" },
+              { id: "e3", text: "เข็มเย็บแผล ไหม Nylon & กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "e7", text: "เครื่องตรวจวัดคลื่นหัวใจ/ชีพจรพกพา", img: "./assets/equipment/pulse_oximeter.png" },
+              { id: "e4", text: "กระบอกฉีดยา Syringe & เข็ม Introducer", img: "./assets/equipment/syringe.png" }
             ]
           }
         },
@@ -264,13 +264,13 @@
               { id: "etr2", name: "🟦 ถาดยาและอุปกรณ์ยึดตรึง (Med & Fix Tray)", sterile: false, expectedIds: ["et5", "et6", "et7"] }
             ],
             pool: [
-              { id: "et1", text: "🔦 Laryngoscope ด้ามและเบลด (เช็กไฟสว่าง)" },
-              { id: "et5", text: "💉 ยานำสลบ (Etomidate/Midazolam) ตามแผนแพทย์" },
-              { id: "et2", text: "🧪 ท่อช่วยหายใจ ET-Tube เบอร์ 7.5 (เช็ก Cuff แล้ว)" },
-              { id: "et6", text: "🩺 หูฟัง Stethoscope สำหรับฟังเสียงปอด" },
-              { id: "et3", text: "〰️ ลวดนำร่อง Stylet สอดในท่อ + เจล K-Y Jelly" },
-              { id: "et7", text: "🩹 พลาสเตอร์ยึดท่อ + Syringe 10ml เป่าลม Cuff" },
-              { id: "et4", text: "👄 Oropharyngeal Airway & สายดูดเสมหะ" }
+              { id: "et1", text: "ไฟฉายส่องตรวจ & Laryngoscope ส่องกล่องเสียง", img: "./assets/equipment/penlight.png" },
+              { id: "et5", text: "ขวดยานำสลบ & หลอดเข็มฉีดยา", img: "./assets/equipment/syringe.png" },
+              { id: "et2", text: "ท่อช่วยหายใจ ET-Tube & หน้ากากออกซิเจน", img: "./assets/equipment/oxygen_mask.png" },
+              { id: "et6", text: "หูฟังแพทย์ Stethoscope ฟังเสียงปอด 2 ข้าง", img: "./assets/equipment/stethoscope.png" },
+              { id: "et3", text: "ลวดนำร่อง Stylet & กรรไกร/คีมคีบ Magill", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "et7", text: "เครื่องตรวจวัดคลื่นหัวใจ/ชีพจรพกพา", img: "./assets/equipment/pulse_oximeter.png" },
+              { id: "et4", text: "เครื่องตรวจพกพา & สายดูดเสมหะ Suction", img: "./assets/equipment/otoscope.png" }
             ]
           }
         },
@@ -388,13 +388,13 @@
               { id: "ftr2", name: "🟦 ถาดยาฉุกเฉินและอุปกรณ์ข้างเตียง (Bedside Tray)", sterile: false, expectedIds: ["fe5", "fe6", "fe7"] }
             ],
             pool: [
-              { id: "fe1", text: "🧤 ถุงมือสเตอไรด์ และชุด Set ทำแผล" },
-              { id: "fe5", text: "💉 ยาฉุกเฉิน Atropine 0.6mg (กันภาวะ Vasovagal)" },
-              { id: "fe2", text: "☁️ ผ้าก๊อซปราศจากเชื้อหนาพิเศษ สำหรับกดแผล" },
-              { id: "fe6", text: "🧱 หมอนทราย (Sandbag) วางทับหลังเลือดหยุด" },
-              { id: "fe3", text: "✂️ ใบมีดตัดไหม ตัดไหมที่เย็บยึดสาย Sheath" },
-              { id: "fe7", text: "🩹 พลาสเตอร์แรงกด (Tensoplast / Elastic tape)" },
-              { id: "fe4", text: "🧴 น้ำยาฆ่าเชื้อ 2% Chlorhexidine ทำความสะอาด" }
+              { id: "fe1", text: "ถุงมือสเตอไรด์ & กรรไกร/คีมคีบ", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "fe5", text: "ยาฉุกเฉิน Atropine & หลอดเข็มฉีดยา", img: "./assets/equipment/syringe.png" },
+              { id: "fe2", text: "ผ้าก๊อซปราศจากเชื้อหนาพิเศษ สำหรับกดแผล", img: "./assets/equipment/first_aid_kit.png" },
+              { id: "fe6", text: "เครื่องวัดความดันโลหิตแบบดิจิทัล (เฝ้าระวัง Shock)", img: "./assets/equipment/bp_monitor.png" },
+              { id: "fe3", text: "ใบมีดตัดไหม ยึดสาย Sheath", img: "./assets/equipment/scissors_forceps.png" },
+              { id: "fe7", text: "เครื่องตรวจวัดคลื่นหัวใจ/ชีพจรพกพา", img: "./assets/equipment/pulse_oximeter.png" },
+              { id: "fe4", text: "น้ำยาฆ่าเชื้อ 2% Chlorhexidine & เซ็ตล้างแผล", img: "./assets/equipment/first_aid_kit.png" }
             ]
           }
         },
