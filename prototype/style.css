@@ -207,7 +207,22 @@ button { font-family: inherit; }
 .tab.on { color: var(--sky-600); background: var(--sky-100); }
 .tab.on .ic { animation: bump .45s ease; }
 .tab:active { transform: scale(.95); }
-.game-dock { display: flex; gap: 10px; align-items: center; }
+.game-dock { display: flex; gap: 8px; align-items: center; width: 100%; }
+.btn-nav {
+  min-height: 48px;
+  padding: 0 12px;
+  font-size: 13px;
+  flex: none;
+}
+.btn-nav .ic { width: 18px; height: 18px; }
+.game-dock .btn-block { min-width: 0; padding: 0 10px; font-size: 14px; }
+.game-dock .btn-sq { width: 48px; min-height: 48px; }
+@media (max-width: 380px) {
+  .game-dock { gap: 6px; }
+  .btn-nav { gap: 4px; padding: 0 6px; font-size: 11px; }
+  .game-dock .btn-block { gap: 4px; padding: 0 4px; font-size: 12px; }
+  .game-dock .btn-sq { width: 44px; }
+}
 
 /* =========================================================================
    WARD SCREEN
@@ -1064,5 +1079,3 @@ button { font-family: inherit; }
     gap: 10px;
   }
 }
-
-

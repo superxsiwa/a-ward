@@ -384,9 +384,40 @@
       el.dock.innerHTML = `<nav class="tabbar">${tabs.map(([k, ic, t]) =>
         `<button class="tab ${ui.tab === k ? 'on' : ''}" data-act="tab" data-tab="${k}" aria-current="${ui.tab === k}">${icon(ic)}<span>${t}</span></button>`).join('')}</nav>`;
     } else {
-      el.dock.innerHTML = `<div class="game-dock">
-        <button class="btn btn-ghost btn-sq" data-act="reset-step" aria-label="จัดใหม่">${icon('undo')}</button>
-        <button class="btn btn-block" data-act="check">${icon('check')}<span>ตรวจคำตอบ</span></button></div>`;
+      const isFirstStep = G.stepIdx === 0;
+      const isLastStep = G.stepIdx === curBed().stageData.length - 1;
+      const isPassed = G.done.has(curStep().id);
+      const canSkip = !isPassed && (G.stepMistakes[curStep().id] || 0) >= 3;
+      el.dock.innerHTML = `
+        <div class="game-dock">
+          ${!isFirstStep ? `
+            <button class="btn btn-ghost btn-nav" data-act="step-prev" aria-label="ย้อนกลับ">
+              ${icon('back')}<span>ย้อนกลับ</span>
+            </button>
+          ` : ''}
+          ${!isPassed ? (
+            canSkip ? `
+              <button class="btn btn-block btn-gold" data-act="step-skip" aria-label="ข้ามไปต่อ">
+                <span>💡 ข้ามไปต่อ</span>${icon('forward')}
+              </button>
+            ` : `
+              <button class="btn btn-block btn-primary" data-act="check">
+                ${icon('check')}<span>ตรวจคำตอบ</span>
+              </button>
+            `
+          ) : !isLastStep ? `
+            <button class="btn btn-block btn-gold" data-act="step-next" aria-label="ไปต่อ">
+              <span>ไปต่อ</span>${icon('forward')}
+            </button>
+          ` : `
+            <div style="flex:1;text-align:center;font-weight:600;color:#16a34a;font-size:14px">
+              ✓ ทำหัตถการครบทุกขั้นตอนแล้ว
+            </div>
+          `}
+          <button class="btn btn-ghost btn-sq" data-act="reset-step" ${isPassed ? 'disabled' : ''} aria-label="จัดใหม่">
+            ${icon('undo')}
+          </button>
+        </div>`;
     }
   }
 
@@ -1411,13 +1442,25 @@
   function openBed(i) {
     closeModal();
     ui.screen = 'game';
-    G = { bedIdx: i, stepIdx: 0, mistakes: 0, done: new Set(), S: null, startStars: totalStars() };
-    renderTop(); renderDock(); loadStep(0);
+    G = {
+      bedIdx: i,
+      stepIdx: 0,
+      mistakes: 0,
+      stepMistakes: {},
+      done: new Set(),
+      S: null,
+      stepStates: {},
+      startStars: totalStars()
+    };
+    renderTop(); loadStep(0);
   }
 
   function loadStep(idx) {
-    G.stepIdx = idx; G.S = buildState(curStep());
-    closeSheet(); renderGame(); el.view.scrollTop = 0;
+    if (G.S && curStep()) G.stepStates[curStep().id] = G.S;
+    G.stepIdx = idx;
+    const stId = curStep().id;
+    G.S = G.stepStates[stId] || buildState(curStep());
+    closeSheet(); renderGame(); renderDock(); el.view.scrollTop = 0;
   }
 
   function stepperHtml() {
@@ -1684,6 +1727,7 @@
 
     if (msgs.length === 0) {
       S.locked = true; G.done.add(step.id); updateStepper();
+      renderDock();
       SFX.ok(); haptic(30);
 
       // บันทึกสถิติขั้นตอนที่ทำถูกโดยไม่มีข้อผิดพลาด
@@ -1697,14 +1741,33 @@
       save(STATS_KEY, playerStats);
 
       const last = G.stepIdx === curBed().stageData.length - 1;
+      if (last) {
+        finishCase();
+        return;
+      }
       const praise = ['ยอดเยี่ยม!', 'เก่งมาก!', 'เป๊ะเลย!', 'สุดยอด!'][Math.floor(Math.random() * 4)];
       showSheet('ok', praise, 'ผ่านขั้นตอนนี้แล้ว ถูกต้องตามหลักความปลอดภัย',
-        '', `<button class="btn btn-success btn-block" data-act="sheet-next">${last ? '⭐ รับดาว' : 'ไปต่อ'}</button>`);
+        '', '<button class="btn btn-success btn-block" data-act="sheet-next">ไปต่อ</button>');
     } else {
       G.mistakes++; SFX.bad(); haptic([30, 40, 30]);
       renderTop(G.mistakes === 1 ? 3 : G.mistakes === 3 ? 2 : 0);
-      showSheet('bad', 'ยังไม่ถูกน้า', 'ลองดูจุดที่ขึ้นสีแดงอีกครั้ง',
-        `<ul>${msgs.map((m) => `<li>${m}</li>`).join('')}</ul>`, '<button class="btn btn-danger btn-block" data-act="sheet-retry">ลองอีกครั้ง</button>');
+      const stId = curStep().id;
+      G.stepMistakes[stId] = (G.stepMistakes[stId] || 0) + 1;
+      const count = G.stepMistakes[stId];
+
+      if (count >= 3) {
+        showSheet('bad', 'พยายามได้ดีมากแล้วจ้า!', 'ผิดครบ 3 ครั้งแล้ว สามารถดูเฉลยแล้วไปต่อได้เลยนะ',
+          `<ul>${msgs.map((m) => `<li>${m}</li>`).join('')}</ul>`,
+          `<div style="display:flex;gap:8px">
+             <button class="btn btn-ghost" style="flex:1" data-act="sheet-retry">ลองอีกที</button>
+             <button class="btn btn-gold" style="flex:2" data-act="step-skip">💡 ดูเฉลย & ไปต่อ</button>
+           </div>`);
+        renderDock();
+      } else {
+        showSheet('bad', `ยังไม่ถูกน้า (ครั้งที่ ${count}/3)`, 'ลองดูจุดที่ขึ้นสีแดงอีกครั้ง',
+          `<ul>${msgs.map((m) => `<li>${m}</li>`).join('')}</ul>`,
+          '<button class="btn btn-danger btn-block" data-act="sheet-retry">ลองอีกครั้ง</button>');
+      }
       renderTask();
     }
   }
@@ -1807,6 +1870,18 @@
         ui.tab = node.dataset.tab;
         SFX.pick();
         renderTabs();
+        break;
+      case 'step-prev':
+        if (G.stepIdx > 0) {
+          SFX.pick();
+          loadStep(G.stepIdx - 1);
+        }
+        break;
+      case 'step-next':
+        if (G.done.has(curStep().id) && G.stepIdx < curBed().stageData.length - 1) {
+          SFX.pick();
+          loadStep(G.stepIdx + 1);
+        }
         break;
       case 'select-day':
         if (node.dataset.locked === '1') {
@@ -1937,6 +2012,24 @@
       case 'toggle-opt': { const id = node.dataset.id; const S = G.S; S.wrongOpts.clear(); if (S.sel.has(id)) S.sel.delete(id); else S.sel.add(id); SFX.pick(); renderTask(); break; }
       case 'reset-step': if (!G.S.locked) { G.S = buildState(curStep()); renderTask(); SFX.pick(); } break;
       case 'check': checkStep(); break;
+      case 'step-prev':
+        if (G.stepIdx > 0) {
+          SFX.pick();
+          loadStep(G.stepIdx - 1);
+        }
+        break;
+      case 'step-next':
+        if (G.done.has(curStep().id) && G.stepIdx < curBed().stageData.length - 1) {
+          SFX.pick();
+          loadStep(G.stepIdx + 1);
+        }
+        break;
+      case 'step-skip':
+        closeSheet();
+        G.done.add(curStep().id);
+        SFX.ok();
+        nextStep();
+        break;
       case 'sheet-next': nextStep(); break;
       case 'sheet-retry': closeSheet(); break;
       case 'win-ward': closeModal(); renderTabs(); break;
@@ -1977,4 +2070,3 @@
 
   renderTabs();
 })();
-
