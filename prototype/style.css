@@ -564,18 +564,9 @@ button { font-family: inherit; }
   max-width: 68px;
 }
 .tray-body .chip.chip-iconic {
-  width: 72px;
-  min-height: 72px;
+  width: 74px;
+  min-height: 74px;
   display: inline-flex;
-}
-.tray-body {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-height: 110px;
-  padding: 12px;
-  pointer-events: auto;
 }
 .tray {
   --tray-bg: linear-gradient(180deg, #eff6ff, #dbeafe); --tray-edge: #93c5fd; --tray-ink: #1e3a8a;
@@ -628,9 +619,35 @@ button { font-family: inherit; }
 .tray.sterile { --tray-bg: linear-gradient(180deg, #ecfdf5, #d1fae5); --tray-edge: #6ee7b7; --tray-ink: #065f46; }
 .tray-h { display: flex; align-items: center; gap: 8px; padding: 9px 12px; font: 600 13px var(--font-display); color: var(--tray-ink); background: rgba(255, 255, 255, .6); }
 .tray-h .count { margin-left: auto; padding: 1px 10px; border-radius: 99px; background: var(--tray-edge); color: #fff; font-size: 12px; }
-.tray-body { display: flex; flex-direction: column; gap: 7px; min-height: 96px; padding: 10px; }
-.tray-body .chip { width: 100%; }
-.tray-ph { margin: auto; text-align: center; font-size: 12px; color: var(--tray-ink); opacity: .65; }
+/* Tray body layout: แนวนอน และขึ้นบรรทัดใหม่เมื่อเต็มแถว */
+.tray-body {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-content: flex-start;
+  gap: 10px !important;
+  min-height: 110px;
+  padding: 12px;
+  pointer-events: auto;
+}
+.tray-body .chip {
+  width: auto;
+}
+.tray-body .chip.chip-iconic {
+  width: 74px;
+  min-height: 74px;
+  display: inline-flex;
+}
+.tray-ph {
+  width: 100%;
+  margin: auto;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tray-ink);
+  opacity: .75;
+  pointer-events: none;
+}
 
 .dz-hover { background: #fef9c3 !important; border-color: #facc15 !important; }
 
