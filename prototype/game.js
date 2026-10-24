@@ -1426,6 +1426,69 @@
   /* =======================================================================
      GAME
      ======================================================================= */
+  let stepTimer = null;
+  let stepTimeRemaining = 20;
+
+  function stopStepTimer() {
+    if (stepTimer) {
+      clearInterval(stepTimer);
+      stepTimer = null;
+    }
+  }
+
+  function startStepTimer(seconds = 20) {
+    stopStepTimer();
+    stepTimeRemaining = seconds;
+    updateStepTimerDisplay();
+    stepTimer = setInterval(() => {
+      stepTimeRemaining--;
+      updateStepTimerDisplay();
+      if (stepTimeRemaining <= 0) {
+        stopStepTimer();
+        handleStepTimeout();
+      }
+    }, 1000);
+  }
+
+  function updateStepTimerDisplay() {
+    const timerEl = $('#step-timer');
+    if (!timerEl) return;
+    const span = timerEl.querySelector('span');
+    if (span) span.textContent = stepTimeRemaining;
+    timerEl.classList.remove('timer-warn', 'timer-urgent');
+    if (stepTimeRemaining <= 5) {
+      timerEl.classList.add('timer-urgent');
+    } else if (stepTimeRemaining <= 10) {
+      timerEl.classList.add('timer-warn');
+    }
+  }
+
+  function handleStepTimeout() {
+    if (!G || !curStep() || G.S.locked) return;
+    G.mistakes++;
+    SFX.bad();
+    haptic([40, 50, 40]);
+    renderTop(G.mistakes === 1 ? 3 : G.mistakes === 3 ? 2 : 0);
+
+    const stId = curStep().id;
+    G.stepMistakes[stId] = (G.stepMistakes[stId] || 0) + 1;
+    const count = G.stepMistakes[stId];
+
+    if (count >= 3) {
+      showSheet('bad', 'หมดเวลา 20 วินาที!', 'ผิด/หมดเวลาครบ 3 ครั้งแล้ว สามารถดูเฉลยแล้วไปต่อได้เลยนะ',
+        '<ul><li>จัดเตรียมอุปกรณ์ไม่ทันในเวลา 20 วินาที</li></ul>',
+        `<div style="display:flex;gap:8px">
+           <button class="btn btn-ghost" style="flex:1" data-act="sheet-retry">ลองอีกที</button>
+           <button class="btn btn-gold" style="flex:2" data-act="step-skip">💡 ดูเฉลย & ไปต่อ</button>
+         </div>`);
+      renderDock();
+    } else {
+      showSheet('bad', `หมดเวลา 20 วินาที! (ครั้งที่ ${count}/3)`, 'การจัดเตรียมอุปกรณ์ในภาวะฉุกเฉินต้องรวดเร็วและแม่นยำ ลองใหม่อีกครั้งนะ',
+        '<ul><li>จัดเตรียมอุปกรณ์ไม่ทันในเวลา 20 วินาที</li></ul>',
+        '<button class="btn btn-danger btn-block" data-act="sheet-retry">ลองอีกครั้ง (จับเวลา 20 วิ)</button>');
+    }
+  }
+
   function buildState(step) {
     const task = step.sequenceTask || step.traysTask || step.unorderedDropTask;
     const items = {}; task.pool.forEach((it) => { items[it.id] = it; });
@@ -1440,6 +1503,7 @@
   }
 
   function openBed(i) {
+    stopStepTimer();
     closeModal();
     ui.screen = 'game';
     G = {
@@ -1456,11 +1520,15 @@
   }
 
   function loadStep(idx) {
+    stopStepTimer();
     if (G.S && curStep()) G.stepStates[curStep().id] = G.S;
     G.stepIdx = idx;
     const stId = curStep().id;
     G.S = G.stepStates[stId] || buildState(curStep());
     closeSheet(); renderGame(); renderDock(); el.view.scrollTop = 0;
+    if (G.stepIdx === 1 && !G.done.has(stId)) {
+      startStepTimer(20);
+    }
   }
 
   function stepperHtml() {
@@ -1475,6 +1543,8 @@
 
   function renderGame() {
     const b = curBed(); const step = curStep(); const v = step.vitals; const alarm = isAlarm(v);
+    const isStep2 = G.stepIdx === 1;
+    const timerBadgeHtml = isStep2 ? `<div class="step-timer" id="step-timer">⏱️ <span>${stepTimeRemaining}</span>s</div>` : '';
     el.view.innerHTML = `
       <section class="game">
         <div class="stepper" id="stepper">${stepperHtml()}</div>
@@ -1482,6 +1552,7 @@
           <h2>${step.name.replace(/^\d+\.\s*/, '')}</h2>
           <span class="step-no">ขั้นที่ ${G.stepIdx + 1}/${b.stageData.length}</span>
           <span class="mech">🎮 ${step.mechanic}</span>
+          ${timerBadgeHtml}
         </div>
         <div class="case">
           <div class="monitor ${alarm ? 'alarm' : ''}">
@@ -1738,6 +1809,7 @@
     }
 
     if (msgs.length === 0) {
+      stopStepTimer();
       S.locked = true; G.done.add(step.id); updateStepper();
       renderDock();
       SFX.ok(); haptic(30);
@@ -1761,6 +1833,7 @@
       showSheet('ok', praise, 'ผ่านขั้นตอนนี้แล้ว ถูกต้องตามหลักความปลอดภัย',
         '', '<button class="btn btn-success btn-block" data-act="sheet-next">ไปต่อ</button>');
     } else {
+      stopStepTimer();
       G.mistakes++; SFX.bad(); haptic([30, 40, 30]);
       renderTop(G.mistakes === 1 ? 3 : G.mistakes === 3 ? 2 : 0);
       const stId = curStep().id;
@@ -1811,6 +1884,7 @@
   }
 
   function finishCase() {
+    stopStepTimer();
     const b = curBed(); const stars = liveStars();
     const before = totalStars(); const prev = progress[b.bedNum] || {};
     const best = Math.max(prev.stars || 0, stars);
@@ -2019,8 +2093,10 @@
         toast('ล้างความก้าวหน้าแล้ว');
         break;
       case 'modal-close': closeModal(); break;
-      case 'exit-game': if (G.done.size === 0 && G.mistakes === 0) { renderTabs(); } else confirmDialog('ออกจากเคสนี้?', 'ความคืบหน้าในเคสนี้จะหายไป ต้องเริ่มใหม่ตั้งแต่ขั้นแรก', 'ออกจากเคส', 'exit-confirm'); break;
-      case 'exit-confirm': closeModal(); renderTabs(); break;
+      case 'exit-game':
+        if (G.done.size === 0 && G.mistakes === 0) { stopStepTimer(); renderTabs(); } else confirmDialog('ออกจากเคสนี้?', 'ความคืบหน้าในเคสนี้จะหายไป ต้องเริ่มใหม่ตั้งแต่ขั้นแรก', 'ออกจากเคส', 'exit-confirm');
+        break;
+      case 'exit-confirm': stopStepTimer(); closeModal(); renderTabs(); break;
       case 'toggle-opt': { const id = node.dataset.id; const S = G.S; S.wrongOpts.clear(); if (S.sel.has(id)) S.sel.delete(id); else S.sel.add(id); SFX.pick(); renderTask(); break; }
       case 'reset-step': if (!G.S.locked) { G.S = buildState(curStep()); renderTask(); SFX.pick(); } break;
       case 'check': checkStep(); break;
@@ -2043,7 +2119,12 @@
         nextStep();
         break;
       case 'sheet-next': nextStep(); break;
-      case 'sheet-retry': closeSheet(); break;
+      case 'sheet-retry':
+        closeSheet();
+        if (G.stepIdx === 1 && !G.done.has(curStep().id)) {
+          startStepTimer(20);
+        }
+        break;
       case 'win-ward': closeModal(); renderTabs(); break;
       case 'win-next': { const n = nextTarget(); closeModal(); openBed(n); break; }
       case 'win-replay': { const i = G.bedIdx; closeModal(); openBed(i); break; }
