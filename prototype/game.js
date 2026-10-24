@@ -1618,8 +1618,8 @@
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     const r = chip.getBoundingClientRect();
     dnd = { id: chip.dataset.chip, chip, pid: e.pointerId, type: e.pointerType, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, ox: e.clientX - r.left, oy: e.clientY - r.top, w: r.width, active: false, timer: null, hover: null, ghost: null, raf: 0 };
-    if (e.pointerType !== 'mouse') dnd.timer = setTimeout(beginDrag, 170); // long-press to drag on touch (keeps scrolling usable)
-    window.addEventListener('pointermove', onPointerMove);
+    if (e.pointerType !== 'mouse') dnd.timer = setTimeout(beginDrag, 120); // 120ms touch drag response
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerCancel);
   }
@@ -1648,10 +1648,14 @@
     dnd.x = e.clientX; dnd.y = e.clientY;
     const dist = Math.hypot(dnd.x - dnd.x0, dnd.y - dnd.y0);
     if (!dnd.active) {
-      if (dnd.type === 'mouse') { if (dist > 5) beginDrag(); }
-      else if (dist > 10) { endDnd(); return; } // finger moved before long-press → user is scrolling
+      if (dnd.type === 'mouse') {
+        if (dist > 3) beginDrag();
+      } else {
+        if (dist > 8) beginDrag();
+      }
       if (!dnd || !dnd.active) return;
     }
+    if (e.cancelable) e.preventDefault();
     moveGhost();
     const t = document.elementFromPoint(dnd.x, dnd.y);
     setHover(t ? t.closest('#task [data-drop]') : null);
