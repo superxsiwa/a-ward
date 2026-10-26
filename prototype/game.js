@@ -296,8 +296,8 @@
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const cleanSpeech = (s) => s.replace(/^💬\s*/, '');
   const cleanTray = (s) => s.replace(/^[🟩🟦]\s*/u, '');
-  const curBed = () => BEDS[G.bedIdx];
-  const curStep = () => curBed().stageData[G.stepIdx];
+  const curBed = () => (G ? BEDS[G.bedIdx] : null);
+  const curStep = () => (curBed() ? curBed().stageData[G.stepIdx] : null);
   const liveStars = () => (G.mistakes === 0 ? 3 : G.mistakes <= 2 ? 2 : 1);
   const isAlarm = (v) => v.hr >= 120 || v.hr < 50 || parseInt(v.spo2, 10) <= 90 || v.map < 65;
   const nextTarget = () => {
@@ -1516,6 +1516,7 @@
       stepStates: {},
       startStars: totalStars()
     };
+    if (window.__AWARD) window.__AWARD.G = G;
     renderTop(); loadStep(0);
   }
 
@@ -2162,4 +2163,9 @@
   el.modal.addEventListener('click', (e) => { if (e.target === el.modal && !el.modal.querySelector('.win-ribbon')) closeModal(); });
 
   renderTabs();
+  window.__AWARD = {
+    get G() { return G; },
+    set G(v) { G = v; },
+    BEDS, loadStep, curStep, finishCase, handleStepTimeout, startStepTimer, stopStepTimer
+  };
 })();
