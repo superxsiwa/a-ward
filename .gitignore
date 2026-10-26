@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Build & Production Outputs
+dist/
+build/
+out/
+backend/dist/
+frontend/dist/
+*.tsbuildinfo
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+
+# Prisma / SQLite Local Databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-journal
+backend/prisma/*.db
+backend/prisma/*.db-*
+
+# Vite / Bundler / Tooling Caches
+.vite/
+**/.vite/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Test & Coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Logs & Runtime Data
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# OS & Editor Specific Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# Temporary Files
+tmp/
+temp/

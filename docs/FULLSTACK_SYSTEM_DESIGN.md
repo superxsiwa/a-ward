@@ -198,3 +198,4 @@ erDiagram
 - `PUT /api/roster/:monthKey` — Saves randomized or updated monthly shift schedule
 - `POST /api/roster/clear-day` — Marks a shift/off day as passed
 - `GET /api/instructor/students` (`INSTRUCTOR`) — Returns student progress & star leaderboard
+

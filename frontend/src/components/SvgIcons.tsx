@@ -1,0 +1,137 @@
+import React from 'react';
+
+export const SvgSprite: React.FC = () => (
+  <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true" focusable="false">
+    <symbol id="i-star" viewBox="0 0 24 24">
+      <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z" />
+    </symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24">
+      <path d="M20 6 9 17l-5-5" />
+    </symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24">
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </symbol>
+    <symbol id="ic-back" viewBox="0 0 24 24">
+      <path d="m15 18-6-6 6-6" />
+    </symbol>
+    <symbol id="ic-forward" viewBox="0 0 24 24">
+      <path d="m9 18 6-6-6-6" />
+    </symbol>
+    <symbol id="ic-undo" viewBox="0 0 24 24">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+      <path d="M3 3v5h5" />
+    </symbol>
+    <symbol id="ic-bed" viewBox="0 0 24 24">
+      <path d="M2 4v16" />
+      <path d="M2 8h18a2 2 0 0 1 2 2v10" />
+      <path d="M2 17h20" />
+      <path d="M6 8v9" />
+    </symbol>
+    <symbol id="ic-trophy" viewBox="0 0 24 24">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+    </symbol>
+    <symbol id="ic-sliders" viewBox="0 0 24 24">
+      <path d="M21 4h-7" />
+      <path d="M10 4H3" />
+      <path d="M21 12h-9" />
+      <path d="M8 12H3" />
+      <path d="M21 20h-5" />
+      <path d="M12 20H3" />
+      <path d="M14 2v4" />
+      <path d="M8 10v4" />
+      <path d="M16 18v4" />
+    </symbol>
+    <symbol id="ic-volume" viewBox="0 0 24 24">
+      <path d="M11 5 6 9H2v6h4l5 4z" />
+      <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+      <path d="M19 5a10 10 0 0 1 0 14" />
+    </symbol>
+    <symbol id="ic-mute" viewBox="0 0 24 24">
+      <path d="M11 5 6 9H2v6h4l5 4z" />
+      <path d="m22 9-6 6" />
+      <path d="m16 9 6 6" />
+    </symbol>
+    <symbol id="ic-play" viewBox="0 0 24 24">
+      <path
+        d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"
+        fill="currentColor"
+        stroke="none"
+      />
+    </symbol>
+    <symbol id="ic-calendar" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="18" rx="3" ry="3" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <path d="M8 14h.01" />
+      <path d="M12 14h.01" />
+      <path d="M16 14h.01" />
+      <path d="M8 18h.01" />
+      <path d="M12 18h.01" />
+    </symbol>
+    <symbol id="ic-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </symbol>
+    <symbol id="ic-edit" viewBox="0 0 24 24">
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+      <path d="m15 5 4 4" />
+    </symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24">
+      <path d="M3 6h18" />
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+    </symbol>
+    <symbol id="ic-share" viewBox="0 0 24 24">
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
+    </symbol>
+  </svg>
+);
+
+export const Icon: React.FC<{ name: string; className?: string }> = ({ name, className = '' }) => (
+  <svg className={`ic ${className}`.trim()} aria-hidden="true">
+    <use href={`#ic-${name}`} />
+  </svg>
+);
+
+export const StarSvg: React.FC<{ on: boolean; size?: number; className?: string }> = ({
+  on,
+  size = 18,
+  className = '',
+}) => (
+  <svg
+    className={`star ${on ? 'on' : ''} ${className}`.trim()}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <use href="#i-star" />
+  </svg>
+);
+
+const BEAT_PATH = 'M0 15 h12 l3 -3 l3 3 h6 l2 4 l3 -16 l3 22 l2 -10 h8 l4 -5 l5 5 h9';
+
+export const EcgWave: React.FC<{ hr: number; color: string }> = ({ hr, color }) => {
+  const dur = (240 / Math.max(30, hr || 60)).toFixed(2);
+  return (
+    <span
+      className="ecg"
+      style={{ '--dur': `${dur}s`, '--ecg': color } as React.CSSProperties}
+    >
+      <svg viewBox="0 0 480 30" preserveAspectRatio="none">
+        {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+          <path key={i} transform={`translate(${i * 60})`} d={BEAT_PATH} />
+        ))}
+      </svg>
+    </span>
+  );
+};

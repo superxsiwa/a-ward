@@ -1,11 +1,18 @@
 {
-  "name": "a-ward",
-  "version": "1.0.0",
-  "description": "CCU Nursing Clinical Simulation & Decision Game for Mobile",
-  "main": "server.js",
+  "name": "a-ward-ccu-fullstack",
+  "version": "2.0.0",
+  "description": "A-WARD CCU Full-Stack Clinical Decision & Simulation Web Application (React + TypeScript + Express + Prisma)",
+  "main": "backend/dist/index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:frontend && npm run build:backend",
+    "db:setup": "npm --prefix backend run db:setup",
+    "seed": "npm --prefix backend run prisma:seed",
+    "test:e2e": "npm --prefix backend run test:e2e",
+    "start": "npm --prefix backend run start",
+    "dev": "npm --prefix backend run dev",
+    "prototype": "node server.js"
   },
   "keywords": [
     "nurse",
@@ -13,8 +20,11 @@
     "simulation",
     "game",
     "clinical",
-    "mobile"
+    "react",
+    "typescript",
+    "prisma"
   ],
   "author": "SuperX & Antigravity",
   "license": "ISC"
 }
+

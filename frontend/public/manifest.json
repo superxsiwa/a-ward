@@ -1,0 +1,15 @@
+{
+  "name": "A-WARD CCU Nursing Sim",
+  "short_name": "A-WARD",
+  "description": "เกมจำลองหัตถการพยาบาล CCU 8 เตียง",
+  "start_url": "/prototype/",
+  "scope": "/prototype/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e0f2fe",
+  "theme_color": "#0284c7",
+  "icons": [
+    { "src": "/prototype/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
+

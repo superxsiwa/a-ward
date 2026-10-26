@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  role         String   @default("NURSE") // "NURSE" | "INSTRUCTOR"
+  avatar       String   @default("👩‍⚕️")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  stats             PlayerStats?
+  settings          PlayerSettings?
+  bedProgress       BedProgress[]
+  rosterSchedules   RosterSchedule[]
+  rosterDayProgress RosterDayProgress[]
+  attemptLogs       CaseAttemptLog[]
+}
+
+model PlayerStats {
+  id                  Int    @id @default(autoincrement())
+  userId              String @unique
+  user                User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalCompletedCases Int    @default(0)
+  totalPlaySeconds    Int    @default(0)
+  perfectCases        Int    @default(0)
+  shiftsCompleted     Int    @default(0)
+  trayItemsSorted     Int    @default(0)
+  stepsWithoutMistake Int    @default(0)
+  emergencyCasesDone  Int    @default(0)
+  replayedCases       Int    @default(0)
+}
+
+model PlayerSettings {
+  id             Int     @id @default(autoincrement())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  soundEnabled   Boolean @default(true)
+  hapticsEnabled Boolean @default(true)
+}
+
+model CcuBed {
+  id           Int              @id @default(autoincrement())
+  bedNum       Int              @unique
+  bedCode      String
+  patientName  String
+  patientAge   Int              @default(65)
+  caseTitle    String
+  dxBadge      String
+  status       String           @default("alert") // "stable" | "alert" | "critical"
+  statusText   String
+  doctorName   String
+  doctorAvatar String           @default("👨‍⚕️")
+  stayDuration String           @default("วันที่ 1 ใน CCU")
+  clinicalNote String           @default("")
+  isDefault    Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  stages       ProcedureStage[]
+}
+
+model ProcedureStage {
+  id              Int      @id @default(autoincrement())
+  bedId           Int
+  bed             CcuBed   @relation(fields: [bedId], references: [id], onDelete: Cascade)
+  stepIndex       Int      // 0..5 (Step 1 to 6)
+  stageNumber     Int      // 1..6
+  name            String
+  mechanic        String
+  doctorSpeech    String
+  reading         String
+  vitalsJson      String   // JSON string: { hr, bp, spo2, map }
+  choicesJson     String?  // JSON string: { prompt, options: [{id, text, correct}] }
+  sequenceJson    String?  // JSON string: { prompt, pool: [{id, text, img?}], correctOrder: string[] }
+  traysJson       String?  // JSON string: { ordered, prompt, trays: [...], pool: [...] }
+  unorderedJson   String?  // JSON string: { prompt, expectedIds: string[], pool: [...] }
+
+  @@unique([bedId, stepIndex])
+}
+
+model BedProgress {
+  id           Int      @id @default(autoincrement())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bedNum       Int
+  passed       Boolean  @default(false)
+  stars        Int      @default(0)
+  bestMistakes Int      @default(0)
+  attemptCount Int      @default(0)
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, bedNum])
+}
+
+model RosterSchedule {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monthKey    String   // "YYYY-M" e.g. "2026-9"
+  scheduleJson String  // JSON string: { "1": "morning", "2": "afternoon", ... }
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, monthKey])
+}
+
+model RosterDayProgress {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dayKey    String   // "YYYY-M-D" e.g. "2026-9-21"
+  shiftId   String   @default("morning")
+  passed    Boolean  @default(false)
+  clearedAt DateTime @default(now())
+
+  @@unique([userId, dayKey])
+}
+
+model CaseAttemptLog {
+  id              Int      @id @default(autoincrement())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bedNum          Int
+  starsEarned     Int
+  mistakesCount   Int
+  durationSeconds Int      @default(0)
+  completedAt     DateTime @default(now())
+}
