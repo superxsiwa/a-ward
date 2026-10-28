@@ -70,5 +70,38 @@ class _CriticalCareAppState extends State<CriticalCareApp> {
       GlobalCupertinoLocalizations.delegate,
     ],
     debugShowCheckedModeBanner: false,
+    builder: (context, child) => _WideScreenText(child: child!),
   );
+}
+
+/// On wide screens (a desktop browser, a tablet in landscape) the phone's point sizes read
+/// small, so text grows by 20% on top of the device's own text size setting.
+class _WideScreenText extends StatelessWidget {
+  const _WideScreenText({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    if (mq.size.width < 1100) return child;
+    return MediaQuery(
+      data: mq.copyWith(textScaler: _Scaled(mq.textScaler, 1.2)),
+      child: child,
+    );
+  }
+}
+
+class _Scaled extends TextScaler {
+  const _Scaled(this.base, this.factor);
+
+  final TextScaler base;
+  final double factor;
+
+  @override
+  double scale(double fontSize) => base.scale(fontSize) * factor;
+
+  @override
+  // ignore: deprecated_member_use
+  double get textScaleFactor => base.scale(1) * factor;
 }

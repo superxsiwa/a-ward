@@ -101,4 +101,25 @@ void main() {
     expect(store.progress.totalStars, 0);
     expect(find.text('ล้างความก้าวหน้าแล้ว'), findsOneWidget);
   });
+
+  testWidgets('a wide screen: the bar lines up with the ward, text is 20% larger', (tester) async {
+    tester.view.physicalSize = const Size(2000, 1100);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
+          progressStoreProvider.overrideWithValue(MemoryProgressStore()),
+          sfxProvider.overrideWithValue(sfx),
+        ],
+        child: const CriticalCareApp(),
+      ),
+    );
+    await settle(tester);
+    expect(find.text('วอร์ดหัวใจ 8 เตียง'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Critical Care')).dx, greaterThanOrEqualTo(500));
+    final scaler = MediaQuery.textScalerOf(tester.element(find.text('Critical Care')));
+    expect(scaler.scale(10), closeTo(12, 0.01));
+  });
 }
