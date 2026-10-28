@@ -13,9 +13,6 @@ class AppLocalizationsTh extends AppLocalizations {
   String get appTitle => 'Critical Care';
 
   @override
-  String get bedListTitle => 'เลือกเตียง';
-
-  @override
   String get casesLoadError => 'โหลดเคสไม่สำเร็จ';
 
   @override
@@ -216,4 +213,125 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get cancel => 'ยกเลิก';
+
+  @override
+  String wardTitle(int count) {
+    return 'วอร์ดหัวใจ $count เตียง';
+  }
+
+  @override
+  String get wardHint => 'แตะที่เตียงเพื่อเริ่มทำการพยาบาลและหัตถการ';
+
+  @override
+  String get startNow => 'เริ่มเลย';
+
+  @override
+  String get continuePlay => 'เล่นต่อ';
+
+  @override
+  String get bedPassed => 'ผ่านแล้ว';
+
+  @override
+  String get nurseStation => 'เคาน์เตอร์พยาบาล';
+
+  @override
+  String passedOf(int passed, int total) {
+    return 'ผ่านแล้ว $passed/$total เตียง';
+  }
+
+  @override
+  String get caseSheets => '📖 ชีทเฉลยเคส';
+
+  @override
+  String totalStars(int stars, int max) {
+    return 'ดาวทั้งหมด $stars/$max';
+  }
+
+  @override
+  String levelRank(int level, String rank) {
+    return 'Lv.$level · $rank';
+  }
+
+  @override
+  String caseDoneGained(int gained) {
+    return 'ผ่านเคสสำเร็จ! ลองเล่นซ้ำเพื่อเก็บให้ครบ 3 ดาวนะ (ได้ดาวเพิ่ม +$gained)';
+  }
+
+  @override
+  String levelUp(int level, String rank) {
+    return '⬆️ เลื่อนระดับ! Lv.$level · $rank';
+  }
+
+  @override
+  String get about => 'เกี่ยวกับ';
+
+  @override
+  String get sheetsTitle => 'ชีทเฉลยเคส';
+
+  @override
+  String get sheetsIntro =>
+      'ทุกขั้นตอนพร้อมคำตอบที่ถูกต้อง สำหรับผู้ตรวจเนื้อหาทางคลินิกและอาจารย์';
+
+  @override
+  String sheetTitle(String bedCode) {
+    return 'ชีทเฉลย $bedCode';
+  }
+
+  @override
+  String get sheetCorrect => 'ถูก';
+
+  @override
+  String get sheetWrong => 'ไม่ควรเลือก';
+
+  @override
+  String get sheetOrder => 'ลำดับที่ถูกต้อง';
+
+  @override
+  String get sheetSafe => 'ควรทำ';
+
+  @override
+  String get sheetUnsafe => 'ไม่ควรทำ';
+
+  @override
+  String get sheetInOrder => 'เรียงตามลำดับ';
+
+  @override
+  String get sheetAnyOrder => 'ไม่ต้องเรียงลำดับ';
+
+  @override
+  String get sheetDoctor => 'แพทย์';
+
+  @override
+  String get sheetNote => 'บันทึกทางคลินิก';
+
+  @override
+  String get noticeTitle => 'สำหรับการฝึกเท่านั้น';
+
+  @override
+  String get noticeBody =>
+      'เกมนี้ใช้ฝึกทักษะการพยาบาลผู้ป่วยวิกฤตเท่านั้น ไม่ใช่แนวทางเวชปฏิบัติ และห้ามใช้ประกอบการตัดสินใจดูแลผู้ป่วยจริง เนื้อหาทางคลินิกอยู่ระหว่างการตรวจทาน';
+
+  @override
+  String get noticeOk => 'เข้าใจแล้ว';
+
+  @override
+  String aboutVersion(String version, String build) {
+    return 'เวอร์ชัน $version · build $build';
+  }
+
+  @override
+  String get aboutCases => 'เคสและการออกแบบเกม: superxsiwa (A-WARD CCU)';
+
+  @override
+  String get aboutClinical => 'ตรวจทานเนื้อหาทางคลินิก: พยาบาลวิชาชีพ (อยู่ระหว่างตรวจทาน)';
+
+  @override
+  String get aboutBuiltBy => 'พัฒนาแอป: ColabsCraft';
+
+  @override
+  String get aboutOffline =>
+      'ทำงานออฟไลน์ ไม่ส่งข้อมูลใดๆ ออกจากเครื่อง ความก้าวหน้าเก็บไว้ในเครื่องนี้เท่านั้น';
+
+  @override
+  String get aboutLicenses => 'สัญญาอนุญาตโอเพนซอร์ส';
 }

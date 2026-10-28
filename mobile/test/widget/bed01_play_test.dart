@@ -1,12 +1,14 @@
 // Plays bed 01 through the real screens with taps only, the way a player without drag would.
 
 import 'package:criticalcare/app/app.dart';
+import 'package:criticalcare/data/progress_store.dart';
 import 'package:criticalcare/data/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/cases.dart';
+import '../support/fake_store.dart';
 
 void main() {
   final b = bed(1);
@@ -15,7 +17,10 @@ void main() {
   String tray(int step, String id) =>
       b.stages[step].trays!.trays.firstWhere((t) => t.id == id).displayName;
 
+  late MemoryProgressStore store;
+
   Future<void> openBed01(WidgetTester tester) async {
+    store = MemoryProgressStore();
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
@@ -23,6 +28,7 @@ void main() {
       ProviderScope(
         overrides: [
           bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
+          progressStoreProvider.overrideWithValue(store),
         ],
         child: const CriticalCareApp(),
       ),
@@ -90,6 +96,8 @@ void main() {
 
     expect(find.text('เสร็จสิ้นเคส!'), findsOneWidget);
     expect(find.text('สุดยอด! ตอบเป๊ะทุกข้อ ได้ครบ 3 ดาวเลย'), findsOneWidget);
+    expect(store.progress.bed(1).stars, 3, reason: 'saved on the device');
+    expect(find.text('เตียงถัดไป ▶'), findsOneWidget, reason: 'bed 02 is next');
     // Behind the dialog the page keeps its height; the last step's bottom bar once took the
     // whole screen (walk finding F1).
     expect(tester.getSize(find.byType(SingleChildScrollView).first).height, greaterThan(400));

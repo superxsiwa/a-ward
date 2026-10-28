@@ -1,23 +1,47 @@
 {
   "@@locale": "th",
   "@@x-source": "Thai strings copied from superxsiwa's frontend (App.tsx, GamePage.tsx, EvaluationStrategyContext.ts) unless marked otherwise.",
-
   "appTitle": "Critical Care",
-  "bedListTitle": "เลือกเตียง",
-  "@bedListTitle": { "description": "Ours: temporary phase-0 bed list; the ward screen replaces it in phase 1." },
   "casesLoadError": "โหลดเคสไม่สำเร็จ",
-  "@casesLoadError": { "description": "Ours." },
-
+  "@casesLoadError": {
+    "description": "Ours."
+  },
   "stepOf": "ขั้นที่ {step}/{total}",
-  "@stepOf": { "placeholders": { "step": { "type": "int" }, "total": { "type": "int" } } },
+  "@stepOf": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "stepDot": "ขั้นที่ {step}",
-  "@stepDot": { "placeholders": { "step": { "type": "int" } } },
+  "@stepDot": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
   "liveStars": "ดาวที่ได้ตอนนี้ {stars} ดวง",
-  "@liveStars": { "placeholders": { "stars": { "type": "int" } } },
+  "@liveStars": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
   "secondsShort": "{seconds}s",
-  "@secondsShort": { "placeholders": { "seconds": { "type": "int" } } },
+  "@secondsShort": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "reading": "📖 สาระความรู้",
-
   "check": "ตรวจคำตอบ",
   "goOn": "ไปต่อ",
   "previous": "ย้อนกลับ",
@@ -25,7 +49,6 @@
   "resetStep": "จัดใหม่",
   "allStepsDone": "✓ ทำหัตถการครบทุกขั้นตอนแล้ว",
   "leaveCase": "ออกจากเคส",
-
   "hintSequence": "แตะการ์ดเพื่อเติมช่องถัดไป · ลากเพื่อสลับตำแหน่ง · แตะการ์ดที่วางแล้วเพื่อเอาออก",
   "hintTrays": "แตะการ์ดแล้วแตะถาดที่ต้องการ · หรือกดค้างแล้วลากไปวาง · แตะการ์ดในถาดเพื่อเอาออก",
   "hintDropBox": "แตะหรือลากการ์ดที่ถูกต้องใส่กล่อง · แตะการ์ดในกล่องเพื่อเอาออก",
@@ -34,37 +57,70 @@
   "trayPlaceholder": "วางอุปกรณ์ในถาดนี้",
   "dropBoxTitle": "กล่องปฏิบัติการพยาบาล",
   "dropBoxPlaceholder": "วางการ์ดที่ถูกต้องที่นี่",
-
   "notReady": "ยังไม่ครบ: {reason}",
-  "@notReady": { "placeholders": { "reason": { "type": "String" } } },
+  "@notReady": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "notReadyOption": "เลือกตัวเลือกอย่างน้อย 1 ข้อ",
   "notReadySlots": "วางการ์ดให้ครบทุกช่อง",
   "notReadyPool": "หยิบอุปกรณ์ลงถาดให้ครบทุกชิ้น",
   "notReadyDropBox": "เลือกให้ครบ {count} ข้อ",
-  "@notReadyDropBox": { "placeholders": { "count": { "type": "int" } } },
-
+  "@notReadyDropBox": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "errorWrongOption": "มีข้อที่ไม่ควรเลือกอยู่ (ข้อสีแดง)",
   "errorMissingOptions": "ยังเลือกไม่ครบทุกข้อที่ต้องตรวจสอบ",
   "errorSequence": "ลำดับบางข้อยังไม่ถูกต้อง (การ์ดสีแดงอยู่ผิดตำแหน่ง)",
   "errorTrayOrder": "ลำดับใน “{tray}” ยังไม่ถูกต้อง",
-  "@errorTrayOrder": { "placeholders": { "tray": { "type": "String" } } },
+  "@errorTrayOrder": {
+    "placeholders": {
+      "tray": {
+        "type": "String"
+      }
+    }
+  },
   "errorTrayWrong": "ใน “{tray}” มีอุปกรณ์อยู่ผิดถาด",
-  "@errorTrayWrong": { "placeholders": { "tray": { "type": "String" } } },
+  "@errorTrayWrong": {
+    "placeholders": {
+      "tray": {
+        "type": "String"
+      }
+    }
+  },
   "errorUnsafe": "มีการพยาบาลที่ไม่ปลอดภัยปนอยู่ (การ์ดสีแดง) ลองเอาออกแล้วเลือกใหม่",
   "errorTimeout": "จัดเตรียมอุปกรณ์ไม่ทันในเวลา 20 วินาที",
-
   "praise1": "ยอดเยี่ยม!",
   "praise2": "เก่งมาก!",
   "praise3": "เป๊ะเลย!",
   "praise4": "สุดยอด!",
   "passedSub": "ผ่านขั้นตอนนี้แล้ว ถูกต้องตามหลักความปลอดภัย",
   "failedTitle": "ยังไม่ถูกน้า (ครั้งที่ {strike}/3)",
-  "@failedTitle": { "placeholders": { "strike": { "type": "int" } } },
+  "@failedTitle": {
+    "placeholders": {
+      "strike": {
+        "type": "int"
+      }
+    }
+  },
   "failedSub": "ลองดูจุดที่ขึ้นสีแดงอีกครั้ง",
   "mercyTitle": "พยายามได้ดีมากแล้วจ้า!",
   "mercySub": "ผิดครบ 3 ครั้งแล้ว สามารถดูเฉลยแล้วไปต่อได้เลยนะ",
   "timeoutTitle": "หมดเวลา 20 วินาที! (ครั้งที่ {strike}/3)",
-  "@timeoutTitle": { "placeholders": { "strike": { "type": "int" } } },
+  "@timeoutTitle": {
+    "placeholders": {
+      "strike": {
+        "type": "int"
+      }
+    }
+  },
   "timeoutSub": "การจัดเตรียมอุปกรณ์ในภาวะฉุกเฉินต้องรวดเร็วและแม่นยำ ลองใหม่อีกครั้งนะ",
   "timeoutMercyTitle": "หมดเวลา 20 วินาที!",
   "timeoutMercySub": "ผิด/หมดเวลาครบ 3 ครั้งแล้ว สามารถดูเฉลยแล้วไปต่อได้เลยนะ",
@@ -73,15 +129,130 @@
   "tryAgain": "ลองอีกครั้ง",
   "tryAgainTimed": "ลองอีกครั้ง (จับเวลา 20 วิ)",
   "tryAgainShort": "ลองอีกที",
-
   "caseDone": "เสร็จสิ้นเคส!",
   "caseDonePerfect": "สุดยอด! ตอบเป๊ะทุกข้อ ได้ครบ 3 ดาวเลย",
   "caseDoneReplay": "ผ่านเคสสำเร็จ! ลองเล่นซ้ำเพื่อเก็บให้ครบ 3 ดาวนะ",
   "nextBed": "เตียงถัดไป ▶",
   "backToWard": "กลับวอร์ด",
   "replayForStars": "เล่นซ้ำเก็บ 3 ดาว",
-
   "leaveTitle": "ออกจากเคสนี้?",
   "leaveBody": "ความคืบหน้าในเคสนี้จะหายไป ต้องเริ่มใหม่ตั้งแต่ขั้นแรก",
-  "cancel": "ยกเลิก"
+  "cancel": "ยกเลิก",
+  "wardTitle": "วอร์ดหัวใจ {count} เตียง",
+  "@wardTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wardHint": "แตะที่เตียงเพื่อเริ่มทำการพยาบาลและหัตถการ",
+  "startNow": "เริ่มเลย",
+  "continuePlay": "เล่นต่อ",
+  "bedPassed": "ผ่านแล้ว",
+  "nurseStation": "เคาน์เตอร์พยาบาล",
+  "passedOf": "ผ่านแล้ว {passed}/{total} เตียง",
+  "@passedOf": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "caseSheets": "📖 ชีทเฉลยเคส",
+  "@caseSheets": {
+    "description": "Ours: opens the answer sheets of every case (for the clinical reviewer and instructors)."
+  },
+  "totalStars": "ดาวทั้งหมด {stars}/{max}",
+  "@totalStars": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "levelRank": "Lv.{level} · {rank}",
+  "@levelRank": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "caseDoneGained": "ผ่านเคสสำเร็จ! ลองเล่นซ้ำเพื่อเก็บให้ครบ 3 ดาวนะ (ได้ดาวเพิ่ม +{gained})",
+  "@caseDoneGained": {
+    "placeholders": {
+      "gained": {
+        "type": "int"
+      }
+    }
+  },
+  "levelUp": "⬆️ เลื่อนระดับ! Lv.{level} · {rank}",
+  "@levelUp": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "String"
+      }
+    }
+  },
+  "about": "เกี่ยวกับ",
+  "@about": {
+    "description": "Ours."
+  },
+  "sheetsTitle": "ชีทเฉลยเคส",
+  "@sheetsTitle": {
+    "description": "Ours: list of the answer sheets."
+  },
+  "sheetsIntro": "ทุกขั้นตอนพร้อมคำตอบที่ถูกต้อง สำหรับผู้ตรวจเนื้อหาทางคลินิกและอาจารย์",
+  "sheetTitle": "ชีทเฉลย {bedCode}",
+  "@sheetTitle": {
+    "placeholders": {
+      "bedCode": {
+        "type": "String"
+      }
+    }
+  },
+  "sheetCorrect": "ถูก",
+  "sheetWrong": "ไม่ควรเลือก",
+  "sheetOrder": "ลำดับที่ถูกต้อง",
+  "sheetSafe": "ควรทำ",
+  "sheetUnsafe": "ไม่ควรทำ",
+  "sheetInOrder": "เรียงตามลำดับ",
+  "sheetAnyOrder": "ไม่ต้องเรียงลำดับ",
+  "sheetDoctor": "แพทย์",
+  "sheetNote": "บันทึกทางคลินิก",
+  "noticeTitle": "สำหรับการฝึกเท่านั้น",
+  "@noticeTitle": {
+    "description": "Ours: first-launch notice."
+  },
+  "noticeBody": "เกมนี้ใช้ฝึกทักษะการพยาบาลผู้ป่วยวิกฤตเท่านั้น ไม่ใช่แนวทางเวชปฏิบัติ และห้ามใช้ประกอบการตัดสินใจดูแลผู้ป่วยจริง เนื้อหาทางคลินิกอยู่ระหว่างการตรวจทาน",
+  "noticeOk": "เข้าใจแล้ว",
+  "aboutVersion": "เวอร์ชัน {version} · build {build}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutCases": "เคสและการออกแบบเกม: superxsiwa (A-WARD CCU)",
+  "aboutClinical": "ตรวจทานเนื้อหาทางคลินิก: พยาบาลวิชาชีพ (อยู่ระหว่างตรวจทาน)",
+  "aboutBuiltBy": "พัฒนาแอป: ColabsCraft",
+  "aboutOffline": "ทำงานออฟไลน์ ไม่ส่งข้อมูลใดๆ ออกจากเครื่อง ความก้าวหน้าเก็บไว้ในเครื่องนี้เท่านั้น",
+  "aboutLicenses": "สัญญาอนุญาตโอเพนซอร์ส"
 }
