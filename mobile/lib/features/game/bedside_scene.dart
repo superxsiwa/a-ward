@@ -9,8 +9,9 @@ import 'monitor.dart';
 /// once the step is passed. The monitor always shows the step's own numbers, never invented ones.
 enum SceneMood { calm, alarm, passed }
 
-/// The bedside at the top of each step (Thanee's visual concept, 2026-10-28): the doctor with the
-/// step's line, the patient in bed, and the monitor on its stand.
+/// The bedside at the top of each step: the doctor's line, then the monitor across the full width
+/// with the patient in its header (Thanee 2026-10-28: the monitor is the focus; a drawn bed took
+/// too much room).
 class BedsideScene extends StatelessWidget {
   const BedsideScene({
     super.key,
@@ -26,71 +27,14 @@ class BedsideScene extends StatelessWidget {
   final SceneMood mood;
 
   @override
-  Widget build(BuildContext context) {
-    final (fill, edge, floor) = switch (mood) {
-      SceneMood.calm => (const Color(0xFFDCEFFB), const Color(0xFFCDE6F6), const Color(0xFFC7E3F4)),
-      SceneMood.alarm => (
-        const Color(0xFFFDECEC),
-        const Color(0xFFFCA5A5),
-        const Color(0xFFF9D9D9),
-      ),
-      SceneMood.passed => (
-        const Color(0xFFE6F8EE),
-        const Color(0xFF86EFAC),
-        const Color(0xFFD3F2E0),
-      ),
-    };
-    const fade = Duration(milliseconds: 250);
-    return AnimatedContainer(
-      duration: fade,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: edge, width: 2),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: 44,
-            child: AnimatedContainer(duration: fade, color: floor),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Doctor(bedCase: bedCase, speech: speech),
-                const SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomLeft,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 300),
-                          child: _Bed(
-                            female: bedCase.patientName.startsWith('นาง'),
-                            settled: mood == SceneMood.passed,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _SceneMonitor(vitals: vitals, mood: mood),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      _Doctor(bedCase: bedCase, speech: speech),
+      const SizedBox(height: 10),
+      _Monitor(bedCase: bedCase, vitals: vitals, mood: mood),
+    ],
+  );
 }
 
 class _Doctor extends StatelessWidget {
@@ -152,225 +96,125 @@ class _Doctor extends StatelessWidget {
   );
 }
 
-/// The patient in bed, drawn; a green tick by the head once the step is passed.
-class _Bed extends StatelessWidget {
-  const _Bed({required this.female, required this.settled});
+/// The bedside monitor across the full width: the patient and bed in its header, HR / BP / SpO2 /
+/// MAP, the moving trace. It alarms on his alarm values and while a wrong check or a timeout is
+/// shown (red frame, glow, ALARM, red heart rate); it turns green once the step is passed.
+class _Monitor extends StatelessWidget {
+  const _Monitor({required this.bedCase, required this.vitals, required this.mood});
 
-  final bool female;
-  final bool settled;
-
-  @override
-  Widget build(BuildContext context) => AspectRatio(
-    aspectRatio: 214 / 112,
-    child: Stack(
-      children: [
-        Positioned.fill(
-          child: CustomPaint(painter: _BedPainter(female: female)),
-        ),
-        if (settled)
-          Align(
-            alignment: const Alignment(-0.3, -0.85),
-            child: Container(
-              width: 26,
-              height: 26,
-              decoration: const BoxDecoration(
-                color: AppColors.success,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppColors.successEdge, offset: Offset(0, 2))],
-              ),
-              child: const Icon(Icons.check_rounded, size: 17, color: Colors.white),
-            ),
-          ),
-      ],
-    ),
-  );
-}
-
-class _BedPainter extends CustomPainter {
-  const _BedPainter({required this.female});
-
-  final bool female;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.scale(size.width / 214, size.height / 112);
-    Paint fill(Color c) => Paint()..color = c;
-    RRect box(double x, double y, double w, double h, double r) =>
-        RRect.fromRectAndRadius(Rect.fromLTWH(x, y, w, h), Radius.circular(r));
-    const rail = Color(0xFF9CCFF0);
-    canvas
-      ..drawRRect(box(4, 8, 12, 78, 5), fill(rail))
-      ..drawRRect(box(20, 84, 6, 20, 2), fill(rail))
-      ..drawRRect(box(188, 84, 6, 20, 2), fill(rail))
-      ..drawCircle(const Offset(23, 106), 4, fill(AppColors.ink3))
-      ..drawCircle(const Offset(191, 106), 4, fill(AppColors.ink3))
-      ..drawRRect(box(10, 60, 200, 25, 9), fill(Colors.white))
-      ..drawRRect(
-        box(10, 60, 200, 25, 9),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..color = const Color(0xFFAED6EF),
-      )
-      ..drawRRect(box(18, 42, 48, 22, 11), fill(AppColors.sky100));
-    const hair = Color(0xFFCBD5E1);
-    if (female) canvas.drawCircle(const Offset(29, 33), 7, fill(hair));
-    canvas.drawCircle(const Offset(42, 41), 15, fill(const Color(0xFFF2C9A0)));
-    final top = Path()
-      ..moveTo(27, 39)
-      ..arcToPoint(const Offset(57, 39), radius: const Radius.circular(15))
-      ..quadraticBezierTo(50, 31, 42, 32)
-      ..quadraticBezierTo(33, 32, 27, 39)
-      ..close();
-    canvas
-      ..drawPath(top, fill(hair))
-      ..drawRRect(box(58, 46, 146, 20, 10), fill(AppColors.sky300))
-      ..drawCircle(const Offset(198, 52), 10, fill(AppColors.sky300))
-      ..drawLine(
-        const Offset(72, 53),
-        const Offset(190, 53),
-        Paint()
-          ..color = AppColors.sky400
-          ..strokeWidth = 2
-          ..strokeCap = StrokeCap.round,
-      );
-  }
-
-  @override
-  bool shouldRepaint(_BedPainter old) => old.female != female;
-}
-
-/// The monitor on its stand: heart rate large, BP / SpO2 / MAP small, the moving trace. It
-/// alarms on his alarm values and while a wrong check is shown; it turns green when passed.
-class _SceneMonitor extends StatelessWidget {
-  const _SceneMonitor({required this.vitals, required this.mood});
-
+  final BedCase bedCase;
   final Vitals vitals;
   final SceneMood mood;
 
   @override
   Widget build(BuildContext context) {
     final alarm = mood == SceneMood.alarm || isAlarmVitals(vitals);
+    final passed = mood == SceneMood.passed;
     final edge = alarm
         ? AppColors.alarm
-        : mood == SceneMood.passed
+        : passed
         ? AppColors.success
         : AppColors.monitorEdge;
     return Semantics(
       label:
-          'HR ${vitals.hr} · BP ${vitals.bp} · SpO₂ ${vitals.spo2} · MAP ${vitals.map}'
-          '${alarm ? ' · ALARM' : ''}',
+          '${bedCase.patientName} · HR ${vitals.hr} · BP ${vitals.bp} · SpO₂ ${vitals.spo2} · '
+          'MAP ${vitals.map}${alarm ? ' · ALARM' : ''}',
       excludeSemantics: true,
-      child: SizedBox(
-        width: 150,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          gradient: const RadialGradient(
+            center: Alignment.topLeft,
+            radius: 1.6,
+            colors: [AppColors.monitorTop, AppColors.monitorBottom],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: edge, width: 3),
+          boxShadow: [
+            if (mood == SceneMood.alarm)
+              BoxShadow(color: AppColors.alarm.withValues(alpha: 0.45), blurRadius: 18),
+            if (passed) BoxShadow(color: AppColors.success.withValues(alpha: 0.35), blurRadius: 14),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (alarm)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.alarm,
-                    borderRadius: BorderRadius.circular(99),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.warning_amber_rounded, size: 13, color: Colors.white),
-                      SizedBox(width: 3),
-                      Text(
-                        'ALARM',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
-              decoration: BoxDecoration(
-                color: AppColors.monitorBottom,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: edge, width: 2),
-                boxShadow: [
-                  if (mood == SceneMood.alarm)
-                    BoxShadow(color: AppColors.alarm.withValues(alpha: 0.45), blurRadius: 16),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 9, 10, 0),
+              child: Row(
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'HR',
-                        style: TextStyle(fontSize: 10.5, color: AppColors.monitorLabel),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '${vitals.hr}',
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 26,
-                          height: 1,
-                          fontWeight: FontWeight.w700,
-                          color: alarm ? AppColors.ecgAlarm : AppColors.hr,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  // Each reading shrinks rather than overflow at large text sizes.
-                  Row(
-                    children: [
-                      for (final (i, (label, value, color)) in [
-                        ('BP', vitals.bp, AppColors.bp),
-                        ('SpO₂', vitals.spo2, AppColors.spo2),
-                        ('MAP', '${vitals.map}', AppColors.map),
-                      ].indexed) ...[
-                        if (i > 0) const SizedBox(width: 4),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: _Reading(label: label, value: value, color: color),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                    // The trace paints past its box; the monitor's glass ends here.
-                    child: ClipRect(
-                      child: EcgTrace(
-                        hr: vitals.hr,
-                        color: alarm ? AppColors.ecgAlarm : AppColors.ecg,
-                      ),
+                  Container(
+                    width: 32,
+                    height: 32,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.12),
+                    ),
+                    child: Text(
+                      bedCase.patientName.startsWith('นาง') ? '👵' : '👴',
+                      style: const TextStyle(fontSize: 19),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          bedCase.patientName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: displayFont,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          bedCase.bedCode,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11.5, color: Color(0xFF9FC3DE)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (alarm)
+                    const _Chip(
+                      color: AppColors.alarm,
+                      icon: Icons.warning_amber_rounded,
+                      text: 'ALARM',
+                    )
+                  else if (passed)
+                    const _Chip(color: AppColors.success, icon: Icons.check_rounded),
                 ],
               ),
             ),
-            Center(child: Container(width: 4, height: 22, color: const Color(0xFF9CCFF0))),
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF9CCFF0),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _Tile(
+                    label: 'HR',
+                    value: '${vitals.hr}',
+                    color: alarm ? AppColors.ecgAlarm : AppColors.hr,
+                    size: 32,
+                  ),
+                  _Tile(label: 'BP', value: vitals.bp, color: AppColors.bp, size: 19),
+                  _Tile(label: 'SpO₂', value: vitals.spo2, color: AppColors.spo2, size: 22),
+                  _Tile(label: 'MAP', value: '${vitals.map}', color: AppColors.map, size: 22),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 40,
+              // The trace paints past its box; the monitor's glass ends here.
+              child: ClipRect(
+                child: EcgTrace(hr: vitals.hr, color: alarm ? AppColors.ecgAlarm : AppColors.ecg),
               ),
             ),
           ],
@@ -380,22 +224,68 @@ class _SceneMonitor extends StatelessWidget {
   }
 }
 
-class _Reading extends StatelessWidget {
-  const _Reading({required this.label, required this.value, required this.color});
+class _Chip extends StatelessWidget {
+  const _Chip({required this.color, required this.icon, this.text});
+
+  final Color color;
+  final IconData icon;
+  final String? text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: EdgeInsets.symmetric(horizontal: text == null ? 4 : 8, vertical: 3),
+    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(99)),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: Colors.white),
+        if (text != null) ...[
+          const SizedBox(width: 3),
+          Text(
+            text!,
+            style: const TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+/// One reading: its label and value; the value shrinks rather than overflow at large text sizes.
+class _Tile extends StatelessWidget {
+  const _Tile({required this.label, required this.value, required this.color, required this.size});
 
   final String label;
   final String value;
   final Color color;
+  final double size;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: const TextStyle(fontSize: 9, color: AppColors.monitorLabel)),
-      Text(
-        value,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color),
-      ),
-    ],
+  Widget build(BuildContext context) => Expanded(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.monitorLabel)),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: size,
+              height: 1.1,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    ),
   );
 }
