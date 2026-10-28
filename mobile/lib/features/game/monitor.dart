@@ -38,7 +38,7 @@ class BedsideMonitor extends StatelessWidget {
                   style: const TextStyle(
                     fontFamily: displayFont,
                     fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                    fontSize: 13.5,
                     color: Colors.white,
                   ),
                 ),
@@ -47,7 +47,7 @@ class BedsideMonitor extends StatelessWidget {
                   child: Text(
                     bedCase.patientName,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11.5, color: Color(0xFF9FC3DE)),
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF9FC3DE)),
                   ),
                 ),
                 if (alarm) const _AlarmBadge(),
@@ -87,7 +87,7 @@ class _AlarmBadge extends StatelessWidget {
       style: TextStyle(
         fontFamily: displayFont,
         fontWeight: FontWeight.w600,
-        fontSize: 10,
+        fontSize: 11,
         letterSpacing: 0.6,
         color: Colors.white,
       ),
@@ -117,7 +117,7 @@ class _Tile extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 9.5,
+              fontSize: 10.5,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.7,
               color: AppColors.monitorLabel,
@@ -310,13 +310,13 @@ class DoctorBubble extends StatelessWidget {
                 style: const TextStyle(
                   fontFamily: displayFont,
                   fontWeight: FontWeight.w600,
-                  fontSize: 11.5,
+                  fontSize: 13,
                   color: AppColors.bubbleName,
                 ),
               ),
               Text(
                 speech.replaceFirst(RegExp(r'^💬\s*', unicode: true), ''),
-                style: const TextStyle(fontSize: 12.8, height: 1.5, color: AppColors.bubbleInk),
+                style: const TextStyle(fontSize: 14.5, height: 1.5, color: AppColors.bubbleInk),
               ),
             ],
           ),

@@ -7,7 +7,7 @@ import 'app/app.dart';
 
 void main() {
   LicenseRegistry.addLicense(() async* {
-    for (final (font, file) in [('Prompt', 'OFL-Prompt.txt'), ('Mitr', 'OFL-Mitr.txt')]) {
+    for (final (font, file) in [('Google Sans', 'OFL-GoogleSans.txt')]) {
       yield LicenseEntryWithLineBreaks([font], await rootBundle.loadString('assets/fonts/$file'));
     }
   });

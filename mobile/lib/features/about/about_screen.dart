@@ -74,7 +74,7 @@ class TrainingNotice extends StatelessWidget {
             style: const TextStyle(
               fontFamily: displayFont,
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 17,
               color: AppColors.readingInk,
             ),
           ),

@@ -57,7 +57,7 @@ class _WardScreenState extends ConsumerState<WardScreen> {
             Text(l.appTitle),
             Text(
               l.levelRank(progress.level, progress.rank),
-              style: const TextStyle(fontFamily: bodyFont, fontSize: 12, color: AppColors.ink2),
+              style: const TextStyle(fontFamily: bodyFont, fontSize: 13.5, color: AppColors.ink2),
             ),
           ],
         ),
@@ -174,7 +174,7 @@ class _Banner extends StatelessWidget {
             style: TextStyle(
               fontFamily: displayFont,
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 17,
               color: Colors.white,
             ),
           ),
@@ -189,11 +189,11 @@ class _Banner extends StatelessWidget {
                 style: const TextStyle(
                   fontFamily: displayFont,
                   fontWeight: FontWeight.w600,
-                  fontSize: 18,
+                  fontSize: 19,
                   color: Colors.white,
                 ),
               ),
-              Text(l.wardHint, style: const TextStyle(fontSize: 12, color: Colors.white)),
+              Text(l.wardHint, style: const TextStyle(fontSize: 13.5, color: Colors.white)),
             ],
           ),
         ),
@@ -298,7 +298,7 @@ class _BedCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 10.5,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: statusInk,
                           ),
@@ -317,14 +317,14 @@ class _BedCard extends StatelessWidget {
                   style: const TextStyle(
                     fontFamily: displayFont,
                     fontWeight: FontWeight.w600,
-                    fontSize: 12.5,
+                    fontSize: 14,
                     height: 1.3,
                   ),
                 ),
                 if (bedCase.stayDuration != null)
                   Text(
                     bedCase.stayDuration!,
-                    style: const TextStyle(fontSize: 10, color: AppColors.ink3),
+                    style: const TextStyle(fontSize: 11, color: AppColors.ink3),
                   ),
                 const Spacer(),
                 const SizedBox(height: 6),
@@ -415,7 +415,7 @@ class _BedArt extends StatelessWidget {
                     child: Text(
                       '♥ ${vitals.hr}',
                       style: TextStyle(
-                        fontSize: 9,
+                        fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: alarm ? AppColors.ecgAlarm : const Color(0xFF86EFAC),
                       ),
@@ -497,7 +497,7 @@ class _Station extends StatelessWidget {
                   ),
                   Text(
                     l.passedOf(progress.passedCount, cases.length),
-                    style: const TextStyle(fontSize: 12, color: AppColors.ink2),
+                    style: const TextStyle(fontSize: 13.5, color: AppColors.ink2),
                   ),
                 ],
               ),
@@ -553,7 +553,7 @@ class _StarPill extends StatelessWidget {
           const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
           const SizedBox(width: 2),
           Text('$stars', style: const TextStyle(fontWeight: FontWeight.w700)),
-          Text('/$max', style: const TextStyle(fontSize: 11, color: AppColors.ink3)),
+          Text('/$max', style: const TextStyle(fontSize: 12, color: AppColors.ink3)),
         ],
       ),
     ),

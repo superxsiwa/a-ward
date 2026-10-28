@@ -72,9 +72,10 @@ abstract final class AppColors {
   static const page = Color(0xFFEAF6FE);
 }
 
-/// Mitr for headings and buttons, Prompt for body text, as in his frontend.
-const displayFont = 'Mitr';
-const bodyFont = 'Prompt';
+/// Google Sans for everything (Thanee 2026-10-28: Prompt and Mitr from his frontend read small
+/// and busy on a phone). Two names kept so headings can differ again later.
+const displayFont = 'GoogleSans';
+const bodyFont = 'GoogleSans';
 
 ThemeData buildTheme() {
   final base = ThemeData(
@@ -98,7 +99,7 @@ ThemeData buildTheme() {
       titleTextStyle: TextStyle(
         fontFamily: displayFont,
         fontWeight: FontWeight.w600,
-        fontSize: 18,
+        fontSize: 19,
         color: AppColors.ink,
       ),
     ),

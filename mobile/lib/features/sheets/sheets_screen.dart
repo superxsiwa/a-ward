@@ -113,7 +113,7 @@ class _StageSheet extends StatelessWidget {
         Text(stage.name, style: _h2),
         Text(
           '${stage.mechanic} · HR ${v.hr} · BP ${v.bp} · SpO₂ ${v.spo2} · MAP ${v.map}',
-          style: const TextStyle(fontSize: 12, color: AppColors.ink3),
+          style: const TextStyle(fontSize: 13.5, color: AppColors.ink3),
         ),
         const SizedBox(height: 6),
         Text(
@@ -169,8 +169,8 @@ class _StageSheet extends StatelessWidget {
   );
 }
 
-const _h1 = TextStyle(fontFamily: displayFont, fontWeight: FontWeight.w600, fontSize: 18);
-const _h2 = TextStyle(fontFamily: displayFont, fontWeight: FontWeight.w600, fontSize: 16);
+const _h1 = TextStyle(fontFamily: displayFont, fontWeight: FontWeight.w600, fontSize: 19);
+const _h2 = TextStyle(fontFamily: displayFont, fontWeight: FontWeight.w600, fontSize: 17);
 
 class _Box extends StatelessWidget {
   const _Box({required this.children});
