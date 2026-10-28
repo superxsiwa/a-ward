@@ -1,5 +1,5 @@
 {
-  "name": "a-ward-ccu-fullstack",
+  "name": "critical-care",
   "version": "2.0.0",
   "description": "A-WARD CCU Full-Stack Clinical Decision & Simulation Web Application (React + TypeScript + Express + Prisma)",
   "main": "backend/dist/index.js",
@@ -11,8 +11,7 @@
     "seed": "npm --prefix backend run prisma:seed",
     "test:e2e": "npm --prefix backend run test:e2e",
     "start": "npm --prefix backend run start",
-    "dev": "npm --prefix backend run dev",
-    "prototype": "node server.js"
+    "dev": "npm --prefix backend run dev"
   },
   "keywords": [
     "nurse",
@@ -27,4 +26,3 @@
   "author": "SuperX & Antigravity",
   "license": "ISC"
 }
-

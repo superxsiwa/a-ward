@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
+// @ts-expect-error CSS is handled by the bundler.
 import './styles/style.css';
 
 if ('serviceWorker' in navigator) {

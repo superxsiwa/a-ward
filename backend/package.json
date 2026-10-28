@@ -1,5 +1,5 @@
 {
-  "name": "a-ward-backend",
+  "name": "critical-care-backend",
   "version": "1.0.0",
   "description": "A-WARD CCU Clinical Simulation Backend API (Express + TypeScript + Prisma)",
   "main": "dist/index.js",

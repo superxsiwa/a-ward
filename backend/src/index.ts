@@ -18,7 +18,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'A-WARD CCU API', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'Critical Care API', timestamp: new Date().toISOString() });
 });
 
 // API Routes
@@ -27,12 +27,6 @@ app.use('/api/cases', casesRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/roster', rosterRoutes);
 app.use('/api/instructor', instructorRoutes);
-
-// Serve reference prototype at /prototype
-const prototypePath = path.resolve(__dirname, '../../prototype');
-if (fs.existsSync(prototypePath)) {
-  app.use('/prototype', express.static(prototypePath));
-}
 
 // Serve Frontend SPA build in production if available
 const frontendDist = path.resolve(__dirname, '../../frontend/dist');
@@ -58,7 +52,7 @@ async function bootstrap() {
   }
 
   app.listen(ENV.PORT, () => {
-    console.log(`🩺 A-WARD CCU Full-Stack Backend running at http://localhost:${ENV.PORT}`);
+    console.log(`🩺 Critical Care Full-Stack Backend running at http://localhost:${ENV.PORT}`);
   });
 }
 

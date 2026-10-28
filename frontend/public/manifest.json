@@ -1,15 +1,14 @@
 {
-  "name": "A-WARD CCU Nursing Sim",
-  "short_name": "A-WARD",
+  "name": "Critical Care CCU Nursing Sim",
+  "short_name": "Critical Care",
   "description": "เกมจำลองหัตถการพยาบาล CCU 8 เตียง",
-  "start_url": "/prototype/",
-  "scope": "/prototype/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#e0f2fe",
   "theme_color": "#0284c7",
   "icons": [
-    { "src": "/prototype/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }
-

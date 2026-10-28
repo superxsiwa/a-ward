@@ -1,4 +1,4 @@
-# 🩺 A-WARD: CCU Nursing Clinical Decision & Simulation Game
+# 🩺 Critical Care: CCU Nursing Clinical Decision & Simulation Game
 
 เกมมือถือจำลองสถานการณ์ทางคลินิก (Mobile-First Clinical Decision Game) สำหรับฝึกทักษะการตัดสินใจ การประเมินสัญญาณชีพ และการปฏิบัติการพยาบาลผู้ป่วยวิกฤต CCU (Coronary Care Unit) ตามลำดับขั้นตอนการทำงานจริง
 
@@ -26,10 +26,14 @@
 
 ## 🚀 วิธีการรันโปรเจกต์ (Quick Start)
 
+ติดตั้ง dependencies ในโฟลเดอร์ `frontend` และ `backend` ก่อน จากนั้นเปิด terminal แยกกัน:
+
 ```bash
-cd /home/superx-desktop/Documents/0_app_projects/a-ward
-npm start
-# หรือ node server.js
+npm --prefix backend run dev
 ```
 
-เปิด Browser ไปที่: **`http://localhost:3030`** (สามารถเปิดด้วยมือถือ หรือเปิด DevTools โหมด Mobile ในเบราว์เซอร์)
+```bash
+npm --prefix frontend run dev
+```
+
+เปิด Frontend ที่ **`http://localhost:5173`** โดย API จะทำงานที่ **`http://localhost:4000`**.

@@ -152,7 +152,7 @@ export async function seedDemoUsers(): Promise<void> {
 }
 
 async function main() {
-  console.log('🌱 Seeding A-WARD CCU Database...');
+  console.log('🌱 Seeding Critical Care Database...');
   await seedDefaultCases(true);
   await seedDemoUsers();
   const bedCount = await prisma.ccuBed.count();

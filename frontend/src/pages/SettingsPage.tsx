@@ -126,7 +126,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </button>
       </div>
       <p className="about">
-        A-WARD CCU · Full-Stack Clinical Simulation
+        Critical Care CCU · Full-Stack Clinical Simulation
         <br />
         ซิงค์ข้อมูลอัตโนมัติกับฐานข้อมูลและรองรับการทำงานแบบออฟไลน์
       </p>

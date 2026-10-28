@@ -17,7 +17,7 @@ async function api(path: string, options: RequestInit = {}, token?: string) {
 async function runVerification() {
   await new Promise((r) => setTimeout(r, 800));
   console.log('\n============================================================');
-  console.log('🧪 Running A-WARD CCU Full-Stack E2E Verification Suite');
+  console.log('🧪 Running Critical Care Full-Stack E2E Verification Suite');
   console.log('============================================================\n');
 
   // 1. Health Check
@@ -140,7 +140,7 @@ async function runVerification() {
   const indexHtmlRes = await fetch(`${BASE_URL}/`);
   const indexHtml = await indexHtmlRes.text();
   assert.strictEqual(indexHtmlRes.status, 200);
-  assert.ok(indexHtml.includes('A-WARD CCU'));
+  assert.ok(indexHtml.includes('Critical Care'));
 
   const equipImgRes = await fetch(`${BASE_URL}/assets/equipment/stethoscope.png`);
   assert.strictEqual(equipImgRes.status, 200);

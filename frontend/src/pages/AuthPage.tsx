@@ -59,7 +59,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthenticated, onToast }) 
       <div className="auth-card">
         <div className="auth-hero">
           <div style={{ fontSize: 32 }}>🩺🏥</div>
-          <h1>A-WARD CCU</h1>
+          <h1>Critical Care CCU</h1>
           <p>เกมจำลองการตัดสินใจทางคลินิกและการพยาบาลผู้ป่วยวิกฤตหัวใจ 8 เตียง</p>
         </div>
 
