@@ -66,6 +66,7 @@ class TrainingNotice extends StatelessWidget {
         border: Border.all(color: AppColors.bubbleBorder, width: 2),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
