@@ -661,6 +661,66 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'สัญญาอนุญาตโอเพนซอร์ส'**
   String get aboutLicenses;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ตั้งค่า'**
+  String get settingsTitle;
+
+  /// No description provided for @soundTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'🔊 เสียงเอฟเฟกต์'**
+  String get soundTitle;
+
+  /// No description provided for @soundSub.
+  ///
+  /// In th, this message translates to:
+  /// **'เสียงตอนหยิบ วาง และผ่านด่าน'**
+  String get soundSub;
+
+  /// No description provided for @hapticsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'📳 การสั่น'**
+  String get hapticsTitle;
+
+  /// No description provided for @hapticsSub.
+  ///
+  /// In th, this message translates to:
+  /// **'สั่นเบาๆ เมื่อตอบถูก/ผิด (มือถือ)'**
+  String get hapticsSub;
+
+  /// No description provided for @resetTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ล้างความก้าวหน้า'**
+  String get resetTitle;
+
+  /// No description provided for @resetConfirmTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ล้างความก้าวหน้าทั้งหมด?'**
+  String get resetConfirmTitle;
+
+  /// No description provided for @resetConfirmBody.
+  ///
+  /// In th, this message translates to:
+  /// **'ดาวและเตียงที่ผ่านแล้วจะหายไป ย้อนกลับไม่ได้'**
+  String get resetConfirmBody;
+
+  /// No description provided for @resetConfirm.
+  ///
+  /// In th, this message translates to:
+  /// **'ล้างข้อมูล'**
+  String get resetConfirm;
+
+  /// No description provided for @resetDone.
+  ///
+  /// In th, this message translates to:
+  /// **'ล้างความก้าวหน้าแล้ว'**
+  String get resetDone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -64,9 +64,9 @@ class _WardScreenState extends ConsumerState<WardScreen> {
         actions: [
           _StarPill(stars: progress.totalStars, max: (cases.value?.length ?? 8) * 3, l: l),
           IconButton(
-            tooltip: l.about,
-            icon: const Icon(Icons.info_outline_rounded),
-            onPressed: () => context.push('/about'),
+            tooltip: l.settingsTitle,
+            icon: const Icon(Icons.settings_rounded),
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),

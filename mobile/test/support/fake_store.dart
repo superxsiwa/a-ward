@@ -23,4 +23,12 @@ class MemoryProgressStore implements ProgressStore {
 
   @override
   Future<void> markNoticeSeen() async => seen = true;
+
+  GameSettings settings = const GameSettings();
+
+  @override
+  Future<GameSettings> loadSettings() async => settings;
+
+  @override
+  Future<void> saveSettings(GameSettings s) async => settings = s;
 }

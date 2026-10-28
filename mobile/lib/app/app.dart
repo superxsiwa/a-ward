@@ -4,12 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
 import '../features/game/game_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/sheets/sheets_screen.dart';
 import '../features/ward/ward_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'theme.dart';
 
-final _router = GoRouter(
+GoRouter _buildRouter() => GoRouter(
   routes: [
     GoRoute(
       path: '/',
@@ -32,13 +33,28 @@ final _router = GoRouter(
           ],
         ),
         GoRoute(path: 'about', builder: (context, state) => const AboutScreen()),
+        GoRoute(path: 'settings', builder: (context, state) => const SettingsScreen()),
       ],
     ),
   ],
 );
 
-class CriticalCareApp extends StatelessWidget {
+class CriticalCareApp extends StatefulWidget {
   const CriticalCareApp({super.key});
+
+  @override
+  State<CriticalCareApp> createState() => _CriticalCareAppState();
+}
+
+class _CriticalCareAppState extends State<CriticalCareApp> {
+  // One router per app instance: a global one kept the last location across widget tests.
+  late final GoRouter _router = _buildRouter();
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp.router(

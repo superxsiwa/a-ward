@@ -1,4 +1,5 @@
 import 'package:criticalcare/app/app.dart';
+import 'package:criticalcare/app/sfx.dart';
 import 'package:criticalcare/data/progress_store.dart';
 import 'package:criticalcare/data/providers.dart';
 import 'package:criticalcare/game/case_session.dart';
@@ -12,6 +13,8 @@ import '../support/fake_store.dart';
 import 'bed01_play_test.dart' show settle, tapText;
 
 void main() {
+  final sfx = SilentSfx();
+
   Future<void> pumpApp(WidgetTester tester, MemoryProgressStore store) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
@@ -21,6 +24,7 @@ void main() {
         overrides: [
           bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
           progressStoreProvider.overrideWithValue(store),
+          sfxProvider.overrideWithValue(sfx),
         ],
         child: const CriticalCareApp(),
       ),
@@ -66,5 +70,35 @@ void main() {
     expect(find.text('ชีทเฉลย เตียง 01 CCU'), findsOneWidget);
     final wrong = bed(1).stages[0].choices!.options.firstWhere((o) => !o.correct);
     expect(find.textContaining('${wrong.text}  (ไม่ควรเลือก)'), findsOneWidget);
+  });
+
+  testWidgets('settings: sound and vibration switches are saved; reset asks first', (tester) async {
+    const done = CaseResult(
+      bedNum: 2,
+      stars: 2,
+      mistakes: 1,
+      traysSorted: 0,
+      flawlessSteps: 0,
+      isEmergency: true,
+    );
+    final store = MemoryProgressStore(progress: Progress.empty.record(done).progress);
+    await pumpApp(tester, store);
+    await tester.tap(find.byTooltip('ตั้งค่า'));
+    await settle(tester);
+    await tapText(tester, '🔊 เสียงเอฟเฟกต์');
+    await settle(tester);
+    expect(store.settings.sound, isFalse);
+    expect(store.settings.haptics, isTrue);
+    await tapText(tester, 'ล้างความก้าวหน้า');
+    await settle(tester);
+    await tapText(tester, 'ยกเลิก');
+    await settle(tester);
+    expect(store.progress.totalStars, 2, reason: 'cancel keeps it');
+    await tapText(tester, 'ล้างความก้าวหน้า');
+    await settle(tester);
+    await tapText(tester, 'ล้างข้อมูล');
+    await settle(tester);
+    expect(store.progress.totalStars, 0);
+    expect(find.text('ล้างความก้าวหน้าแล้ว'), findsOneWidget);
   });
 }
