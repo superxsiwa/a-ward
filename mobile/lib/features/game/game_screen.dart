@@ -326,6 +326,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     board: s.board,
                     onMove: (move) => _setSession(s.update(move)),
                     drag: DragHooks(onMove: _dragMoved, onEnd: _dragEnded),
+                    enabled: !s.waitingForRetry,
                   ),
                 ],
               ),
@@ -347,7 +348,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   panel: _panel!,
                   l: l,
                   canShowAnswer: s.canShowAnswer,
-                  timed: s.stepIndex == timedStepIndex,
+                  timed: isTimedStage(s.stage),
                   onGoOn: _goOn,
                   onRetry: _retry,
                   onShowAnswer: _showAnswer,
@@ -631,20 +632,15 @@ class _Dock extends StatelessWidget {
     final s = session;
     final Widget main;
     if (!s.isPassed) {
-      main = s.canShowAnswer
-          ? GameButton(
-              label: l.showAnswerGoOn,
-              color: AppColors.gold,
-              edge: AppColors.goldEdge,
-              onTap: onShowAnswer,
-            )
-          : GameButton(
-              label: l.check,
-              icon: Icons.check_rounded,
-              color: AppColors.sky500,
-              edge: AppColors.sky700,
-              onTap: onCheck,
-            );
+      // After 3 mistakes "try again" really retries: check stays, the answer is offered above it
+      // (decision Q-A, 2026-10-28; his version replaced check with show answer).
+      main = GameButton(
+        label: l.check,
+        icon: Icons.check_rounded,
+        color: AppColors.sky500,
+        edge: AppColors.sky700,
+        onTap: onCheck,
+      );
     } else if (!s.isLastStep) {
       main = GameButton(
         label: l.goOn,
@@ -663,18 +659,33 @@ class _Dock extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!s.isFirstStep) ...[
-            _GhostButton(icon: Icons.arrow_back_rounded, label: l.previous, onTap: onBack),
-            const SizedBox(width: 8),
+          if (s.canShowAnswer) ...[
+            GameButton(
+              label: l.showAnswerGoOn,
+              color: AppColors.gold,
+              edge: AppColors.goldEdge,
+              onTap: onShowAnswer,
+            ),
+            const SizedBox(height: 10),
           ],
-          Expanded(child: main),
-          const SizedBox(width: 8),
-          _GhostButton(
-            icon: Icons.undo_rounded,
-            tooltip: l.resetStep,
-            onTap: s.isPassed ? null : onReset,
+          Row(
+            children: [
+              if (!s.isFirstStep) ...[
+                _GhostButton(icon: Icons.arrow_back_rounded, label: l.previous, onTap: onBack),
+                const SizedBox(width: 8),
+              ],
+              Expanded(child: main),
+              const SizedBox(width: 8),
+              _GhostButton(
+                icon: Icons.undo_rounded,
+                tooltip: l.resetStep,
+                onTap: s.isPassed ? null : onReset,
+              ),
+            ],
           ),
         ],
       ),

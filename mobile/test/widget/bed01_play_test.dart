@@ -110,6 +110,29 @@ void main() {
     expect(find.bySemanticsLabel('ดาวที่ได้ตอนนี้ 2 ดวง'), findsOneWidget);
   });
 
+  testWidgets('after 3 mistakes both check and show answer are offered (Q-A)', (tester) async {
+    await openBed01(tester);
+    for (final id in ['fc1', 'fc2', 'fc3', 'fc4']) {
+      await tapText(tester, option(id));
+    }
+    for (final id in ['fs1', 'fs2', 'fs3', 'fs4']) {
+      await tapText(tester, card(0, id));
+    }
+    for (var i = 1; i <= 3; i++) {
+      await tapText(tester, 'ตรวจคำตอบ');
+      await settle(tester);
+      await tapText(tester, i < 3 ? 'ลองอีกครั้ง' : 'ลองอีกที');
+      await settle(tester);
+    }
+    expect(find.text('ตรวจคำตอบ'), findsOneWidget);
+    expect(find.text('💡 ดูเฉลย & ไปต่อ'), findsOneWidget);
+    // Fixing the pick and checking again passes: the retry is real.
+    await tapText(tester, option('fc4'));
+    await tapText(tester, 'ตรวจคำตอบ');
+    await settle(tester);
+    expect(find.text('ผ่านขั้นตอนนี้แล้ว ถูกต้องตามหลักความปลอดภัย'), findsOneWidget);
+  });
+
   testWidgets('checking too early shows what is missing and counts nothing', (tester) async {
     await openBed01(tester);
     await tapText(tester, 'ตรวจคำตอบ');
@@ -133,8 +156,15 @@ void main() {
     }
     expect(find.text('หมดเวลา 20 วินาที! (ครั้งที่ 1/3)'), findsOneWidget);
     expect(find.text('ลองอีกครั้ง (จับเวลา 20 วิ)'), findsOneWidget);
+    // The cards wait for retry (Q-C): picking a card and tapping a tray leaves both trays at 0.
+    await tapText(tester, card(1, 'fe1'));
+    await tapText(tester, tray(1, 'ftr1'));
+    expect(find.text('1'), findsNothing, reason: 'no tray count went to 1');
     await tapText(tester, 'ลองอีกครั้ง (จับเวลา 20 วิ)');
     expect(find.text('⏱️ 20s'), findsOneWidget);
+    await tapText(tester, card(1, 'fe1'));
+    await tapText(tester, tray(1, 'ftr1'));
+    expect(find.text('1'), findsOneWidget, reason: 'after retry the card lands');
     // Leave the step so its timer stops before the test ends.
     await tapText(tester, 'ย้อนกลับ');
   });

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:clock/clock.dart';
+import 'package:criticalcare/game/case_model.dart';
 import 'package:criticalcare/game/case_session.dart';
 import 'package:criticalcare/game/step_checker.dart';
 import 'package:criticalcare/game/step_board.dart';
@@ -272,6 +273,45 @@ void main() {
       expect(fail(s).$1.canLeaveFreely, isFalse);
       (s, _) = pass(s);
       expect(s.canLeaveFreely, isFalse);
+    }),
+  );
+
+  test(
+    'after a timeout the cards wait for retry: no move, check or reset (Q-C)',
+    () => at(() {
+      var s = start();
+      (s, _) = pass(s);
+      (s, _) = s.next();
+      s = s.update((b) => b.move('fe1', const TrayZone('ftr1')));
+      now = now.add(const Duration(seconds: 20));
+      (s, _) = s.timeOut();
+      expect(s.waitingForRetry, isTrue);
+      expect(s.update((b) => b.move('fe2', const TrayZone('ftr1'))), same(s));
+      expect(s.resetStep(), same(s));
+      expect(s.check().$2, isNull);
+      s = s.retry();
+      expect(s.waitingForRetry, isFalse);
+      expect(s.update((b) => b.move('fe2', const TrayZone('ftr1'))).board.trays!['ftr1'], [
+        'fe1',
+        'fe2',
+      ]);
+    }),
+  );
+
+  test(
+    'the timer follows the equipment step when cases put it elsewhere (Q-B)',
+    () => at(() {
+      final json = copyJson(bedJson(1));
+      final stages = json['stageData'] as List;
+      final trays = stages.removeAt(1);
+      stages.insert(2, trays); // the equipment step is now step 3
+      var s = CaseSession.start(BedCase.fromJson(json), random: Random(5));
+      (s, _) = pass(s);
+      (s, _) = s.next();
+      expect(s.deadline, isNull, reason: 'step 2 is now the ordered trays');
+      (s, _) = pass(s);
+      (s, _) = s.next();
+      expect(s.secondsLeft, 20);
     }),
   );
 }

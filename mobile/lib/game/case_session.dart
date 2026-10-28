@@ -97,6 +97,7 @@ class CaseSession {
     required this.traysSorted,
     required this.flawlessSteps,
     required this.finished,
+    required this.waitingForRetry,
     required this._random,
   });
 
@@ -114,6 +115,7 @@ class CaseSession {
       traysSorted: 0,
       flawlessSteps: 0,
       finished: false,
+      waitingForRetry: false,
       random: r,
     );
   }
@@ -136,6 +138,11 @@ class CaseSession {
   final int traysSorted;
   final int flawlessSteps;
   final bool finished;
+
+  /// After a timeout the cards stay as they are until "try again" restarts the clock, so the
+  /// timed step cannot be arranged with the clock stopped (decision Q-C, 2026-10-28; his version
+  /// left the cards movable).
+  final bool waitingForRetry;
   final Random _random;
 
   Stage get stage => bed.stages[stepIndex];
@@ -170,6 +177,7 @@ class CaseSession {
     int? traysSorted,
     int? flawlessSteps,
     bool? finished,
+    bool? waitingForRetry,
   }) => CaseSession._(
     bed: bed,
     stepIndex: stepIndex ?? this.stepIndex,
@@ -181,25 +189,26 @@ class CaseSession {
     traysSorted: traysSorted ?? this.traysSorted,
     flawlessSteps: flawlessSteps ?? this.flawlessSteps,
     finished: finished ?? this.finished,
+    waitingForRetry: waitingForRetry ?? this.waitingForRetry,
     random: _random,
   );
 
   CaseSession _withBoard(StepBoard b) => _copy(boards: {...boards, stage.id: b});
 
   DateTime? _timerFor(int index, Set<String> done) =>
-      index == timedStepIndex && !done.contains(bed.stages[index].id)
+      isTimedStage(bed.stages[index]) && !done.contains(bed.stages[index].id)
       ? clock.now().add(const Duration(seconds: timedStepSeconds))
       : null;
 
   /// Applies a card or option move made on the current step.
   CaseSession update(StepBoard Function(StepBoard b) move) {
-    if (finished || board.locked) return this;
+    if (finished || board.locked || waitingForRetry) return this;
     return _withBoard(move(board));
   }
 
   /// The check button (`checkStep`).
   (CaseSession, GameFeedback?) check() {
-    if (finished || board.locked) return (this, null);
+    if (finished || board.locked || waitingForRetry) return (this, null);
     final result = checkStep(stage, board);
     switch (result) {
       case CheckIncomplete(:final reason):
@@ -226,7 +235,8 @@ class CaseSession {
     }
   }
 
-  /// The timed step's clock reached zero (`handleStepTimeout`). The cards stay where they are.
+  /// The timed step's clock reached zero (`handleStepTimeout`). The cards stay where they are and
+  /// wait for [retry].
   (CaseSession, GameFeedback?) timeOut() {
     if (finished || deadline == null || board.locked) return (this, null);
     final strike = strikes + 1;
@@ -234,6 +244,7 @@ class CaseSession {
       mistakes: mistakes + 1,
       stepMistakes: {...stepMistakes, stage.id: strike},
       deadline: () => null,
+      waitingForRetry: true,
     );
     return (next, TimedOut(strike: strike, canShowAnswer: strike >= mercyStrikes));
   }
@@ -241,7 +252,7 @@ class CaseSession {
   /// "Try again" after a wrong check or a timeout: the timed step gets its full time back.
   CaseSession retry() {
     if (finished) return this;
-    return _copy(deadline: () => _timerFor(stepIndex, done));
+    return _copy(deadline: () => _timerFor(stepIndex, done), waitingForRetry: false);
   }
 
   /// The mercy rule (`handleMercySkip`): lay out the answer and count the step as done.
@@ -263,6 +274,7 @@ class CaseSession {
           ? boards
           : {...boards, target.id: StepBoard.fresh(target, _random)},
       deadline: () => _timerFor(index, done),
+      waitingForRetry: false,
     );
   }
 
@@ -274,7 +286,7 @@ class CaseSession {
 
   /// The reset button: fresh cards for an unpassed step. Mistakes stay counted.
   CaseSession resetStep() {
-    if (finished || isPassed) return this;
+    if (finished || isPassed || waitingForRetry) return this;
     return _withBoard(StepBoard.fresh(stage, _random));
   }
 

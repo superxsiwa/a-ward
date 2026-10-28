@@ -25,6 +25,7 @@ class TaskView extends StatelessWidget {
     required this.board,
     required this.onMove,
     required this.drag,
+    this.enabled = true,
   });
 
   final Stage stage;
@@ -32,10 +33,13 @@ class TaskView extends StatelessWidget {
   final StepMove onMove;
   final DragHooks drag;
 
+  /// False while a timeout waits for "try again": the cards stay put.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final ctx = _TaskContext(board: board, onMove: onMove, drag: drag);
+    final ctx = _TaskContext(board: board, onMove: onMove, drag: drag, enabled: enabled);
     final choices = stage.choices;
     final sequence = stage.sequence;
     final trays = stage.trays;
@@ -74,11 +78,20 @@ class TaskView extends StatelessWidget {
 }
 
 class _TaskContext {
-  const _TaskContext({required this.board, required this.onMove, required this.drag});
+  const _TaskContext({
+    required this.board,
+    required this.onMove,
+    required this.drag,
+    required this.enabled,
+  });
 
   final StepBoard board;
   final StepMove onMove;
   final DragHooks drag;
+  final bool enabled;
+
+  /// Nothing can move: the step is passed, or a timeout waits for "try again".
+  bool get frozen => board.locked || !enabled;
 
   void tapCard(String id) => onMove((s) => s.tapCard(id));
   void tapZone(Zone zone) => onMove((s) => s.tapZone(zone));
@@ -222,7 +235,7 @@ class _Zone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DragTarget<String>(
-    onWillAcceptWithDetails: (_) => !ctx.board.locked,
+    onWillAcceptWithDetails: (_) => !ctx.frozen,
     onAcceptWithDetails: (d) => ctx.drop(d.data, zone),
     builder: (context, candidates, _) => GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -396,7 +409,7 @@ class _TrayBox extends StatelessWidget {
                           for (final (i, id) in cards.indexed)
                             // Dropping on a card puts the dragged card in front of it.
                             DragTarget<String>(
-                              onWillAcceptWithDetails: (d) => !ctx.board.locked && d.data != id,
+                              onWillAcceptWithDetails: (d) => !ctx.frozen && d.data != id,
                               onAcceptWithDetails: (d) =>
                                   ctx.drop(d.data, TrayZone(tray.id, before: id)),
                               builder: (context, candidates, _) => _InsertMark(
@@ -508,7 +521,7 @@ class _CardChip extends StatelessWidget {
       number: number,
       expand: expand,
     );
-    if (ctx.board.locked) return face;
+    if (ctx.frozen) return face;
     return LongPressDraggable<String>(
       data: id,
       delay: const Duration(milliseconds: 150),
