@@ -334,4 +334,34 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get aboutLicenses => 'สัญญาอนุญาตโอเพนซอร์ส';
+
+  @override
+  String get settingsTitle => 'ตั้งค่า';
+
+  @override
+  String get soundTitle => '🔊 เสียงเอฟเฟกต์';
+
+  @override
+  String get soundSub => 'เสียงตอนหยิบ วาง และผ่านด่าน';
+
+  @override
+  String get hapticsTitle => '📳 การสั่น';
+
+  @override
+  String get hapticsSub => 'สั่นเบาๆ เมื่อตอบถูก/ผิด (มือถือ)';
+
+  @override
+  String get resetTitle => 'ล้างความก้าวหน้า';
+
+  @override
+  String get resetConfirmTitle => 'ล้างความก้าวหน้าทั้งหมด?';
+
+  @override
+  String get resetConfirmBody => 'ดาวและเตียงที่ผ่านแล้วจะหายไป ย้อนกลับไม่ได้';
+
+  @override
+  String get resetConfirm => 'ล้างข้อมูล';
+
+  @override
+  String get resetDone => 'ล้างความก้าวหน้าแล้ว';
 }

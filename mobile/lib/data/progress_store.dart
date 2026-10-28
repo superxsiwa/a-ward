@@ -6,6 +6,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../game/case_session.dart';
 import '../game/progress.dart';
 
+/// The player's settings (his SettingsPage): both on by default.
+class GameSettings {
+  const GameSettings({this.sound = true, this.haptics = true});
+
+  final bool sound;
+  final bool haptics;
+
+  GameSettings copyWith({bool? sound, bool? haptics}) =>
+      GameSettings(sound: sound ?? this.sound, haptics: haptics ?? this.haptics);
+}
+
 /// Where progress lives on the device. Today one small JSON value in shared_preferences
 /// (localStorage on the web); a database can replace it behind this interface when sync comes.
 abstract interface class ProgressStore {
@@ -15,6 +26,9 @@ abstract interface class ProgressStore {
   /// Whether the player has seen the "for training only" notice.
   Future<bool> noticeSeen();
   Future<void> markNoticeSeen();
+
+  Future<GameSettings> loadSettings();
+  Future<void> saveSettings(GameSettings settings);
 }
 
 class PrefsProgressStore implements ProgressStore {
@@ -44,6 +58,18 @@ class PrefsProgressStore implements ProgressStore {
 
   @override
   Future<void> markNoticeSeen() => _prefs.setBool(_noticeKey, true);
+
+  @override
+  Future<GameSettings> loadSettings() async => GameSettings(
+    sound: await _prefs.getBool('settings.sound') ?? true,
+    haptics: await _prefs.getBool('settings.haptics') ?? true,
+  );
+
+  @override
+  Future<void> saveSettings(GameSettings settings) async {
+    await _prefs.setBool('settings.sound', settings.sound);
+    await _prefs.setBool('settings.haptics', settings.haptics);
+  }
 }
 
 final progressStoreProvider = Provider<ProgressStore>((ref) => PrefsProgressStore());
@@ -60,6 +86,26 @@ class ProgressNotifier extends AsyncNotifier<Progress> {
     await ref.read(progressStoreProvider).save(outcome.progress);
     return outcome;
   }
+
+  /// "Reset progress" in settings: every bed and counter back to zero.
+  Future<void> reset() async {
+    state = const AsyncData(Progress.empty);
+    await ref.read(progressStoreProvider).save(Progress.empty);
+  }
 }
 
 final progressProvider = AsyncNotifierProvider<ProgressNotifier, Progress>(ProgressNotifier.new);
+
+class SettingsNotifier extends AsyncNotifier<GameSettings> {
+  @override
+  Future<GameSettings> build() => ref.watch(progressStoreProvider).loadSettings();
+
+  Future<void> set(GameSettings settings) async {
+    state = AsyncData(settings);
+    await ref.read(progressStoreProvider).saveSettings(settings);
+  }
+}
+
+final settingsProvider = AsyncNotifierProvider<SettingsNotifier, GameSettings>(
+  SettingsNotifier.new,
+);

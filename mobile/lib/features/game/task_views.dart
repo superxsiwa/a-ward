@@ -11,8 +11,9 @@ typedef StepMove = void Function(StepBoard Function(StepBoard s) move);
 
 /// Drag callbacks, so the page can scroll while a card is held near its edge.
 class DragHooks {
-  const DragHooks({required this.onMove, required this.onEnd});
+  const DragHooks({required this.onStart, required this.onMove, required this.onEnd});
 
+  final VoidCallback onStart;
   final void Function(Offset globalPosition) onMove;
   final VoidCallback onEnd;
 }
@@ -526,6 +527,7 @@ class _CardChip extends StatelessWidget {
       data: id,
       delay: const Duration(milliseconds: 150),
       hapticFeedbackOnStart: false,
+      onDragStarted: ctx.drag.onStart,
       onDragUpdate: (d) => ctx.drag.onMove(d.globalPosition),
       onDragEnd: (_) => ctx.drag.onEnd(),
       onDraggableCanceled: (_, _) => ctx.drag.onEnd(),

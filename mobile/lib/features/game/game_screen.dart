@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/sfx.dart';
 import '../../app/theme.dart';
 import '../../data/progress_store.dart';
 import '../../data/providers.dart';
 import '../../game/case_model.dart';
 import '../../game/case_session.dart';
 import '../../game/progress.dart';
+import '../../game/step_board.dart';
 import '../../game/rules.dart';
 import '../../game/step_checker.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -96,6 +98,21 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   void _show(GameFeedback f, CaseSession s) {
     final l = AppLocalizations.of(context);
+    final sfx = ref.read(sfxProvider);
+    switch (f) {
+      case NotReady():
+        sfx.play(Sound.pick);
+      case StepPassed() || AnswerShown():
+        sfx
+          ..play(Sound.ok)
+          ..buzz(Buzz.success);
+      case StepFailed() || TimedOut():
+        sfx
+          ..play(Sound.bad)
+          ..buzz(Buzz.error);
+      case CaseFinished():
+        break;
+    }
     switch (f) {
       case NotReady(:final reason):
         ScaffoldMessenger.of(context)
@@ -153,6 +170,31 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   };
 
   // Actions
+
+  /// A card or option move, with his sounds: "drop" when a card lands, "pick" when one is picked
+  /// up or taken back.
+  void _move(StepBoard Function(StepBoard b) move) {
+    final s = _session!;
+    final next = s.update(move);
+    if (identical(next, s)) return;
+    _setSession(next);
+    final before = s.board;
+    final after = next.board;
+    final sfx = ref.read(sfxProvider);
+    final picked = after.picked != before.picked || after.selected.length != before.selected.length;
+    if (after.pool.length > before.pool.length || picked) {
+      sfx.play(Sound.pick);
+    } else {
+      sfx
+        ..play(Sound.drop)
+        ..buzz(Buzz.tick);
+    }
+  }
+
+  void _tap(VoidCallback action) {
+    ref.read(sfxProvider).play(Sound.pick);
+    action();
+  }
 
   void _check() => _apply(_session!.check());
 
@@ -214,6 +256,14 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   Future<void> _finish(BedCase bed, CaseResult result) async {
     final l = AppLocalizations.of(context);
     final outcome = await ref.read(progressProvider.notifier).record(result);
+    final sfx = ref.read(sfxProvider)
+      ..play(Sound.win)
+      ..buzz(Buzz.win);
+    for (var i = 0; i < result.stars; i++) {
+      Future.delayed(Duration(milliseconds: 450 + i * 320), () {
+        if (mounted) sfx.play(Sound.values[Sound.star0.index + i]);
+      });
+    }
     final cases = ref.read(bundledCasesProvider).value ?? const <BedCase>[];
     final next = outcome.progress.nextBed([for (final c in cases) c.bedNum]);
     if (!mounted) return;
@@ -336,8 +386,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   TaskView(
                     stage: s.stage,
                     board: s.board,
-                    onMove: (move) => _setSession(s.update(move)),
-                    drag: DragHooks(onMove: _dragMoved, onEnd: _dragEnded),
+                    onMove: _move,
+                    drag: DragHooks(
+                      onStart: () {
+                        ref.read(sfxProvider)
+                          ..play(Sound.pick)
+                          ..buzz(Buzz.tick);
+                      },
+                      onMove: _dragMoved,
+                      onEnd: _dragEnded,
+                    ),
                     enabled: !s.waitingForRetry,
                   ),
                 ],
@@ -350,19 +408,19 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               ? _Dock(
                   session: s,
                   l: l,
-                  onBack: () => _goTo(s.stepIndex - 1),
+                  onBack: () => _tap(() => _goTo(s.stepIndex - 1)),
                   onCheck: _check,
                   onShowAnswer: _showAnswer,
-                  onGoOn: _goOn,
-                  onReset: () => _setSession(s.resetStep()),
+                  onGoOn: () => _tap(_goOn),
+                  onReset: () => _tap(() => _setSession(s.resetStep())),
                 )
               : _FeedbackPanel(
                   panel: _panel!,
                   l: l,
                   canShowAnswer: s.canShowAnswer,
                   timed: isTimedStage(s.stage),
-                  onGoOn: _goOn,
-                  onRetry: _retry,
+                  onGoOn: () => _tap(_goOn),
+                  onRetry: () => _tap(_retry),
                   onShowAnswer: _showAnswer,
                 ),
         ),
