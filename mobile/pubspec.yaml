@@ -50,6 +50,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -82,3 +83,18 @@ flutter:
           weight: 500
         - asset: assets/fonts/Mitr-SemiBold.ttf
           weight: 600
+
+# App icon (drawn by tool/make_icon.py): python3 tool/make_icon.py && dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/icon-full.png
+  adaptive_icon_background: assets/branding/icon-background.png
+  adaptive_icon_foreground: assets/branding/icon-foreground.png
+  adaptive_icon_monochrome: assets/branding/icon-monochrome.png
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: assets/branding/icon-full.png
+    background_color: "#0EA5E9"
+    theme_color: "#0EA5E9"
