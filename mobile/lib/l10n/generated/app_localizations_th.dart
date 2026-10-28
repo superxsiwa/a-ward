@@ -643,4 +643,10 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get resetCasesDone => 'คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄';
+
+  @override
+  String get readingChip => 'สาระความรู้';
+
+  @override
+  String get tapToRead => 'แตะเพื่ออ่าน';
 }

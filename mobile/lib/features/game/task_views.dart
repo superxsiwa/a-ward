@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../data/case_repository.dart';
+import '../../game/card_kinds.dart';
 import '../../game/case_model.dart';
 import '../../game/step_board.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -27,6 +30,7 @@ class TaskView extends StatelessWidget {
     required this.onMove,
     required this.drag,
     this.enabled = true,
+    this.dockDrop = false,
   });
 
   final Stage stage;
@@ -36,6 +40,9 @@ class TaskView extends StatelessWidget {
 
   /// False while a timeout waits for "try again": the cards stay put.
   final bool enabled;
+
+  /// The drop box is shown docked at the bottom of the screen ([DropTray]), not in the page.
+  final bool dockDrop;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +77,7 @@ class TaskView extends StatelessWidget {
             prompt: drop.prompt,
             children: [
               _Pool(ctx, hint: l.hintDropBox),
-              _DropBox(ctx, needed: drop.expectedIds.length),
+              if (!dockDrop) _DropBox(ctx, needed: drop.expectedIds.length),
             ],
           ),
       ],
@@ -273,6 +280,8 @@ class _Pool extends StatelessWidget {
                       style: const TextStyle(fontSize: 14, color: AppColors.ink3),
                     ),
                   )
+                : pool.every((id) => _isText(ctx.board.items[id]))
+                ? _TileGrid(ctx, ids: pool)
                 : Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -503,12 +512,21 @@ class _DropBox extends StatelessWidget {
 
 /// A card: tap to place or take back, press and hold to drag.
 class _CardChip extends StatelessWidget {
-  const _CardChip(this.ctx, {required this.id, this.number, this.expand = false});
+  const _CardChip(
+    this.ctx, {
+    required this.id,
+    this.number,
+    this.expand = false,
+    this.tile = false,
+  });
 
   final _TaskContext ctx;
   final String id;
   final int? number;
   final bool expand;
+
+  /// Icon above the text, for the two-column pool.
+  final bool tile;
 
   @override
   Widget build(BuildContext context) {
@@ -520,6 +538,7 @@ class _CardChip extends StatelessWidget {
       wrong: ctx.board.wrongItems.contains(id),
       number: number,
       expand: expand,
+      tile: tile,
     );
     if (ctx.frozen) return face;
     return LongPressDraggable<String>(
@@ -561,6 +580,7 @@ class _CardFace extends StatelessWidget {
     required this.number,
     required this.expand,
     this.lifted = false,
+    this.tile = false,
   });
 
   final PoolItem item;
@@ -569,6 +589,7 @@ class _CardFace extends StatelessWidget {
   final int? number;
   final bool expand;
   final bool lifted;
+  final bool tile;
 
   @override
   Widget build(BuildContext context) {
@@ -634,24 +655,38 @@ class _CardFace extends StatelessWidget {
           ],
         ),
       );
+    } else if (tile) {
+      body = Container(
+        padding: const EdgeInsets.all(10),
+        decoration: decoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _KindIcon(cardKindOf(item.text), size: 32),
+            const SizedBox(height: 6),
+            Text(
+              withoutLeadingEmoji(item.text),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.4),
+            ),
+          ],
+        ),
+      );
     } else {
       body = Container(
         constraints: const BoxConstraints(minHeight: 46),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: decoration,
         child: Row(
           mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
           children: [
-            if (number != null) ...[
-              _NumberBadge(number!, color: AppColors.gold, edge: AppColors.goldEdge, size: 24),
-              const SizedBox(width: 8),
-            ] else ...[
-              const Icon(Icons.drag_indicator, size: 18, color: Color(0xFF9DBDD4)),
-              const SizedBox(width: 6),
-            ],
+            if (number != null)
+              _NumberBadge(number!, color: AppColors.gold, edge: AppColors.goldEdge, size: 24)
+            else
+              _KindIcon(cardKindOf(item.text), size: 28),
+            const SizedBox(width: 8),
             Flexible(
               child: Text(
-                item.text,
+                withoutLeadingEmoji(item.text),
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, height: 1.4),
               ),
             ),
@@ -731,4 +766,282 @@ class _CountPill extends StatelessWidget {
       style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Colors.white),
     ),
   );
+}
+
+bool _isText(PoolItem? item) =>
+    item != null && (item.img == null || equipmentAsset(item.img!) == null);
+
+/// Text cards two to a row (one on a very narrow screen), each row as tall as its taller card.
+class _TileGrid extends StatelessWidget {
+  const _TileGrid(this.ctx, {required this.ids});
+
+  final _TaskContext ctx;
+  final List<String> ids;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      final perRow = box.maxWidth >= 300 ? 2 : 1;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < ids.length; i += perRow)
+            Padding(
+              padding: EdgeInsets.only(top: i == 0 ? 0 : 8),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var j = i; j < i + perRow; j++) ...[
+                      if (j > i) const SizedBox(width: 8),
+                      Expanded(
+                        child: j < ids.length
+                            ? _CardChip(ctx, id: ids[j], tile: true)
+                            : const SizedBox(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+        ],
+      );
+    },
+  );
+}
+
+/// A text card's icon: what it is about (monitor, hands-on, talk...), from its own words.
+class _KindIcon extends StatelessWidget {
+  const _KindIcon(this.kind, {required this.size});
+
+  final CardKind kind;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, fill, ink) = switch (kind) {
+      CardKind.monitor => (
+        Icons.monitor_heart_rounded,
+        const Color(0xFFFFE4E6),
+        const Color(0xFFE11D48),
+      ),
+      CardKind.handsOn => (
+        Icons.back_hand_rounded,
+        const Color(0xFFFEF3C7),
+        const Color(0xFFB45309),
+      ),
+      CardKind.assess => (Icons.visibility_rounded, AppColors.sky100, AppColors.sky700),
+      CardKind.talk => (
+        Icons.chat_bubble_rounded,
+        const Color(0xFFEDE9FE),
+        const Color(0xFF6D28D9),
+      ),
+      CardKind.position => (
+        Icons.airline_seat_flat_rounded,
+        const Color(0xFFCCFBF1),
+        const Color(0xFF0F766E),
+      ),
+      CardKind.medicine => (
+        Icons.medication_rounded,
+        const Color(0xFFFCE7F3),
+        const Color(0xFFBE185D),
+      ),
+      CardKind.record => (
+        Icons.edit_note_rounded,
+        const Color(0xFFE2E8F0),
+        const Color(0xFF475569),
+      ),
+      CardKind.equipment => (
+        Icons.medical_services_rounded,
+        const Color(0xFFDBEAFE),
+        const Color(0xFF1D4ED8),
+      ),
+      CardKind.care => (
+        Icons.health_and_safety_rounded,
+        const Color(0xFFDCFCE7),
+        const Color(0xFF15803D),
+      ),
+    };
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
+      child: Icon(icon, size: size * 0.56, color: ink),
+    );
+  }
+}
+
+/// The drop box docked at the bottom of the screen (visual concept 2026-10-28): a slot for each
+/// card the step needs, always in reach while a card is dragged. Tap a card in it to take it back.
+class DropTray extends StatelessWidget {
+  const DropTray({
+    super.key,
+    required this.stage,
+    required this.board,
+    required this.onMove,
+    required this.drag,
+    this.enabled = true,
+  });
+
+  final Stage stage;
+  final StepBoard board;
+  final StepMove onMove;
+  final DragHooks drag;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final drop = stage.unorderedDrop;
+    final cards = board.dropBox;
+    if (drop == null || cards == null) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
+    final ctx = _TaskContext(board: board, onMove: onMove, drag: drag, enabled: enabled);
+    final needed = drop.expectedIds.length;
+    final count = max(needed, cards.length);
+    const perRow = 4;
+    return _Zone(
+      ctx: ctx,
+      zone: const DropBoxZone(),
+      builder: (hover) => AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: hover ? AppColors.sky100 : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.dropBoxTitle,
+                    style: const TextStyle(
+                      fontFamily: displayFont,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.5,
+                      color: AppColors.sky700,
+                    ),
+                  ),
+                ),
+                _CountPill(
+                  '${cards.length}/$needed',
+                  color: board.locked ? AppColors.success : AppColors.sky500,
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            for (var i = 0; i < count; i += perRow)
+              Padding(
+                padding: EdgeInsets.only(top: i == 0 ? 0 : 6),
+                child: Row(
+                  children: [
+                    for (var j = i; j < i + perRow; j++) ...[
+                      if (j > i) const SizedBox(width: 6),
+                      Expanded(
+                        child: j < cards.length
+                            ? _TrayChip(ctx, id: cards[j])
+                            : j < count
+                            ? const _EmptySlot()
+                            : const SizedBox(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The height of a slot in the docked tray: an icon and two short lines.
+const _trayHeight = 70.0;
+
+class _EmptySlot extends StatelessWidget {
+  const _EmptySlot();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: _trayHeight,
+    decoration: BoxDecoration(
+      color: AppColors.slotFill,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: AppColors.slotBorder, width: 2),
+    ),
+  );
+}
+
+/// A card in the docked tray: its icon and the start of its text; red when the check found it
+/// unsafe, green once the step is passed.
+class _TrayChip extends StatelessWidget {
+  const _TrayChip(this.ctx, {required this.id});
+
+  final _TaskContext ctx;
+  final String id;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = ctx.board.items[id];
+    if (item == null) return const SizedBox.shrink();
+    final wrong = ctx.board.wrongItems.contains(id);
+    final done = ctx.board.locked;
+    final (fill, edge, ink) = wrong
+        ? (AppColors.wrongFill, AppColors.wrongBorder, const Color(0xFF9F1239))
+        : done
+        ? (const Color(0xFFF0FDF4), const Color(0xFF86EFAC), const Color(0xFF166534))
+        : (Colors.white, AppColors.chipBorder, AppColors.ink);
+    final text = withoutLeadingEmoji(item.text);
+    return Semantics(
+      button: true,
+      label: text,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: ctx.frozen ? null : () => ctx.tapCard(id),
+        child: Container(
+          height: _trayHeight,
+          padding: const EdgeInsets.all(5),
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: fill,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: edge, width: 2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (wrong || done)
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: wrong ? AppColors.danger : AppColors.success,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    wrong ? Icons.close_rounded : Icons.check_rounded,
+                    size: 15,
+                    color: Colors.white,
+                  ),
+                )
+              else
+                _KindIcon(cardKindOf(item.text), size: 22),
+              const SizedBox(height: 3),
+              Expanded(
+                child: Text(
+                  text,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11, height: 1.25, color: ink),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
