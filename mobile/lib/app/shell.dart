@@ -8,7 +8,7 @@ import '../l10n/generated/app_localizations.dart';
 import 'sfx.dart';
 import 'theme.dart';
 
-/// His tab bar under the roster, the ward and the settings. Android BACK on another tab goes to
+/// His tab bar under the roster, the ward, the progress page and the settings. Android BACK on another tab goes to
 /// the roster first; BACK on the roster leaves the app.
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key, required this.shell});
@@ -72,6 +72,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               icon: const Icon(Icons.bed_outlined),
               selectedIcon: const Icon(Icons.bed_rounded, color: AppColors.sky600),
               label: l.tabWard,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.emoji_events_outlined),
+              selectedIcon: const Icon(Icons.emoji_events_rounded, color: AppColors.sky600),
+              label: l.tabProgress,
             ),
             NavigationDestination(
               icon: const Icon(Icons.tune_outlined),

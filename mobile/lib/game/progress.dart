@@ -37,9 +37,10 @@ class BedRecord {
       BedRecord(passed: j['passed'] == true, stars: (j['stars'] as num?)?.toInt() ?? 0);
 }
 
-/// His `PlayerStats` (play time and shifts come with the roster).
+/// His `PlayerStats`. Shifts worked are counted by the roster.
 class PlayerStats {
   const PlayerStats({
+    this.totalPlaySeconds = 0,
     this.totalCompletedCases = 0,
     this.perfectCases = 0,
     this.emergencyCasesDone = 0,
@@ -48,6 +49,8 @@ class PlayerStats {
     this.stepsWithoutMistake = 0,
   });
 
+  /// Time with the app open in the foreground (his playtime tracker).
+  final int totalPlaySeconds;
   final int totalCompletedCases;
   final int perfectCases;
   final int emergencyCasesDone;
@@ -56,6 +59,7 @@ class PlayerStats {
   final int stepsWithoutMistake;
 
   static const _keys = [
+    'totalPlaySeconds',
     'totalCompletedCases',
     'perfectCases',
     'emergencyCasesDone',
@@ -65,6 +69,7 @@ class PlayerStats {
   ];
 
   List<int> get _values => [
+    totalPlaySeconds,
     totalCompletedCases,
     perfectCases,
     emergencyCasesDone,
@@ -78,6 +83,7 @@ class PlayerStats {
   factory PlayerStats.fromJson(Map<String, Object?> j) {
     int v(String k) => (j[k] as num?)?.toInt() ?? 0;
     return PlayerStats(
+      totalPlaySeconds: v('totalPlaySeconds'),
       totalCompletedCases: v('totalCompletedCases'),
       perfectCases: v('perfectCases'),
       emergencyCasesDone: v('emergencyCasesDone'),
@@ -139,6 +145,7 @@ class Progress {
         r.bedNum: BedRecord(passed: true, stars: best),
       },
       stats: PlayerStats(
+        totalPlaySeconds: s.totalPlaySeconds,
         totalCompletedCases: s.totalCompletedCases + 1,
         perfectCases: s.perfectCases + (r.stars == 3 ? 1 : 0),
         emergencyCasesDone: s.emergencyCasesDone + (r.isEmergency ? 1 : 0),
@@ -151,6 +158,23 @@ class Progress {
       progress: next,
       gainedStars: best - before.stars,
       levelUp: next.level > level ? next.level : null,
+    );
+  }
+
+  /// [seconds] more play time.
+  Progress played(int seconds) {
+    final s = stats;
+    return Progress(
+      beds: beds,
+      stats: PlayerStats(
+        totalPlaySeconds: s.totalPlaySeconds + seconds,
+        totalCompletedCases: s.totalCompletedCases,
+        perfectCases: s.perfectCases,
+        emergencyCasesDone: s.emergencyCasesDone,
+        replayedCases: s.replayedCases,
+        trayItemsSorted: s.trayItemsSorted,
+        stepsWithoutMistake: s.stepsWithoutMistake,
+      ),
     );
   }
 

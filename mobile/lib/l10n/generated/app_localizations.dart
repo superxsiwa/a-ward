@@ -949,6 +949,114 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'กลับตารางเวร'**
   String get backToRoster;
+
+  /// No description provided for @tabProgress.
+  ///
+  /// In th, this message translates to:
+  /// **'ความก้าวหน้า'**
+  String get tabProgress;
+
+  /// No description provided for @progressTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ความก้าวหน้า & เป้าหมาย (Milestones)'**
+  String get progressTitle;
+
+  /// No description provided for @ringOf.
+  ///
+  /// In th, this message translates to:
+  /// **'จาก {max} ดาวเตียง'**
+  String ringOf(int max);
+
+  /// No description provided for @progressHint.
+  ///
+  /// In th, this message translates to:
+  /// **'ผ่านแล้ว {passed} / {total} เตียง · ดาวสะสมรวมทั้งหมด {grand} ⭐'**
+  String progressHint(int passed, int total, int grand);
+
+  /// No description provided for @statHours.
+  ///
+  /// In th, this message translates to:
+  /// **'ชั่วโมงบิน CCU'**
+  String get statHours;
+
+  /// No description provided for @minutesShort.
+  ///
+  /// In th, this message translates to:
+  /// **'{minutes} น.'**
+  String minutesShort(int minutes);
+
+  /// No description provided for @hoursShort.
+  ///
+  /// In th, this message translates to:
+  /// **'{hours} ชม.'**
+  String hoursShort(String hours);
+
+  /// No description provided for @statCases.
+  ///
+  /// In th, this message translates to:
+  /// **'หัตถการสำเร็จ'**
+  String get statCases;
+
+  /// No description provided for @timesCount.
+  ///
+  /// In th, this message translates to:
+  /// **'{count} ครั้ง'**
+  String timesCount(int count);
+
+  /// No description provided for @statMilestones.
+  ///
+  /// In th, this message translates to:
+  /// **'ดาว Milestone'**
+  String get statMilestones;
+
+  /// No description provided for @milestoneStarsOf.
+  ///
+  /// In th, this message translates to:
+  /// **'{stars} / {max} ⭐'**
+  String milestoneStarsOf(int stars, int max);
+
+  /// No description provided for @goalsTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'🏆 เป้าหมายสะสมดาว (Goals & Milestones)'**
+  String get goalsTitle;
+
+  /// No description provided for @goalsSub.
+  ///
+  /// In th, this message translates to:
+  /// **'ทำครบเงื่อนไขเพื่อรับดาวเพิ่ม'**
+  String get goalsSub;
+
+  /// No description provided for @goalNow.
+  ///
+  /// In th, this message translates to:
+  /// **'ปัจจุบัน:'**
+  String get goalNow;
+
+  /// No description provided for @goalNext.
+  ///
+  /// In th, this message translates to:
+  /// **'เป้าดาวถัดไป ({stars}⭐): {target}'**
+  String goalNext(int stars, String target);
+
+  /// No description provided for @goalMax.
+  ///
+  /// In th, this message translates to:
+  /// **'✓ ได้ครบ 3 ดาวแล้ว!'**
+  String get goalMax;
+
+  /// No description provided for @hoursValue.
+  ///
+  /// In th, this message translates to:
+  /// **'{hours} ชม. ({minutes} นาที)'**
+  String hoursValue(String hours, int minutes);
+
+  /// Ours: the screen reader label of his XP bar.
+  ///
+  /// In th, this message translates to:
+  /// **'EXP สู่เลเวลถัดไป {percent}%'**
+  String expBar(int percent);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

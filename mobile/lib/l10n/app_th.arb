@@ -415,5 +415,102 @@
   "backToRoster": "กลับตารางเวร",
   "@backToRoster": {
     "description": "Ours."
+  },
+  "tabProgress": "ความก้าวหน้า",
+  "progressTitle": "ความก้าวหน้า & เป้าหมาย (Milestones)",
+  "ringOf": "จาก {max} ดาวเตียง",
+  "@ringOf": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "progressHint": "ผ่านแล้ว {passed} / {total} เตียง · ดาวสะสมรวมทั้งหมด {grand} ⭐",
+  "@progressHint": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "grand": {
+        "type": "int"
+      }
+    }
+  },
+  "statHours": "ชั่วโมงบิน CCU",
+  "minutesShort": "{minutes} น.",
+  "@minutesShort": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursShort": "{hours} ชม.",
+  "@hoursShort": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "statCases": "หัตถการสำเร็จ",
+  "timesCount": "{count} ครั้ง",
+  "@timesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statMilestones": "ดาว Milestone",
+  "milestoneStarsOf": "{stars} / {max} ⭐",
+  "@milestoneStarsOf": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "goalsTitle": "🏆 เป้าหมายสะสมดาว (Goals & Milestones)",
+  "goalsSub": "ทำครบเงื่อนไขเพื่อรับดาวเพิ่ม",
+  "goalNow": "ปัจจุบัน:",
+  "goalNext": "เป้าดาวถัดไป ({stars}⭐): {target}",
+  "@goalNext": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "goalMax": "✓ ได้ครบ 3 ดาวแล้ว!",
+  "hoursValue": "{hours} ชม. ({minutes} นาที)",
+  "@hoursValue": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "expBar": "EXP สู่เลเวลถัดไป {percent}%",
+  "@expBar": {
+    "description": "Ours: the screen reader label of his XP bar.",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   }
 }
