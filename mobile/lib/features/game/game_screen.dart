@@ -654,15 +654,11 @@ class _Dock extends StatelessWidget {
         onTap: onGoOn,
       );
     } else {
-      main = Center(
-        child: Text(
-          l.allStepsDone,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF16A34A),
-            fontSize: 14,
-          ),
-        ),
+      // A Center here would take the whole screen height inside the bar's Row.
+      main = Text(
+        l.allStepsDone,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF16A34A), fontSize: 14),
       );
     }
     return Padding(

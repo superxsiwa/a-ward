@@ -90,6 +90,9 @@ void main() {
 
     expect(find.text('เสร็จสิ้นเคส!'), findsOneWidget);
     expect(find.text('สุดยอด! ตอบเป๊ะทุกข้อ ได้ครบ 3 ดาวเลย'), findsOneWidget);
+    // Behind the dialog the page keeps its height; the last step's bottom bar once took the
+    // whole screen (walk finding F1).
+    expect(tester.getSize(find.byType(SingleChildScrollView).first).height, greaterThan(400));
   });
 
   testWidgets('a wrong pick shows strike 1/3 and the reason, and costs a star', (tester) async {
