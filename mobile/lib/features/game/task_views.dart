@@ -127,7 +127,7 @@ class _TaskCard extends StatelessWidget {
           style: const TextStyle(
             fontFamily: displayFont,
             fontWeight: FontWeight.w600,
-            fontSize: 14,
+            fontSize: 15.5,
             height: 1.45,
           ),
         ),
@@ -210,11 +210,7 @@ class _OptionRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     option.text,
-                    style: const TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
-                    ),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, height: 1.4),
                   ),
                 ),
               ],
@@ -274,7 +270,7 @@ class _Pool extends StatelessWidget {
                 ? Center(
                     child: Text(
                       l.poolEmpty,
-                      style: const TextStyle(fontSize: 12.5, color: AppColors.ink3),
+                      style: const TextStyle(fontSize: 14, color: AppColors.ink3),
                     ),
                   )
                 : Wrap(
@@ -285,7 +281,7 @@ class _Pool extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(hint, style: const TextStyle(fontSize: 11.5, height: 1.5, color: AppColors.ink3)),
+        Text(hint, style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.ink3)),
       ],
     );
   }
@@ -331,7 +327,7 @@ class _Slots extends StatelessWidget {
                       child: id == null
                           ? Text(
                               l.slotPlaceholder,
-                              style: const TextStyle(fontSize: 12, color: AppColors.ink3),
+                              style: const TextStyle(fontSize: 13.5, color: AppColors.ink3),
                             )
                           : _CardChip(ctx, id: id, expand: true),
                     ),
@@ -387,7 +383,7 @@ class _TrayBox extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: displayFont,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: 15,
                           color: ink,
                         ),
                       ),
@@ -401,7 +397,10 @@ class _TrayBox extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 child: cards.isEmpty
                     ? Center(
-                        child: Text(l.trayPlaceholder, style: TextStyle(fontSize: 12, color: ink)),
+                        child: Text(
+                          l.trayPlaceholder,
+                          style: TextStyle(fontSize: 13.5, color: ink),
+                        ),
                       )
                     : Wrap(
                         spacing: 10,
@@ -465,7 +464,7 @@ class _DropBox extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: displayFont,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 15,
                         color: AppColors.sterileInk,
                       ),
                     ),
@@ -481,7 +480,7 @@ class _DropBox extends StatelessWidget {
                   ? Center(
                       child: Text(
                         l.dropBoxPlaceholder,
-                        style: const TextStyle(fontSize: 12, color: AppColors.sterileInk),
+                        style: const TextStyle(fontSize: 13.5, color: AppColors.sterileInk),
                       ),
                     )
                   : Column(
@@ -617,7 +616,7 @@ class _CardFace extends StatelessWidget {
                 Text(
                   item.text,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 10.5, height: 1.25, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 12, height: 1.25, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -653,7 +652,7 @@ class _CardFace extends StatelessWidget {
             Flexible(
               child: Text(
                 item.text,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, height: 1.4),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, height: 1.4),
               ),
             ),
           ],
@@ -729,7 +728,7 @@ class _CountPill extends StatelessWidget {
     decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(99)),
     child: Text(
       text,
-      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+      style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600, color: Colors.white),
     ),
   );
 }

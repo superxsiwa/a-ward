@@ -341,7 +341,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
               Text(s.bed.bedCode),
               Text(
                 s.bed.caseTitle,
-                style: const TextStyle(fontFamily: bodyFont, fontSize: 12, color: AppColors.ink2),
+                style: const TextStyle(fontFamily: bodyFont, fontSize: 13.5, color: AppColors.ink2),
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -502,7 +502,7 @@ class _StepDot extends StatelessWidget {
                 style: TextStyle(
                   fontFamily: displayFont,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13.5,
+                  fontSize: 15,
                   color: ink,
                 ),
               ),
@@ -530,12 +530,12 @@ class _StepHead extends StatelessWidget {
           style: const TextStyle(
             fontFamily: displayFont,
             fontWeight: FontWeight.w600,
-            fontSize: 19,
+            fontSize: 20,
           ),
         ),
         Text(
           l.stepOf(session.stepIndex + 1, session.bed.stages.length),
-          style: const TextStyle(fontSize: 12, color: AppColors.ink3),
+          style: const TextStyle(fontSize: 13.5, color: AppColors.ink3),
         ),
         _Pill(
           text: '🎮 ${session.stage.mechanic}',
@@ -641,7 +641,7 @@ class _ReadingState extends State<_Reading> {
                       style: const TextStyle(
                         fontFamily: displayFont,
                         fontWeight: FontWeight.w600,
-                        fontSize: 13.5,
+                        fontSize: 15,
                         color: AppColors.readingInk,
                       ),
                     ),
@@ -664,7 +664,7 @@ class _ReadingState extends State<_Reading> {
                   child: Text(
                     widget.text,
                     style: const TextStyle(
-                      fontSize: 13,
+                      fontSize: 15,
                       height: 1.65,
                       color: AppColors.readingBody,
                     ),
@@ -724,7 +724,11 @@ class _Dock extends StatelessWidget {
       main = Text(
         l.allStepsDone,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF16A34A), fontSize: 14),
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF16A34A),
+          fontSize: 15.5,
+        ),
       );
     }
     return Padding(
@@ -825,13 +829,10 @@ class _FeedbackPanel extends StatelessWidget {
                         style: const TextStyle(
                           fontFamily: displayFont,
                           fontWeight: FontWeight.w600,
-                          fontSize: 17,
+                          fontSize: 18,
                         ),
                       ),
-                      Text(
-                        panel.sub,
-                        style: const TextStyle(fontSize: 12.5, color: AppColors.ink2),
-                      ),
+                      Text(panel.sub, style: const TextStyle(fontSize: 14, color: AppColors.ink2)),
                     ],
                   ),
                 ),
@@ -850,7 +851,7 @@ class _FeedbackPanel extends StatelessWidget {
                       '•  ',
                       style: TextStyle(color: accent, fontWeight: FontWeight.w700),
                     ),
-                    Expanded(child: Text(e, style: const TextStyle(fontSize: 13))),
+                    Expanded(child: Text(e, style: const TextStyle(fontSize: 15))),
                   ],
                 ),
               ),
@@ -973,7 +974,7 @@ class _ResultDialog extends StatelessWidget {
                 ? l.caseDoneGained(outcome.gainedStars)
                 : l.caseDoneReplay,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 15.5),
           ),
           if (outcome.levelUp case final level?) ...[
             const SizedBox(height: 10),
@@ -1066,7 +1067,7 @@ class GameButton extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: displayFont,
                       fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                      fontSize: 16,
                       color: Colors.white,
                     ),
                   ),
@@ -1122,7 +1123,7 @@ class _GhostButton extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: displayFont,
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 15.5,
                         color: ink,
                       ),
                     ),
