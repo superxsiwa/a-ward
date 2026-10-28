@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
 import '../features/game/game_screen.dart';
+import '../features/progress/progress_screen.dart';
 import '../features/roster/roster_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/sheets/sheets_screen.dart';
 import '../features/ward/ward_screen.dart';
 import '../l10n/generated/app_localizations.dart';
+import 'play_clock.dart';
 import 'shell.dart';
 import 'theme.dart';
 
@@ -24,6 +26,9 @@ GoRouter _buildRouter() => GoRouter(
         ),
         StatefulShellBranch(
           routes: [GoRoute(path: '/ward', builder: (context, state) => const WardScreen())],
+        ),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/progress', builder: (context, state) => const ProgressScreen())],
         ),
         StatefulShellBranch(
           routes: [GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen())],
@@ -82,7 +87,7 @@ class _CriticalCareAppState extends State<CriticalCareApp> {
       GlobalCupertinoLocalizations.delegate,
     ],
     debugShowCheckedModeBanner: false,
-    builder: (context, child) => _WideScreenText(child: child!),
+    builder: (context, child) => PlayClock(child: _WideScreenText(child: child!)),
   );
 }
 

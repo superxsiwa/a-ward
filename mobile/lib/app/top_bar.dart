@@ -14,12 +14,16 @@ const contentMaxWidth = 1000.0;
 double contentInset(double width) =>
     width > contentMaxWidth + 24 ? (width - contentMaxWidth - 24) / 2 : 0.0;
 
-/// His top bar on the tab screens: the app, the player's level and rank, and the star count.
+/// His top bar on the tab screens: the app, the player's level and rank with his EXP bar (the
+/// stars towards the next level), and the star count.
 class PlayerBar extends ConsumerWidget implements PreferredSizeWidget {
   const PlayerBar({super.key});
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(_height);
+
+  /// Room for three lines (title, level, EXP) at larger phone text sizes.
+  static const _height = kToolbarHeight + 8;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +31,12 @@ class PlayerBar extends ConsumerWidget implements PreferredSizeWidget {
     final progress = ref.watch(progressProvider).value ?? Progress.empty;
     final beds = ref.watch(bundledCasesProvider).value?.length ?? 8;
     final inset = contentInset(MediaQuery.sizeOf(context).width);
+    final max = beds * 3;
+    final stars = progress.totalStars;
+    // His `xp`: one level per 3 stars, full once every bed has 3.
+    final exp = max > 0 && stars >= max ? 1.0 : (stars % 3) / 3;
     return AppBar(
+      toolbarHeight: _height,
       // On wide screens the title and the star count line up with the centred column.
       titleSpacing: 16 + inset,
       title: Column(
@@ -38,10 +47,27 @@ class PlayerBar extends ConsumerWidget implements PreferredSizeWidget {
             l.levelRank(progress.level, progress.rank),
             style: const TextStyle(fontFamily: bodyFont, fontSize: 13.5, color: AppColors.ink2),
           ),
+          const SizedBox(height: 3),
+          Semantics(
+            label: l.expBar((exp * 100).round()),
+            excludeSemantics: true,
+            child: SizedBox(
+              width: 150,
+              height: 6,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: LinearProgressIndicator(
+                  value: exp,
+                  backgroundColor: AppColors.stepIdle,
+                  color: AppColors.gold,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       actions: [
-        _StarPill(stars: progress.totalStars, max: beds * 3, l: l),
+        _StarPill(stars: stars, max: max, l: l),
         SizedBox(width: 12 + inset),
       ],
     );

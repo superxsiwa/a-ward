@@ -101,11 +101,21 @@ class ProgressNotifier extends AsyncNotifier<Progress> {
 
   /// Saves a finished case and says what it changed.
   Future<RecordOutcome> record(CaseResult result) async {
-    final current = state.value ?? await future;
+    if (state.value == null) await future;
+    final current = state.value ?? Progress.empty;
     final outcome = current.record(result);
     state = AsyncData(outcome.progress);
     await ref.read(progressStoreProvider).save(outcome.progress);
     return outcome;
+  }
+
+  /// Adds play time (the play clock calls it every few seconds).
+  Future<void> addPlayTime(int seconds) async {
+    if (state.value == null) await future;
+    final current = state.value ?? Progress.empty;
+    final next = current.played(seconds);
+    state = AsyncData(next);
+    await ref.read(progressStoreProvider).save(next);
   }
 
   /// "Reset progress" in settings: every bed and counter back to zero.

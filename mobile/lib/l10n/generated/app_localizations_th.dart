@@ -501,4 +501,76 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get backToRoster => 'กลับตารางเวร';
+
+  @override
+  String get tabProgress => 'ความก้าวหน้า';
+
+  @override
+  String get progressTitle => 'ความก้าวหน้า & เป้าหมาย (Milestones)';
+
+  @override
+  String ringOf(int max) {
+    return 'จาก $max ดาวเตียง';
+  }
+
+  @override
+  String progressHint(int passed, int total, int grand) {
+    return 'ผ่านแล้ว $passed / $total เตียง · ดาวสะสมรวมทั้งหมด $grand ⭐';
+  }
+
+  @override
+  String get statHours => 'ชั่วโมงบิน CCU';
+
+  @override
+  String minutesShort(int minutes) {
+    return '$minutes น.';
+  }
+
+  @override
+  String hoursShort(String hours) {
+    return '$hours ชม.';
+  }
+
+  @override
+  String get statCases => 'หัตถการสำเร็จ';
+
+  @override
+  String timesCount(int count) {
+    return '$count ครั้ง';
+  }
+
+  @override
+  String get statMilestones => 'ดาว Milestone';
+
+  @override
+  String milestoneStarsOf(int stars, int max) {
+    return '$stars / $max ⭐';
+  }
+
+  @override
+  String get goalsTitle => '🏆 เป้าหมายสะสมดาว (Goals & Milestones)';
+
+  @override
+  String get goalsSub => 'ทำครบเงื่อนไขเพื่อรับดาวเพิ่ม';
+
+  @override
+  String get goalNow => 'ปัจจุบัน:';
+
+  @override
+  String goalNext(int stars, String target) {
+    return 'เป้าดาวถัดไป ($stars⭐): $target';
+  }
+
+  @override
+  String get goalMax => '✓ ได้ครบ 3 ดาวแล้ว!';
+
+  @override
+  String hoursValue(String hours, int minutes) {
+    return '$hours ชม. ($minutes นาที)';
+  }
+
+  @override
+  String expBar(int percent) {
+    return 'EXP สู่เลเวลถัดไป $percent%';
+  }
 }
