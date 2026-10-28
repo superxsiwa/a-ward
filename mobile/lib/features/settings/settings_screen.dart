@@ -80,6 +80,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (ok != true) return;
     await ref.read(progressProvider.notifier).reset();
+    await ref.read(rosterProvider.notifier).reset();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.resetDone)));
     }

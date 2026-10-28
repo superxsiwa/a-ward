@@ -1,13 +1,10 @@
 // Plays bed 01 through the real screens with taps only, the way a player without drag would.
 
-import 'package:criticalcare/app/app.dart';
 import 'package:criticalcare/app/sfx.dart';
-import 'package:criticalcare/data/progress_store.dart';
-import 'package:criticalcare/data/providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/app.dart';
 import '../support/cases.dart';
 import '../support/fake_store.dart';
 
@@ -24,20 +21,8 @@ void main() {
   Future<void> openBed01(WidgetTester tester) async {
     store = MemoryProgressStore();
     sfx = SilentSfx();
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 2.625;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
-          progressStoreProvider.overrideWithValue(store),
-          sfxProvider.overrideWithValue(sfx),
-        ],
-        child: const CriticalCareApp(),
-      ),
-    );
-    await tester.pump();
+    await pumpApp(tester, store: store, sfx: sfx);
+    await openTab(tester, 'วอร์ด');
     await tester.tap(find.text(b.caseTitle));
     await settle(tester);
   }
@@ -46,57 +31,7 @@ void main() {
     await openBed01(tester);
     expect(find.text('ขั้นที่ 1/6'), findsOneWidget);
 
-    // Step 1: pick the three checks, then fill the slots in order.
-    for (final id in ['fc1', 'fc2', 'fc3']) {
-      await tapText(tester, option(id));
-    }
-    for (final id in ['fs1', 'fs2', 'fs3', 'fs4']) {
-      await tapText(tester, card(0, id));
-    }
-    await checkAndGoOn(tester);
-
-    // Step 2: pick each card up and tap its tray; the countdown runs.
-    expect(find.textContaining('⏱️'), findsOneWidget);
-    for (final (ids, t) in [
-      (['fe1', 'fe2', 'fe3', 'fe4'], 'ftr1'),
-      (['fe5', 'fe6', 'fe7'], 'ftr2'),
-    ]) {
-      for (final id in ids) {
-        await tapText(tester, card(1, id));
-        await tapText(tester, tray(1, t));
-      }
-    }
-    await checkAndGoOn(tester);
-    expect(find.textContaining('⏱️'), findsNothing);
-
-    // Step 3: the same, in order.
-    for (final (ids, t) in [
-      (['fd1', 'fd2', 'fd3'], 'fdtr1'),
-      (['fd4', 'fd5', 'fd6'], 'fdtr2'),
-    ]) {
-      for (final id in ids) {
-        await tapText(tester, card(2, id));
-        await tapText(tester, tray(2, t));
-      }
-    }
-    await checkAndGoOn(tester);
-
-    // Step 4: tap the four safe actions into the box.
-    for (final id in ['fa1', 'fa2', 'fa3', 'fa4']) {
-      await tapText(tester, card(3, id));
-    }
-    await checkAndGoOn(tester);
-
-    // Steps 5 and 6: sequences.
-    for (final id in ['fp1', 'fp2', 'fp3', 'fp4']) {
-      await tapText(tester, card(4, id));
-    }
-    await checkAndGoOn(tester);
-    for (final id in ['fis1', 'fis2', 'fis3', 'fis4']) {
-      await tapText(tester, card(5, id));
-    }
-    await tapText(tester, 'ตรวจคำตอบ');
-    await settle(tester);
+    await playBed01Perfectly(tester);
 
     expect(find.text('เสร็จสิ้นเคส!'), findsOneWidget);
     expect(find.text('สุดยอด! ตอบเป๊ะทุกข้อ ได้ครบ 3 ดาวเลย'), findsOneWidget);
@@ -194,24 +129,71 @@ void main() {
 
 /// Pumps long enough for routes, dialogs and panels to finish moving. The ECG and the step
 /// timer never settle, so pumpAndSettle cannot be used.
-Future<void> settle(WidgetTester tester) async {
-  for (var i = 0; i < 6; i++) {
-    await tester.pump(const Duration(milliseconds: 100));
-  }
-}
-
-Future<void> tapText(WidgetTester tester, String text) async {
-  final f = find.text(text).last;
-  await tester.ensureVisible(f);
-  await tester.pump();
-  await tester.tap(f);
-  await tester.pump();
-}
-
 Future<void> checkAndGoOn(WidgetTester tester) async {
   await tapText(tester, 'ตรวจคำตอบ');
   await settle(tester);
   expect(find.text('ผ่านขั้นตอนนี้แล้ว ถูกต้องตามหลักความปลอดภัย'), findsOneWidget);
   await tapText(tester, 'ไปต่อ');
+  await settle(tester);
+}
+
+/// Plays bed 01 from its first step to the result dialog without a mistake, by taps only.
+Future<void> playBed01Perfectly(WidgetTester tester) async {
+  final b = bed(1);
+  String card(int step, String id) => b.stages[step].pool.firstWhere((p) => p.id == id).text;
+  String option(String id) => b.stages[0].choices!.options.firstWhere((o) => o.id == id).text;
+  String tray(int step, String id) =>
+      b.stages[step].trays!.trays.firstWhere((t) => t.id == id).displayName;
+
+  // Step 1: pick the three checks, then fill the slots in order.
+  for (final id in ['fc1', 'fc2', 'fc3']) {
+    await tapText(tester, option(id));
+  }
+  for (final id in ['fs1', 'fs2', 'fs3', 'fs4']) {
+    await tapText(tester, card(0, id));
+  }
+  await checkAndGoOn(tester);
+
+  // Step 2: pick each card up and tap its tray; the countdown runs.
+  expect(find.textContaining('⏱️'), findsOneWidget);
+  for (final (ids, t) in [
+    (['fe1', 'fe2', 'fe3', 'fe4'], 'ftr1'),
+    (['fe5', 'fe6', 'fe7'], 'ftr2'),
+  ]) {
+    for (final id in ids) {
+      await tapText(tester, card(1, id));
+      await tapText(tester, tray(1, t));
+    }
+  }
+  await checkAndGoOn(tester);
+  expect(find.textContaining('⏱️'), findsNothing);
+
+  // Step 3: the same, in order.
+  for (final (ids, t) in [
+    (['fd1', 'fd2', 'fd3'], 'fdtr1'),
+    (['fd4', 'fd5', 'fd6'], 'fdtr2'),
+  ]) {
+    for (final id in ids) {
+      await tapText(tester, card(2, id));
+      await tapText(tester, tray(2, t));
+    }
+  }
+  await checkAndGoOn(tester);
+
+  // Step 4: tap the four safe actions into the box.
+  for (final id in ['fa1', 'fa2', 'fa3', 'fa4']) {
+    await tapText(tester, card(3, id));
+  }
+  await checkAndGoOn(tester);
+
+  // Steps 5 and 6: sequences.
+  for (final id in ['fp1', 'fp2', 'fp3', 'fp4']) {
+    await tapText(tester, card(4, id));
+  }
+  await checkAndGoOn(tester);
+  for (final id in ['fis1', 'fis2', 'fis3', 'fis4']) {
+    await tapText(tester, card(5, id));
+  }
+  await tapText(tester, 'ตรวจคำตอบ');
   await settle(tester);
 }

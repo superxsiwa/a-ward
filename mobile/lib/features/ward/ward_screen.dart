@@ -2,84 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/sfx.dart';
 import '../../app/theme.dart';
+import '../../app/top_bar.dart';
 import '../../data/progress_store.dart';
 import '../../data/providers.dart';
 import '../../game/case_model.dart';
 import '../../game/progress.dart';
+import '../../game/roster.dart';
 import '../../game/rules.dart';
 import '../../l10n/generated/app_localizations.dart';
-import '../about/about_screen.dart';
 import '../game/monitor.dart';
 
 /// The 8-bed CCU ward, after superxsiwa's WardPage: a banner with "start" / "continue", the bed
-/// cards with their monitor, patient, status and stars, and the nurse station between bays.
-/// The ward's column width on wide screens (the bar and the beds share it).
-const wardMaxWidth = 1000.0;
-
-class WardScreen extends ConsumerStatefulWidget {
+/// cards with their monitor, patient, status and stars, and the nurse station between bays. On
+/// duty from the roster, the shift's beds stand out and the others fade (his ward filter).
+class WardScreen extends ConsumerWidget {
   const WardScreen({super.key});
 
   @override
-  ConsumerState<WardScreen> createState() => _WardScreenState();
-}
-
-class _WardScreenState extends ConsumerState<WardScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _noticeOnce());
-  }
-
-  /// The "for training only" notice, once per device.
-  Future<void> _noticeOnce() async {
-    final store = ref.read(progressStoreProvider);
-    if (await store.noticeSeen() || !mounted) return;
-    final l = AppLocalizations.of(context);
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: const TrainingNotice(),
-        actions: [FilledButton(onPressed: () => Navigator.pop(context), child: Text(l.noticeOk))],
-      ),
-    );
-    await store.markNoticeSeen();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final cases = ref.watch(bundledCasesProvider);
-    final width = MediaQuery.sizeOf(context).width;
-    final inset = width > wardMaxWidth + 24 ? (width - wardMaxWidth - 24) / 2 : 0.0;
     final progress = ref.watch(progressProvider).value ?? Progress.empty;
+    final roster = ref.watch(rosterProvider).value ?? Roster.empty;
+    final duty = ref.watch(dutyProvider);
     return Scaffold(
-      appBar: AppBar(
-        // On wide screens the bar's title and buttons line up with the ward's centred column.
-        titleSpacing: 16 + inset,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l.appTitle),
-            Text(
-              l.levelRank(progress.level, progress.rank),
-              style: const TextStyle(fontFamily: bodyFont, fontSize: 13.5, color: AppColors.ink2),
-            ),
-          ],
-        ),
-        actions: [
-          _StarPill(stars: progress.totalStars, max: (cases.value?.length ?? 8) * 3, l: l),
-          IconButton(
-            tooltip: l.settingsTitle,
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () => context.push('/settings'),
-          ),
-          SizedBox(width: inset),
-        ],
-      ),
+      appBar: const PlayerBar(),
       body: switch (cases) {
-        AsyncData(:final value) => _Ward(cases: value, progress: progress, l: l),
+        AsyncData(:final value) => _Ward(
+          cases: value,
+          progress: progress,
+          roster: roster,
+          duty: duty,
+          l: l,
+          onEndDuty: () {
+            ref.read(sfxProvider).play(Sound.pick);
+            ref.read(dutyProvider.notifier).end();
+          },
+        ),
         AsyncError() => Center(child: Text(l.casesLoadError)),
         _ => const Center(child: CircularProgressIndicator()),
       },
@@ -88,19 +49,39 @@ class _WardScreenState extends ConsumerState<WardScreen> {
 }
 
 class _Ward extends StatelessWidget {
-  const _Ward({required this.cases, required this.progress, required this.l});
+  const _Ward({
+    required this.cases,
+    required this.progress,
+    required this.roster,
+    required this.duty,
+    required this.l,
+    required this.onEndDuty,
+  });
 
   final List<BedCase> cases;
   final Progress progress;
+  final Roster roster;
+  final Duty? duty;
   final AppLocalizations l;
+  final VoidCallback onEndDuty;
 
   @override
   Widget build(BuildContext context) {
-    final next = progress.nextBed([for (final c in cases) c.bedNum]);
+    final bedNums = [for (final c in cases) c.bedNum];
+    final duty = this.duty;
+    final dutyBeds = duty?.shift.bedsIn(bedNums);
+    final next =
+        (duty == null ? null : roster.nextDutyBed(duty, bedNums)) ?? progress.nextBed(bedNums);
     void open(int bedNum) => context.push('/bed/$bedNum');
     final cards = [
       for (final c in cases)
-        _BedCard(bedCase: c, record: progress.bed(c.bedNum), l: l, onTap: () => open(c.bedNum)),
+        _BedCard(
+          bedCase: c,
+          record: progress.bed(c.bedNum),
+          faded: dutyBeds != null && !dutyBeds.contains(c.bedNum),
+          l: l,
+          onTap: () => open(c.bedNum),
+        ),
     ];
     final station = _Station(cases: cases, progress: progress, l: l);
     return LayoutBuilder(
@@ -128,7 +109,7 @@ class _Ward extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: wardMaxWidth),
+              constraints: const BoxConstraints(maxWidth: contentMaxWidth),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -138,6 +119,16 @@ class _Ward extends StatelessWidget {
                     label: progress.passedCount == 0 ? l.startNow : l.continuePlay,
                     onStart: next == null ? null : () => open(next),
                   ),
+                  if (duty != null) ...[
+                    const SizedBox(height: 10),
+                    _DutyBanner(
+                      duty: duty,
+                      beds: dutyBeds!,
+                      done: roster.counts(duty) ? roster.doneOn(duty.month, duty.day) : null,
+                      l: l,
+                      onEnd: onEndDuty,
+                    ),
+                  ],
                   const SizedBox(height: 14),
                   ...rows(cards.sublist(0, half)),
                   station,
@@ -149,6 +140,71 @@ class _Ward extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// His `ward-filter-banner`: the shift on duty, its beds, today's count, and "show all beds".
+class _DutyBanner extends StatelessWidget {
+  const _DutyBanner({
+    required this.duty,
+    required this.beds,
+    required this.done,
+    required this.l,
+    required this.onEnd,
+  });
+
+  final Duty duty;
+  final List<int> beds;
+
+  /// The beds finished on the duty day; null when the day no longer counts (a review).
+  final Set<int>? done;
+  final AppLocalizations l;
+  final VoidCallback onEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final done = this.done;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.bubbleBorder, width: 2),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l.dutyTitle('${duty.shift.icon} ${duty.shift.name}'),
+                  style: const TextStyle(
+                    fontFamily: displayFont,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.readingInk,
+                  ),
+                ),
+                Text(
+                  l.dutyBeds(beds.map((n) => l.bedNo('$n')).join(', ')),
+                  style: const TextStyle(fontSize: 12.5, color: AppColors.readingBody),
+                ),
+                if (done != null)
+                  Text(
+                    l.dutyToday(duty.day, beds.where(done.contains).length, beds.length),
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.goldEdge,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          TextButton(onPressed: onEnd, child: Text(l.showAllBeds)),
+        ],
+      ),
     );
   }
 }
@@ -226,12 +282,16 @@ class _BedCard extends StatelessWidget {
   const _BedCard({
     required this.bedCase,
     required this.record,
+    required this.faded,
     required this.l,
     required this.onTap,
   });
 
   final BedCase bedCase;
   final BedRecord record;
+
+  /// Not one of the duty shift's beds: dimmed but still playable.
+  final bool faded;
   final AppLocalizations l;
   final VoidCallback onTap;
 
@@ -257,7 +317,7 @@ class _BedCard extends StatelessWidget {
             ),
           };
     final vitals = bedCase.stages.first.vitals;
-    return Semantics(
+    final card = Semantics(
       button: true,
       label: '${bedCase.bedCode} ${bedCase.caseTitle}',
       excludeSemantics: true,
@@ -366,6 +426,7 @@ class _BedCard extends StatelessWidget {
         ),
       ),
     );
+    return faded ? Opacity(opacity: 0.4, child: card) : card;
   }
 }
 
@@ -533,37 +594,6 @@ class _Station extends StatelessWidget {
           child: TextButton(onPressed: () => context.push('/sheets'), child: Text(l.caseSheets)),
         ),
       ],
-    ),
-  );
-}
-
-class _StarPill extends StatelessWidget {
-  const _StarPill({required this.stars, required this.max, required this.l});
-
-  final int stars;
-  final int max;
-  final AppLocalizations l;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: l.totalStars(stars, max),
-    excludeSemantics: true,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: AppColors.bubbleBorder, width: 1.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.star_rounded, color: AppColors.gold, size: 20),
-          const SizedBox(width: 2),
-          Text('$stars', style: const TextStyle(fontWeight: FontWeight.w700)),
-          Text('/$max', style: const TextStyle(fontSize: 12, color: AppColors.ink3)),
-        ],
-      ),
     ),
   );
 }

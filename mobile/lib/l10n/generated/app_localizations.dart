@@ -721,6 +721,234 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'ล้างความก้าวหน้าแล้ว'**
   String get resetDone;
+
+  /// No description provided for @tabRoster.
+  ///
+  /// In th, this message translates to:
+  /// **'ตารางเวร'**
+  String get tabRoster;
+
+  /// No description provided for @tabWard.
+  ///
+  /// In th, this message translates to:
+  /// **'วอร์ด'**
+  String get tabWard;
+
+  /// No description provided for @rosterBadge.
+  ///
+  /// In th, this message translates to:
+  /// **'📅 ปฏิทินเวรพยาบาล CCU'**
+  String get rosterBadge;
+
+  /// No description provided for @reroll.
+  ///
+  /// In th, this message translates to:
+  /// **'🎲 สุ่มเวรใหม่'**
+  String get reroll;
+
+  /// No description provided for @rerolled.
+  ///
+  /// In th, this message translates to:
+  /// **'สุ่มเวรใหม่ประจำเดือนแล้ว 🎲'**
+  String get rerolled;
+
+  /// No description provided for @rosterTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ตารางเวรประจำเดือน'**
+  String get rosterTitle;
+
+  /// No description provided for @rosterHint.
+  ///
+  /// In th, this message translates to:
+  /// **'ต้องเล่นผ่านเวรเรียงตามวัน (ช่องสีทองที่มีเครื่องหมาย ▶ เล่นวันนี้ได้) ปฏิบัติงานให้ครบเพื่อก้าวสู่วันถัดไป'**
+  String get rosterHint;
+
+  /// The part of rosterHint shown in gold.
+  ///
+  /// In th, this message translates to:
+  /// **'▶ เล่นวันนี้ได้'**
+  String get rosterHintMark;
+
+  /// No description provided for @prevMonth.
+  ///
+  /// In th, this message translates to:
+  /// **'เดือนก่อนหน้า'**
+  String get prevMonth;
+
+  /// No description provided for @nextMonth.
+  ///
+  /// In th, this message translates to:
+  /// **'เดือนถัดไป'**
+  String get nextMonth;
+
+  /// No description provided for @dayLocked.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังเข้าเวรนี้ไม่ได้! กรุณาผ่านเวรวันที่ {day} ให้สำเร็จก่อน'**
+  String dayLocked(int day);
+
+  /// No description provided for @dayPlayable.
+  ///
+  /// In th, this message translates to:
+  /// **'เล่นวันนี้ได้ (เวรปัจจุบัน)'**
+  String get dayPlayable;
+
+  /// No description provided for @dayDone.
+  ///
+  /// In th, this message translates to:
+  /// **'ผ่านเวรนี้แล้ว'**
+  String get dayDone;
+
+  /// No description provided for @dayNotYet.
+  ///
+  /// In th, this message translates to:
+  /// **'ยังไม่ถึงวันเข้าเวร'**
+  String get dayNotYet;
+
+  /// No description provided for @dayTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'วัน{weekday}ที่ {day} {month} {year}'**
+  String dayTitle(String weekday, int day, String month, int year);
+
+  /// No description provided for @myShiftToday.
+  ///
+  /// In th, this message translates to:
+  /// **'เวรของคุณวันนี้: {shift}'**
+  String myShiftToday(String shift);
+
+  /// No description provided for @shiftPassed.
+  ///
+  /// In th, this message translates to:
+  /// **'✓ ผ่านเวรนี้แล้ว'**
+  String get shiftPassed;
+
+  /// No description provided for @offName.
+  ///
+  /// In th, this message translates to:
+  /// **'วันหยุดพักผ่อน (Off)'**
+  String get offName;
+
+  /// No description provided for @offTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'วันนี้เป็นวันหยุดของคุณ (Off)'**
+  String get offTitle;
+
+  /// No description provided for @offHint.
+  ///
+  /// In th, this message translates to:
+  /// **'พักผ่อนให้เต็มที่ หรือเลือกดูเคสหัตถการในวอร์ดเพื่อทบทวนความรู้ได้เสมอ'**
+  String get offHint;
+
+  /// No description provided for @seeWholeWard.
+  ///
+  /// In th, this message translates to:
+  /// **'ดูวอร์ดทั้งหมด'**
+  String get seeWholeWard;
+
+  /// No description provided for @yourShift.
+  ///
+  /// In th, this message translates to:
+  /// **'เวรของคุณ'**
+  String get yourShift;
+
+  /// No description provided for @shiftMetaDone.
+  ///
+  /// In th, this message translates to:
+  /// **'หัวหน้าเวร: {nurse} · คนไข้ในความรับผิดชอบ ({done}/{total} เคส)'**
+  String shiftMetaDone(String nurse, int done, int total);
+
+  /// Ours: the other shifts of the day, without a count.
+  ///
+  /// In th, this message translates to:
+  /// **'หัวหน้าเวร: {nurse} · คนไข้ในความรับผิดชอบ {total} เคส'**
+  String shiftMeta(String nurse, int total);
+
+  /// No description provided for @bedNo.
+  ///
+  /// In th, this message translates to:
+  /// **'เตียง {bed}'**
+  String bedNo(String bed);
+
+  /// No description provided for @enterShift.
+  ///
+  /// In th, this message translates to:
+  /// **'เข้าวอร์ดเวรนี้'**
+  String get enterShift;
+
+  /// No description provided for @reviewShift.
+  ///
+  /// In th, this message translates to:
+  /// **'ทบทวนวอร์ดเวรนี้'**
+  String get reviewShift;
+
+  /// No description provided for @pillMorning.
+  ///
+  /// In th, this message translates to:
+  /// **'เช้า'**
+  String get pillMorning;
+
+  /// No description provided for @pillAfternoon.
+  ///
+  /// In th, this message translates to:
+  /// **'บ่าย'**
+  String get pillAfternoon;
+
+  /// No description provided for @pillNight.
+  ///
+  /// In th, this message translates to:
+  /// **'ดึก'**
+  String get pillNight;
+
+  /// No description provided for @pillOff.
+  ///
+  /// In th, this message translates to:
+  /// **'OFF'**
+  String get pillOff;
+
+  /// No description provided for @dutyTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ประจำการ: {shift}'**
+  String dutyTitle(String shift);
+
+  /// No description provided for @dutyBeds.
+  ///
+  /// In th, this message translates to:
+  /// **'เน้นเตียงที่ได้รับมอบหมายในเวร ({beds})'**
+  String dutyBeds(String beds);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'วันที่ {day}: ทำแล้ว {done}/{total} เคส'**
+  String dutyToday(int day, int done, int total);
+
+  /// No description provided for @showAllBeds.
+  ///
+  /// In th, this message translates to:
+  /// **'แสดงทุกเตียง ✕'**
+  String get showAllBeds;
+
+  /// No description provided for @shiftCleared.
+  ///
+  /// In th, this message translates to:
+  /// **'🎉 ยินดีด้วย! ปฏิบัติหน้าที่ครบใน{shift}แล้ว ปลดล็อกวันที่ {day} เรียบร้อย!'**
+  String shiftCleared(String shift, int day);
+
+  /// Ours: his message would name day 32.
+  ///
+  /// In th, this message translates to:
+  /// **'🎉 ยินดีด้วย! ปฏิบัติหน้าที่ครบใน{shift}แล้ว ผ่านเวรครบทั้งเดือนแล้ว!'**
+  String monthCleared(String shift);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'กลับตารางเวร'**
+  String get backToRoster;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

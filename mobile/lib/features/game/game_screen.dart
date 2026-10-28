@@ -251,11 +251,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     }
   }
 
-  /// Saves the result, then shows it with the stars gained, a level-up, and the next bed (his
-  /// `finishCase` + win modal).
+  /// Saves the result (and the roster day, when on duty), then shows it with the stars gained, a
+  /// level-up, a cleared shift, and the next bed (his `finishCase` + win modal).
   Future<void> _finish(BedCase bed, CaseResult result) async {
     final l = AppLocalizations.of(context);
     final outcome = await ref.read(progressProvider.notifier).record(result);
+    final cases = ref.read(bundledCasesProvider).value ?? const <BedCase>[];
+    final bedNums = [for (final c in cases) c.bedNum];
+    final duty = ref.read(dutyProvider);
+    final rosterNotifier = ref.read(rosterProvider.notifier);
+    final cleared = await rosterNotifier.recordBed(bed.bedNum, bedNums);
     final sfx = ref.read(sfxProvider)
       ..play(Sound.win)
       ..buzz(Buzz.win);
@@ -264,8 +269,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         if (mounted) sfx.play(Sound.values[Sound.star0.index + i]);
       });
     }
-    final cases = ref.read(bundledCasesProvider).value ?? const <BedCase>[];
-    final next = outcome.progress.nextBed([for (final c in cases) c.bedNum]);
+    final roster = ref.read(rosterProvider).value;
+    final next = cleared
+        ? null
+        : (duty == null ? null : roster?.nextDutyBed(duty, bedNums)) ??
+              outcome.progress.nextBed(bedNums);
+    final shiftMessage = !cleared || duty == null
+        ? null
+        : duty.day < duty.month.days
+        ? l.shiftCleared(duty.shift.name, duty.day + 1)
+        : l.monthCleared(duty.shift.name);
     if (!mounted) return;
     final choice = await showDialog<String>(
       context: context,
@@ -274,6 +287,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         bed: bed,
         result: result,
         outcome: outcome,
+        shiftMessage: shiftMessage,
         hasNext: next != null && next != bed.bedNum,
         l: l,
       ),
@@ -282,6 +296,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     switch (choice) {
       case 'next':
         context.pushReplacement('/bed/$next');
+      case 'roster':
+        context.go('/roster');
       case 'replay':
         _replay();
         _scrollToTop();
@@ -900,6 +916,7 @@ class _ResultDialog extends StatelessWidget {
     required this.bed,
     required this.result,
     required this.outcome,
+    required this.shiftMessage,
     required this.hasNext,
     required this.l,
   });
@@ -907,6 +924,9 @@ class _ResultDialog extends StatelessWidget {
   final BedCase bed;
   final RecordOutcome outcome;
   final CaseResult result;
+
+  /// Set when this bed cleared the roster day.
+  final String? shiftMessage;
   final bool hasNext;
   final AppLocalizations l;
 
@@ -976,6 +996,22 @@ class _ResultDialog extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 15.5),
           ),
+          if (shiftMessage case final message?) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF86EFAC), width: 2),
+              ),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF065F46)),
+              ),
+            ),
+          ],
           if (outcome.levelUp case final level?) ...[
             const SizedBox(height: 10),
             Container(
@@ -993,6 +1029,16 @@ class _ResultDialog extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
+          if (shiftMessage != null) ...[
+            GameButton(
+              label: l.backToRoster,
+              icon: Icons.calendar_month_rounded,
+              color: AppColors.gold,
+              edge: AppColors.goldEdge,
+              onTap: () => Navigator.pop(context, 'roster'),
+            ),
+            const SizedBox(height: 10),
+          ],
           if (hasNext) ...[
             GameButton(
               label: l.nextBed,

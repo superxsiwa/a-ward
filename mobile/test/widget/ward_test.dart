@@ -1,40 +1,27 @@
-import 'package:criticalcare/app/app.dart';
 import 'package:criticalcare/app/sfx.dart';
-import 'package:criticalcare/data/progress_store.dart';
-import 'package:criticalcare/data/providers.dart';
 import 'package:criticalcare/game/case_session.dart';
+import 'package:criticalcare/features/ward/ward_screen.dart';
 import 'package:criticalcare/game/progress.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/app.dart' hide pumpApp;
+import '../support/app.dart' as app;
 import '../support/cases.dart';
 import '../support/fake_store.dart';
-import 'bed01_play_test.dart' show settle, tapText;
 
 void main() {
   final sfx = SilentSfx();
 
-  Future<void> pumpApp(WidgetTester tester, MemoryProgressStore store) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 2.625;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
-          progressStoreProvider.overrideWithValue(store),
-          sfxProvider.overrideWithValue(sfx),
-        ],
-        child: const CriticalCareApp(),
-      ),
-    );
-    await settle(tester);
+  /// The app, then its ward tab ([ward] false stays on the roster).
+  Future<void> pumpApp(WidgetTester tester, MemoryProgressStore store, {bool ward = true}) async {
+    await app.pumpApp(tester, store: store, sfx: sfx);
+    if (ward) await openTab(tester, 'วอร์ด');
   }
 
   testWidgets('the training notice shows on first launch only', (tester) async {
     final store = MemoryProgressStore(seen: false);
-    await pumpApp(tester, store);
+    await pumpApp(tester, store, ward: false);
     expect(find.text('⚠️ สำหรับการฝึกเท่านั้น'), findsOneWidget);
     await tapText(tester, 'เข้าใจแล้ว');
     await settle(tester);
@@ -82,9 +69,8 @@ void main() {
       isEmergency: true,
     );
     final store = MemoryProgressStore(progress: Progress.empty.record(done).progress);
-    await pumpApp(tester, store);
-    await tester.tap(find.byTooltip('ตั้งค่า'));
-    await settle(tester);
+    await pumpApp(tester, store, ward: false);
+    await openTab(tester, 'ตั้งค่า');
     await tapText(tester, '🔊 เสียงเอฟเฟกต์');
     await settle(tester);
     expect(store.settings.sound, isFalse);
@@ -103,23 +89,21 @@ void main() {
   });
 
   testWidgets('a wide screen: the bar lines up with the ward, text is 20% larger', (tester) async {
-    tester.view.physicalSize = const Size(2000, 1100);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
-          progressStoreProvider.overrideWithValue(MemoryProgressStore()),
-          sfxProvider.overrideWithValue(sfx),
-        ],
-        child: const CriticalCareApp(),
-      ),
+    await app.pumpApp(
+      tester,
+      store: MemoryProgressStore(),
+      sfx: sfx,
+      size: const Size(2000, 1100),
+      pixelRatio: 1.0,
     );
-    await settle(tester);
+    await openTab(tester, 'วอร์ด');
     expect(find.text('วอร์ดหัวใจ 8 เตียง'), findsOneWidget);
-    expect(tester.getTopLeft(find.text('Critical Care')).dx, greaterThanOrEqualTo(500));
-    final scaler = MediaQuery.textScalerOf(tester.element(find.text('Critical Care')));
+    final title = find.descendant(
+      of: find.byType(WardScreen),
+      matching: find.text('Critical Care'),
+    );
+    expect(tester.getTopLeft(title).dx, greaterThanOrEqualTo(500));
+    final scaler = MediaQuery.textScalerOf(tester.element(title));
     expect(scaler.scale(10), closeTo(12, 0.01));
   });
 }
