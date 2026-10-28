@@ -16,7 +16,7 @@ import '../../game/step_board.dart';
 import '../../game/rules.dart';
 import '../../game/step_checker.dart';
 import '../../l10n/generated/app_localizations.dart';
-import 'monitor.dart';
+import 'bedside_scene.dart';
 import 'task_views.dart';
 
 /// One bed played step by step. The rules live in [CaseSession]; this screen shows the session
@@ -309,6 +309,16 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
   // Auto scroll while a card is dragged near the top or bottom (his PointerDnD autoScroll).
 
+  late final _dragHooks = DragHooks(
+    onStart: () {
+      ref.read(sfxProvider)
+        ..play(Sound.pick)
+        ..buzz(Buzz.tick);
+    },
+    onMove: _dragMoved,
+    onEnd: _dragEnded,
+  );
+
   void _dragMoved(Offset p) {
     _dragPoint = p;
     _autoScroll ??= Timer.periodic(const Duration(milliseconds: 16), (_) => _scrollStep());
@@ -326,7 +336,10 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     if (p == null || box == null || !_scroll.hasClients) return;
     final top = box.localToGlobal(Offset.zero).dy;
     final bottom = top + box.size.height;
-    final double dy = p.dy < top + 70
+    // Below the page the finger is over the docked tray: hold still so the card can be dropped.
+    final double dy = p.dy > bottom
+        ? 0
+        : p.dy < top + 70
         ? -min(16.0, (top + 70 - p.dy) / 4)
         : p.dy > bottom - 70
         ? min(16.0, (p.dy - (bottom - 70)) / 4)
@@ -394,52 +407,72 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   const SizedBox(height: 14),
                   _StepHead(session: s, l: l),
                   const SizedBox(height: 14),
-                  BedsideMonitor(bedCase: s.bed, vitals: s.stage.vitals),
-                  const SizedBox(height: 12),
-                  DoctorBubble(bedCase: s.bed, speech: s.stage.doctorSpeech),
-                  const SizedBox(height: 14),
+                  BedsideScene(
+                    bedCase: s.bed,
+                    vitals: s.stage.vitals,
+                    speech: s.stage.doctorSpeech,
+                    mood: s.isPassed
+                        ? SceneMood.passed
+                        : _panel?.ok == false
+                        ? SceneMood.alarm
+                        : SceneMood.calm,
+                  ),
+                  const SizedBox(height: 10),
                   _Reading(text: s.stage.reading, l: l, key: ValueKey('reading-${s.stage.id}')),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   TaskView(
                     stage: s.stage,
                     board: s.board,
                     onMove: _move,
-                    drag: DragHooks(
-                      onStart: () {
-                        ref.read(sfxProvider)
-                          ..play(Sound.pick)
-                          ..buzz(Buzz.tick);
-                      },
-                      onMove: _dragMoved,
-                      onEnd: _dragEnded,
-                    ),
+                    drag: _dragHooks,
                     enabled: !s.waitingForRetry,
+                    dockDrop: true,
                   ),
                 ],
               ),
             ),
           ),
         ),
-        bottomNavigationBar: SafeArea(
-          child: _panel == null
-              ? _Dock(
-                  session: s,
-                  l: l,
-                  onBack: () => _tap(() => _goTo(s.stepIndex - 1)),
-                  onCheck: _check,
-                  onShowAnswer: _showAnswer,
-                  onGoOn: () => _tap(_goOn),
-                  onReset: () => _tap(() => _setSession(s.resetStep())),
-                )
-              : _FeedbackPanel(
-                  panel: _panel!,
-                  l: l,
-                  canShowAnswer: s.canShowAnswer,
-                  timed: isTimedStage(s.stage),
-                  onGoOn: () => _tap(_goOn),
-                  onRetry: () => _tap(_retry),
-                  onShowAnswer: _showAnswer,
+        bottomNavigationBar: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+            boxShadow: [BoxShadow(color: Color(0x1F0F2742), blurRadius: 20, offset: Offset(0, -6))],
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DropTray(
+                  stage: s.stage,
+                  board: s.board,
+                  onMove: _move,
+                  drag: _dragHooks,
+                  enabled: !s.waitingForRetry,
                 ),
+                _panel == null
+                    ? _Dock(
+                        session: s,
+                        l: l,
+                        onBack: () => _tap(() => _goTo(s.stepIndex - 1)),
+                        onCheck: _check,
+                        onShowAnswer: _showAnswer,
+                        onGoOn: () => _tap(_goOn),
+                        onReset: () => _tap(() => _setSession(s.resetStep())),
+                      )
+                    : _FeedbackPanel(
+                        panel: _panel!,
+                        l: l,
+                        canShowAnswer: s.canShowAnswer,
+                        timed: isTimedStage(s.stage),
+                        onGoOn: () => _tap(_goOn),
+                        onRetry: () => _tap(_retry),
+                        onShowAnswer: _showAnswer,
+                      ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -619,7 +652,7 @@ class _Pill extends StatelessWidget {
   );
 }
 
-/// The knowledge box, open by default.
+/// The knowledge box as a chip, folded by default (visual concept): tap to read it.
 class _Reading extends StatefulWidget {
   const _Reading({super.key, required this.text, required this.l});
 
@@ -631,66 +664,79 @@ class _Reading extends StatefulWidget {
 }
 
 class _ReadingState extends State<_Reading> {
-  var _open = true;
+  var _open = false;
 
   @override
-  Widget build(BuildContext context) => Container(
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: AppColors.bubbleBorder, width: 2),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Material(
-          color: AppColors.readingHead,
-          child: InkWell(
-            onTap: () => setState(() => _open = !_open),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(13, 10, 13, 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.l.reading,
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Row(
+        children: [
+          Material(
+            color: AppColors.readingHead,
+            shape: const StadiumBorder(side: BorderSide(color: AppColors.bubbleBorder, width: 2)),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => setState(() => _open = !_open),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.menu_book_rounded, size: 18, color: AppColors.readingInk),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.l.readingChip,
                       style: const TextStyle(
                         fontFamily: displayFont,
                         fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                        fontSize: 14,
                         color: AppColors.readingInk,
                       ),
                     ),
-                  ),
-                  AnimatedRotation(
-                    turns: _open ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.expand_more, color: AppColors.readingInk),
-                  ),
-                ],
+                    AnimatedRotation(
+                      turns: _open ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(Icons.expand_more, color: AppColors.readingInk),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 200),
-          child: _open
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(13, 10, 13, 13),
-                  child: Text(
-                    widget.text,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      height: 1.65,
-                      color: AppColors.readingBody,
-                    ),
-                  ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
-      ],
-    ),
+          if (!_open) ...[
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                widget.l.tapToRead,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13, color: AppColors.ink3),
+              ),
+            ),
+          ],
+        ],
+      ),
+      AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        alignment: Alignment.topCenter,
+        child: _open
+            ? Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.fromLTRB(13, 10, 13, 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.bubbleBorder, width: 2),
+                ),
+                child: Text(
+                  widget.text,
+                  style: const TextStyle(fontSize: 15, height: 1.65, color: AppColors.readingBody),
+                ),
+              )
+            : const SizedBox(width: double.infinity),
+      ),
+    ],
   );
 }
 

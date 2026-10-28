@@ -1,6 +1,7 @@
 // Plays bed 01 through the real screens with taps only, the way a player without drag would.
 
 import 'package:criticalcare/app/sfx.dart';
+import 'package:criticalcare/game/card_kinds.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,7 +11,9 @@ import '../support/fake_store.dart';
 
 void main() {
   final b = bed(1);
-  String card(int step, String id) => b.stages[step].pool.firstWhere((p) => p.id == id).text;
+  // As shown on screen: a leading emoji is hidden (finding F-emoji).
+  String card(int step, String id) =>
+      withoutLeadingEmoji(b.stages[step].pool.firstWhere((p) => p.id == id).text);
   String option(String id) => b.stages[0].choices!.options.firstWhere((o) => o.id == id).text;
   String tray(int step, String id) =>
       b.stages[step].trays!.trays.firstWhere((t) => t.id == id).displayName;
@@ -137,10 +140,13 @@ Future<void> checkAndGoOn(WidgetTester tester) async {
   await settle(tester);
 }
 
-/// Plays bed 01 from its first step to the result dialog without a mistake, by taps only.
-Future<void> playBed01Perfectly(WidgetTester tester) async {
+/// Plays bed 01 from its first step to the result dialog without a mistake, by taps only; with
+/// [stepsDone] it stops once that many steps are passed.
+Future<void> playBed01Perfectly(WidgetTester tester, {int stepsDone = 6}) async {
   final b = bed(1);
-  String card(int step, String id) => b.stages[step].pool.firstWhere((p) => p.id == id).text;
+  // As shown on screen: a leading emoji is hidden (finding F-emoji).
+  String card(int step, String id) =>
+      withoutLeadingEmoji(b.stages[step].pool.firstWhere((p) => p.id == id).text);
   String option(String id) => b.stages[0].choices!.options.firstWhere((o) => o.id == id).text;
   String tray(int step, String id) =>
       b.stages[step].trays!.trays.firstWhere((t) => t.id == id).displayName;
@@ -179,6 +185,8 @@ Future<void> playBed01Perfectly(WidgetTester tester) async {
     }
   }
   await checkAndGoOn(tester);
+
+  if (stepsDone == 3) return;
 
   // Step 4: tap the four safe actions into the box.
   for (final id in ['fa1', 'fa2', 'fa3', 'fa4']) {

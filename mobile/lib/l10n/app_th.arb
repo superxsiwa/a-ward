@@ -586,5 +586,13 @@
   "resetCasesTitle": "คืนค่าเคสตั้งต้น?",
   "resetCasesBody": "เคสทั้งหมดจะถูกรีเซ็ตกลับเป็น 8 เตียงมาตรฐานของ CCU",
   "resetCasesConfirm": "คืนค่าเริ่มต้น",
-  "resetCasesDone": "คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄"
+  "resetCasesDone": "คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄",
+  "readingChip": "สาระความรู้",
+  "@readingChip": {
+    "description": "His '📖 สาระความรู้' without the emoji: the chip draws a book icon."
+  },
+  "tapToRead": "แตะเพื่ออ่าน",
+  "@tapToRead": {
+    "description": "Ours."
+  }
 }

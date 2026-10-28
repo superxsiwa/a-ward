@@ -1177,6 +1177,18 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄'**
   String get resetCasesDone;
+
+  /// His '📖 สาระความรู้' without the emoji: the chip draws a book icon.
+  ///
+  /// In th, this message translates to:
+  /// **'สาระความรู้'**
+  String get readingChip;
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'แตะเพื่ออ่าน'**
+  String get tapToRead;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
