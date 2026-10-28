@@ -1,12 +1,18 @@
 import 'package:criticalcare/data/progress_store.dart';
 import 'package:criticalcare/game/progress.dart';
+import 'package:criticalcare/game/roster.dart';
 
 /// Progress kept in memory, for widget tests (no platform channel).
 class MemoryProgressStore implements ProgressStore {
-  MemoryProgressStore({this.progress = Progress.empty, this.seen = true});
+  MemoryProgressStore({
+    this.progress = Progress.empty,
+    this.seen = true,
+    this.roster = Roster.empty,
+  });
 
   Progress progress;
   bool seen;
+  Roster roster;
   int saves = 0;
 
   @override
@@ -31,4 +37,10 @@ class MemoryProgressStore implements ProgressStore {
 
   @override
   Future<void> saveSettings(GameSettings s) async => settings = s;
+
+  @override
+  Future<Roster> loadRoster() async => roster;
+
+  @override
+  Future<void> saveRoster(Roster r) async => roster = r;
 }

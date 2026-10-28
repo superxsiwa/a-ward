@@ -4,38 +4,50 @@ import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
 import '../features/game/game_screen.dart';
+import '../features/roster/roster_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/sheets/sheets_screen.dart';
 import '../features/ward/ward_screen.dart';
 import '../l10n/generated/app_localizations.dart';
+import 'shell.dart';
 import 'theme.dart';
 
 GoRouter _buildRouter() => GoRouter(
+  initialLocation: '/roster',
+  redirect: (context, state) => state.uri.path == '/' ? '/roster' : null,
   routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const WardScreen(),
-      routes: [
-        GoRoute(
-          path: 'bed/:bedNum',
-          builder: (context, state) =>
-              GameScreen(bedNum: int.tryParse(state.pathParameters['bedNum']!) ?? 1),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, shell) => HomeShell(shell: shell),
+      branches: [
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/roster', builder: (context, state) => const RosterScreen())],
         ),
-        GoRoute(
-          path: 'sheets',
-          builder: (context, state) => const SheetsScreen(),
-          routes: [
-            GoRoute(
-              path: ':bedNum',
-              builder: (context, state) =>
-                  SheetScreen(bedNum: int.tryParse(state.pathParameters['bedNum']!) ?? 1),
-            ),
-          ],
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/ward', builder: (context, state) => const WardScreen())],
         ),
-        GoRoute(path: 'about', builder: (context, state) => const AboutScreen()),
-        GoRoute(path: 'settings', builder: (context, state) => const SettingsScreen()),
+        StatefulShellBranch(
+          routes: [GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen())],
+        ),
       ],
     ),
+    // Full screen, above the tab bar.
+    GoRoute(
+      path: '/bed/:bedNum',
+      builder: (context, state) =>
+          GameScreen(bedNum: int.tryParse(state.pathParameters['bedNum']!) ?? 1),
+    ),
+    GoRoute(
+      path: '/sheets',
+      builder: (context, state) => const SheetsScreen(),
+      routes: [
+        GoRoute(
+          path: ':bedNum',
+          builder: (context, state) =>
+              SheetScreen(bedNum: int.tryParse(state.pathParameters['bedNum']!) ?? 1),
+        ),
+      ],
+    ),
+    GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
   ],
 );
 

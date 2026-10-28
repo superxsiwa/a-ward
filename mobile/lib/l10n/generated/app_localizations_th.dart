@@ -364,4 +364,141 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get resetDone => 'ล้างความก้าวหน้าแล้ว';
+
+  @override
+  String get tabRoster => 'ตารางเวร';
+
+  @override
+  String get tabWard => 'วอร์ด';
+
+  @override
+  String get rosterBadge => '📅 ปฏิทินเวรพยาบาล CCU';
+
+  @override
+  String get reroll => '🎲 สุ่มเวรใหม่';
+
+  @override
+  String get rerolled => 'สุ่มเวรใหม่ประจำเดือนแล้ว 🎲';
+
+  @override
+  String get rosterTitle => 'ตารางเวรประจำเดือน';
+
+  @override
+  String get rosterHint =>
+      'ต้องเล่นผ่านเวรเรียงตามวัน (ช่องสีทองที่มีเครื่องหมาย ▶ เล่นวันนี้ได้) ปฏิบัติงานให้ครบเพื่อก้าวสู่วันถัดไป';
+
+  @override
+  String get rosterHintMark => '▶ เล่นวันนี้ได้';
+
+  @override
+  String get prevMonth => 'เดือนก่อนหน้า';
+
+  @override
+  String get nextMonth => 'เดือนถัดไป';
+
+  @override
+  String dayLocked(int day) {
+    return 'ยังเข้าเวรนี้ไม่ได้! กรุณาผ่านเวรวันที่ $day ให้สำเร็จก่อน';
+  }
+
+  @override
+  String get dayPlayable => 'เล่นวันนี้ได้ (เวรปัจจุบัน)';
+
+  @override
+  String get dayDone => 'ผ่านเวรนี้แล้ว';
+
+  @override
+  String get dayNotYet => 'ยังไม่ถึงวันเข้าเวร';
+
+  @override
+  String dayTitle(String weekday, int day, String month, int year) {
+    return 'วัน$weekdayที่ $day $month $year';
+  }
+
+  @override
+  String myShiftToday(String shift) {
+    return 'เวรของคุณวันนี้: $shift';
+  }
+
+  @override
+  String get shiftPassed => '✓ ผ่านเวรนี้แล้ว';
+
+  @override
+  String get offName => 'วันหยุดพักผ่อน (Off)';
+
+  @override
+  String get offTitle => 'วันนี้เป็นวันหยุดของคุณ (Off)';
+
+  @override
+  String get offHint => 'พักผ่อนให้เต็มที่ หรือเลือกดูเคสหัตถการในวอร์ดเพื่อทบทวนความรู้ได้เสมอ';
+
+  @override
+  String get seeWholeWard => 'ดูวอร์ดทั้งหมด';
+
+  @override
+  String get yourShift => 'เวรของคุณ';
+
+  @override
+  String shiftMetaDone(String nurse, int done, int total) {
+    return 'หัวหน้าเวร: $nurse · คนไข้ในความรับผิดชอบ ($done/$total เคส)';
+  }
+
+  @override
+  String shiftMeta(String nurse, int total) {
+    return 'หัวหน้าเวร: $nurse · คนไข้ในความรับผิดชอบ $total เคส';
+  }
+
+  @override
+  String bedNo(String bed) {
+    return 'เตียง $bed';
+  }
+
+  @override
+  String get enterShift => 'เข้าวอร์ดเวรนี้';
+
+  @override
+  String get reviewShift => 'ทบทวนวอร์ดเวรนี้';
+
+  @override
+  String get pillMorning => 'เช้า';
+
+  @override
+  String get pillAfternoon => 'บ่าย';
+
+  @override
+  String get pillNight => 'ดึก';
+
+  @override
+  String get pillOff => 'OFF';
+
+  @override
+  String dutyTitle(String shift) {
+    return 'ประจำการ: $shift';
+  }
+
+  @override
+  String dutyBeds(String beds) {
+    return 'เน้นเตียงที่ได้รับมอบหมายในเวร ($beds)';
+  }
+
+  @override
+  String dutyToday(int day, int done, int total) {
+    return 'วันที่ $day: ทำแล้ว $done/$total เคส';
+  }
+
+  @override
+  String get showAllBeds => 'แสดงทุกเตียง ✕';
+
+  @override
+  String shiftCleared(String shift, int day) {
+    return '🎉 ยินดีด้วย! ปฏิบัติหน้าที่ครบใน$shiftแล้ว ปลดล็อกวันที่ $day เรียบร้อย!';
+  }
+
+  @override
+  String monthCleared(String shift) {
+    return '🎉 ยินดีด้วย! ปฏิบัติหน้าที่ครบใน$shiftแล้ว ผ่านเวรครบทั้งเดือนแล้ว!';
+  }
+
+  @override
+  String get backToRoster => 'กลับตารางเวร';
 }

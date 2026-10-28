@@ -264,5 +264,156 @@
   "resetConfirmTitle": "ล้างความก้าวหน้าทั้งหมด?",
   "resetConfirmBody": "ดาวและเตียงที่ผ่านแล้วจะหายไป ย้อนกลับไม่ได้",
   "resetConfirm": "ล้างข้อมูล",
-  "resetDone": "ล้างความก้าวหน้าแล้ว"
+  "resetDone": "ล้างความก้าวหน้าแล้ว",
+  "tabRoster": "ตารางเวร",
+  "tabWard": "วอร์ด",
+  "rosterBadge": "📅 ปฏิทินเวรพยาบาล CCU",
+  "reroll": "🎲 สุ่มเวรใหม่",
+  "rerolled": "สุ่มเวรใหม่ประจำเดือนแล้ว 🎲",
+  "rosterTitle": "ตารางเวรประจำเดือน",
+  "rosterHint": "ต้องเล่นผ่านเวรเรียงตามวัน (ช่องสีทองที่มีเครื่องหมาย ▶ เล่นวันนี้ได้) ปฏิบัติงานให้ครบเพื่อก้าวสู่วันถัดไป",
+  "rosterHintMark": "▶ เล่นวันนี้ได้",
+  "@rosterHintMark": {
+    "description": "The part of rosterHint shown in gold."
+  },
+  "prevMonth": "เดือนก่อนหน้า",
+  "nextMonth": "เดือนถัดไป",
+  "dayLocked": "ยังเข้าเวรนี้ไม่ได้! กรุณาผ่านเวรวันที่ {day} ให้สำเร็จก่อน",
+  "@dayLocked": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "dayPlayable": "เล่นวันนี้ได้ (เวรปัจจุบัน)",
+  "dayDone": "ผ่านเวรนี้แล้ว",
+  "dayNotYet": "ยังไม่ถึงวันเข้าเวร",
+  "dayTitle": "วัน{weekday}ที่ {day} {month} {year}",
+  "@dayTitle": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "myShiftToday": "เวรของคุณวันนี้: {shift}",
+  "@myShiftToday": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "shiftPassed": "✓ ผ่านเวรนี้แล้ว",
+  "offName": "วันหยุดพักผ่อน (Off)",
+  "offTitle": "วันนี้เป็นวันหยุดของคุณ (Off)",
+  "offHint": "พักผ่อนให้เต็มที่ หรือเลือกดูเคสหัตถการในวอร์ดเพื่อทบทวนความรู้ได้เสมอ",
+  "seeWholeWard": "ดูวอร์ดทั้งหมด",
+  "yourShift": "เวรของคุณ",
+  "shiftMetaDone": "หัวหน้าเวร: {nurse} · คนไข้ในความรับผิดชอบ ({done}/{total} เคส)",
+  "@shiftMetaDone": {
+    "placeholders": {
+      "nurse": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "shiftMeta": "หัวหน้าเวร: {nurse} · คนไข้ในความรับผิดชอบ {total} เคส",
+  "@shiftMeta": {
+    "description": "Ours: the other shifts of the day, without a count.",
+    "placeholders": {
+      "nurse": {
+        "type": "String"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bedNo": "เตียง {bed}",
+  "@bedNo": {
+    "placeholders": {
+      "bed": {
+        "type": "String"
+      }
+    }
+  },
+  "enterShift": "เข้าวอร์ดเวรนี้",
+  "reviewShift": "ทบทวนวอร์ดเวรนี้",
+  "pillMorning": "เช้า",
+  "pillAfternoon": "บ่าย",
+  "pillNight": "ดึก",
+  "pillOff": "OFF",
+  "dutyTitle": "ประจำการ: {shift}",
+  "@dutyTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "dutyBeds": "เน้นเตียงที่ได้รับมอบหมายในเวร ({beds})",
+  "@dutyBeds": {
+    "placeholders": {
+      "beds": {
+        "type": "String"
+      }
+    }
+  },
+  "dutyToday": "วันที่ {day}: ทำแล้ว {done}/{total} เคส",
+  "@dutyToday": {
+    "description": "Ours.",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "showAllBeds": "แสดงทุกเตียง ✕",
+  "shiftCleared": "🎉 ยินดีด้วย! ปฏิบัติหน้าที่ครบใน{shift}แล้ว ปลดล็อกวันที่ {day} เรียบร้อย!",
+  "@shiftCleared": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      },
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "monthCleared": "🎉 ยินดีด้วย! ปฏิบัติหน้าที่ครบใน{shift}แล้ว ผ่านเวรครบทั้งเดือนแล้ว!",
+  "@monthCleared": {
+    "description": "Ours: his message would name day 32.",
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "backToRoster": "กลับตารางเวร",
+  "@backToRoster": {
+    "description": "Ours."
+  }
 }
