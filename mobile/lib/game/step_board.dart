@@ -36,8 +36,8 @@ class DropBoxZone extends Zone {
 ///
 /// Immutable: every move returns a new state. A locked state (step passed or answer shown)
 /// ignores every move.
-class StepState {
-  const StepState._({
+class StepBoard {
+  const StepBoard._({
     required this.items,
     required this.pool,
     required this.slots,
@@ -51,9 +51,9 @@ class StepState {
   });
 
   /// A new step: the pool shuffled with [random], every slot, tray and box empty.
-  factory StepState.fresh(Stage stage, Random random) {
+  factory StepBoard.fresh(Stage stage, Random random) {
     final pool = [for (final p in stage.pool) p.id]..shuffle(random);
-    return StepState._(
+    return StepBoard._(
       items: {for (final p in stage.pool) p.id: p},
       pool: List.unmodifiable(pool),
       slots: stage.sequence == null
@@ -111,7 +111,7 @@ class StepState {
   /// Moves card [id] to [dest] (`moveItemInState`). Dropping on a filled slot swaps the two
   /// cards when the moved card came from a slot, and sends the old card back to the pool
   /// otherwise. Any move clears the red marks on cards and drops the picked card.
-  StepState move(String id, Zone dest) {
+  StepBoard move(String id, Zone dest) {
     if (locked || !items.containsKey(id)) return this;
     if (dest is TrayZone && dest.before == id) return this;
     final d = _Draft(this);
@@ -149,7 +149,7 @@ class StepState {
   /// A tap on card [id] (`handleTap`). From the pool it fills the first empty slot, or goes
   /// into the drop box, or (trays) is picked up or put down again. A placed card goes back to
   /// the pool.
-  StepState tapCard(String id) {
+  StepBoard tapCard(String id) {
     if (locked || !items.containsKey(id)) return this;
     if (!pool.contains(id)) return move(id, const PoolZone());
     if (slots != null) {
@@ -162,7 +162,7 @@ class StepState {
 
   /// A tap on a zone while a card is picked up (`handleDropZoneClick`): the pool puts the card
   /// down, any other zone receives it.
-  StepState tapZone(Zone zone) {
+  StepBoard tapZone(Zone zone) {
     final id = picked;
     if (locked || id == null) return this;
     if (zone is PoolZone) return (_Draft(this)..picked = null).build();
@@ -170,7 +170,7 @@ class StepState {
   }
 
   /// Selects or unselects option [id] and clears the red marks on options.
-  StepState toggleOption(String id) {
+  StepBoard toggleOption(String id) {
     if (locked) return this;
     final d = _Draft(this);
     d.wrongOptions.clear();
@@ -179,7 +179,7 @@ class StepState {
   }
 
   /// The state after a failed check: [items] and [options] turn red.
-  StepState markWrong(Set<String> items, Set<String> options) {
+  StepBoard markWrong(Set<String> items, Set<String> options) {
     final d = _Draft(this);
     d.wrongItems
       ..clear()
@@ -191,7 +191,7 @@ class StepState {
   }
 
   /// The state after a passed check: locked, no red marks.
-  StepState lock() {
+  StepBoard lock() {
     final d = _Draft(this)..locked = true;
     d.wrongItems.clear();
     d.wrongOptions.clear();
@@ -200,7 +200,7 @@ class StepState {
 
   /// The correct answer laid out and locked (`populateCorrectSolution`, the mercy rule).
   /// Unsafe cards of an unordered drop task stay in the pool; other pools end up empty.
-  StepState solved(Stage stage) {
+  StepBoard solved(Stage stage) {
     final d = _Draft(this)
       ..picked = null
       ..locked = true;
@@ -211,29 +211,34 @@ class StepState {
     if (choices != null) {
       d.selected
         ..clear()
-        ..addAll([for (final o in choices.options) if (o.correct) o.id]);
+        ..addAll([
+          for (final o in choices.options)
+            if (o.correct) o.id,
+        ]);
     }
     final sequence = stage.sequence;
     if (sequence != null) d.slots = [...sequence.correctOrder];
     final trays = stage.trays;
     if (trays != null) {
       d.trays = {
-        for (final t in trays.trays)
-          t.id: [...?(trays.ordered ? t.expectedOrder : t.expectedIds)],
+        for (final t in trays.trays) t.id: [...?(trays.ordered ? t.expectedOrder : t.expectedIds)],
       };
     }
     final drop = stage.unorderedDrop;
     if (drop != null) {
       d.dropBox = [...drop.expectedIds];
-      d.pool.addAll([for (final p in drop.pool) if (!drop.expectedIds.contains(p.id)) p.id]);
+      d.pool.addAll([
+        for (final p in drop.pool)
+          if (!drop.expectedIds.contains(p.id)) p.id,
+      ]);
     }
     return d.build();
   }
 }
 
-/// Mutable copy used to build the next [StepState].
+/// Mutable copy used to build the next [StepBoard].
 class _Draft {
-  _Draft(StepState s)
+  _Draft(StepBoard s)
     : items = s.items,
       pool = [...s.pool],
       slots = s.slots == null ? null : [...s.slots!],
@@ -271,7 +276,7 @@ class _Draft {
     return null;
   }
 
-  StepState build() => StepState._(
+  StepBoard build() => StepBoard._(
     items: items,
     pool: List.unmodifiable(pool),
     slots: slots == null ? null : List.unmodifiable(slots!),

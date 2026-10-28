@@ -9,11 +9,7 @@ List<String> issuesAfter(void Function(Map<String, Object?> json) edit, {Set<Str
   final json = copyJson(bedJson(1));
   edit(json);
   return [
-    for (final i in validateCase(
-      BedCase.fromJson(json),
-      imageExists: images?.contains,
-    ))
-      '$i',
+    for (final i in validateCase(BedCase.fromJson(json), imageExists: images?.contains)) '$i',
   ];
 }
 
@@ -29,14 +25,12 @@ void main() {
   });
 
   test('a case needs 6 steps with distinct ids', () {
-    expect(
-      issuesAfter((j) => (j['stageData'] as List).removeLast()),
-      [r'$.stageData: has 5 steps, expected 6'],
-    );
-    expect(
-      issuesAfter((j) => stageOf(j, 1)['id'] = 1),
-      [r'$.stageData[1].id: step id 1 is used twice'],
-    );
+    expect(issuesAfter((j) => (j['stageData'] as List).removeLast()), [
+      r'$.stageData: has 5 steps, expected 6',
+    ]);
+    expect(issuesAfter((j) => stageOf(j, 1)['id'] = 1), [
+      r'$.stageData[1].id: step id 1 is used twice',
+    ]);
   });
 
   test('vitals must read as numbers', () {
@@ -56,14 +50,12 @@ void main() {
   });
 
   test('a step shows one card task and at least one task', () {
-    expect(
-      issuesAfter((j) => stageOf(j, 3)['sequenceTask'] = stageOf(j, 4)['sequenceTask']),
-      [r'$.stageData[3]: has sequenceTask and unorderedDropTask; a step can show one of them'],
-    );
-    expect(
-      issuesAfter((j) => stageOf(j, 4).remove('sequenceTask')),
-      [r'$.stageData[4]: has no task'],
-    );
+    expect(issuesAfter((j) => stageOf(j, 3)['sequenceTask'] = stageOf(j, 4)['sequenceTask']), [
+      r'$.stageData[3]: has sequenceTask and unorderedDropTask; a step can show one of them',
+    ]);
+    expect(issuesAfter((j) => stageOf(j, 4).remove('sequenceTask')), [
+      r'$.stageData[4]: has no task',
+    ]);
   });
 
   test('a choices task needs a correct option and distinct ids', () {
@@ -121,10 +113,9 @@ void main() {
   });
 
   test('the safe actions must be pool cards', () {
-    expect(
-      issuesAfter((j) => task(j, 3, 'unorderedDropTask')['expectedIds'] = ['fa1', 'fa5']),
-      [r'$.stageData[3].unorderedDropTask.expectedIds: "fa5" is not in the pool'],
-    );
+    expect(issuesAfter((j) => task(j, 3, 'unorderedDropTask')['expectedIds'] = ['fa1', 'fa5']), [
+      r'$.stageData[3].unorderedDropTask.expectedIds: "fa5" is not in the pool',
+    ]);
   });
 
   test('pool cards need distinct ids, text, and an image that exists', () {

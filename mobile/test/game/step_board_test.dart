@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:criticalcare/game/case_model.dart';
-import 'package:criticalcare/game/step_state.dart';
+import 'package:criticalcare/game/step_board.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/cases.dart';
@@ -13,7 +13,7 @@ void main() {
   final ordered = b.stages[2]; // ordered trays fdtr1, fdtr2
   final safe = b.stages[3]; // drop box fa1-fa4, unsafe faw1, faw2
 
-  StepState fresh(Stage stage) => StepState.fresh(stage, Random(7));
+  StepBoard fresh(Stage stage) => StepBoard.fresh(stage, Random(7));
 
   group('fresh', () {
     test('shuffles the whole pool with the given random; slots, trays and box start empty', () {
@@ -44,7 +44,7 @@ void main() {
       final sequence = stageOf(json, 0)['sequenceTask'] as Map<String, Object?>;
       (sequence['pool'] as List).add({'id': 'fsx', 'text': 'extra card'});
       final stage = BedCase.fromJson(json).stages[0];
-      var s = StepState.fresh(stage, Random(7));
+      var s = StepBoard.fresh(stage, Random(7));
       for (final id in ['fs1', 'fs2', 'fs3', 'fs4']) {
         s = s.tapCard(id);
       }
@@ -110,8 +110,13 @@ void main() {
     });
 
     test('between trays takes the card out of the old tray', () {
-      final s = fresh(trays).move('fe1', const TrayZone('ftr2')).move('fe1', const TrayZone('ftr1'));
-      expect(s.trays, {'ftr1': ['fe1'], 'ftr2': <String>[]});
+      final s = fresh(trays)
+          .move('fe1', const TrayZone('ftr2'))
+          .move('fe1', const TrayZone('ftr1'));
+      expect(s.trays, {
+        'ftr1': ['fe1'],
+        'ftr2': <String>[],
+      });
       expect(s.whereIs('fe1'), isA<TrayZone>().having((z) => z.trayId, 'tray', 'ftr1'));
     });
 

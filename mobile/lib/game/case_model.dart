@@ -278,7 +278,11 @@ class _Reader {
     prompt: this['prompt'].string(),
     options: [
       for (final o in this['options'].list())
-        ChoiceOption(id: o['id'].string(), text: o['text'].string(), correct: o['correct'].boolean()),
+        ChoiceOption(
+          id: o['id'].string(),
+          text: o['text'].string(),
+          correct: o['correct'].boolean(),
+        ),
     ],
   );
 

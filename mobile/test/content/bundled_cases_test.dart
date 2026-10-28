@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:criticalcare/data/case_repository.dart';
 import 'package:criticalcare/game/case_validation.dart';
 import 'package:criticalcare/game/step_checker.dart';
-import 'package:criticalcare/game/step_state.dart';
+import 'package:criticalcare/game/step_board.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -31,7 +31,7 @@ void main() {
   test('the shown answer of every step of every bundled case passes the check', () async {
     for (final c in await CaseRepository(rootBundle).loadBundled()) {
       for (final stage in c.stages) {
-        final solved = StepState.fresh(stage, Random(1)).solved(stage);
+        final solved = StepBoard.fresh(stage, Random(1)).solved(stage);
         final result = checkStep(stage, solved);
         expect(
           result,

@@ -5,28 +5,28 @@ import 'package:clock/clock.dart';
 import 'case_model.dart';
 import 'rules.dart';
 import 'step_checker.dart';
-import 'step_state.dart';
+import 'step_board.dart';
 
 /// What the player is told after an action.
-sealed class Feedback {
-  const Feedback();
+sealed class GameFeedback {
+  const GameFeedback();
 }
 
 /// The step cannot be checked yet (a toast); nothing is counted.
-class NotReady extends Feedback {
+class NotReady extends GameFeedback {
   const NotReady(this.reason);
 
   final Incomplete reason;
 }
 
 /// The step is right; the player goes on.
-class StepPassed extends Feedback {
+class StepPassed extends GameFeedback {
   const StepPassed();
 }
 
 /// The step is wrong. [strike] counts this step's mistakes; [canShowAnswer] once it reaches
 /// [mercyStrikes].
-class StepFailed extends Feedback {
+class StepFailed extends GameFeedback {
   const StepFailed(this.errors, {required this.strike, required this.canShowAnswer});
 
   final List<StepError> errors;
@@ -35,7 +35,7 @@ class StepFailed extends Feedback {
 }
 
 /// The timed step ran out of time; counted like a wrong check.
-class TimedOut extends Feedback {
+class TimedOut extends GameFeedback {
   const TimedOut({required this.strike, required this.canShowAnswer});
 
   final int strike;
@@ -43,12 +43,12 @@ class TimedOut extends Feedback {
 }
 
 /// The mercy rule laid out the answer; the player studies it and goes on.
-class AnswerShown extends Feedback {
+class AnswerShown extends GameFeedback {
   const AnswerShown();
 }
 
 /// The last step is done.
-class CaseFinished extends Feedback {
+class CaseFinished extends GameFeedback {
   const CaseFinished(this.result);
 
   final CaseResult result;
@@ -84,12 +84,12 @@ class CaseResult {
 ///
 /// Ported from the game state in superxsiwa's App.tsx (`openBed`, `loadStep`, `checkStep`,
 /// `handleStepTimeout`, `handleMercySkip`, `handleNextStep`, `finishCase`). Immutable: every
-/// action returns the next session, with the [Feedback] to show when there is one.
+/// action returns the next session, with the [GameFeedback] to show when there is one.
 class CaseSession {
   const CaseSession._({
     required this.bed,
     required this.stepIndex,
-    required this.states,
+    required this.boards,
     required this.done,
     required this.mistakes,
     required this.stepMistakes,
@@ -106,7 +106,7 @@ class CaseSession {
     return CaseSession._(
       bed: bed,
       stepIndex: 0,
-      states: {bed.stages.first.id: StepState.fresh(bed.stages.first, r)},
+      boards: {bed.stages.first.id: StepBoard.fresh(bed.stages.first, r)},
       done: const {},
       mistakes: 0,
       stepMistakes: const {},
@@ -122,7 +122,7 @@ class CaseSession {
   final int stepIndex;
 
   /// The cards of every step visited so far, by step id.
-  final Map<String, StepState> states;
+  final Map<String, StepBoard> boards;
 
   /// Ids of the steps passed, by a check or by the mercy rule.
   final Set<String> done;
@@ -139,7 +139,7 @@ class CaseSession {
   final Random _random;
 
   Stage get stage => bed.stages[stepIndex];
-  StepState get state => states[stage.id]!;
+  StepBoard get board => boards[stage.id]!;
   bool get isFirstStep => stepIndex == 0;
   bool get isLastStep => stepIndex == bed.stages.length - 1;
   bool get isPassed => done.contains(stage.id);
@@ -162,7 +162,7 @@ class CaseSession {
 
   CaseSession _copy({
     int? stepIndex,
-    Map<String, StepState>? states,
+    Map<String, StepBoard>? boards,
     Set<String>? done,
     int? mistakes,
     Map<String, int>? stepMistakes,
@@ -173,7 +173,7 @@ class CaseSession {
   }) => CaseSession._(
     bed: bed,
     stepIndex: stepIndex ?? this.stepIndex,
-    states: states ?? this.states,
+    boards: boards ?? this.boards,
     done: done ?? this.done,
     mistakes: mistakes ?? this.mistakes,
     stepMistakes: stepMistakes ?? this.stepMistakes,
@@ -184,7 +184,7 @@ class CaseSession {
     random: _random,
   );
 
-  CaseSession _withState(StepState s) => _copy(states: {...states, stage.id: s});
+  CaseSession _withBoard(StepBoard b) => _copy(boards: {...boards, stage.id: b});
 
   DateTime? _timerFor(int index, Set<String> done) =>
       index == timedStepIndex && !done.contains(bed.stages[index].id)
@@ -192,23 +192,23 @@ class CaseSession {
       : null;
 
   /// Applies a card or option move made on the current step.
-  CaseSession update(StepState Function(StepState s) move) {
-    if (finished || state.locked) return this;
-    return _withState(move(state));
+  CaseSession update(StepBoard Function(StepBoard b) move) {
+    if (finished || board.locked) return this;
+    return _withBoard(move(board));
   }
 
   /// The check button (`checkStep`).
-  (CaseSession, Feedback?) check() {
-    if (finished || state.locked) return (this, null);
-    final result = checkStep(stage, state);
+  (CaseSession, GameFeedback?) check() {
+    if (finished || board.locked) return (this, null);
+    final result = checkStep(stage, board);
     switch (result) {
       case CheckIncomplete(:final reason):
         // The timer keeps running.
         return (this, NotReady(reason));
       case CheckDone(passed: true):
-        final trays = state.trays;
+        final trays = board.trays;
         final sorted = trays == null ? 0 : trays.values.fold(0, (n, t) => n + t.length);
-        final next = _withState(state.lock())._copy(
+        final next = _withBoard(board.lock())._copy(
           done: {...done, stage.id},
           deadline: () => null,
           traysSorted: traysSorted + sorted,
@@ -217,7 +217,7 @@ class CaseSession {
         return isLastStep ? next._finish() : (next, const StepPassed());
       case CheckDone(:final errors, :final wrongItems, :final wrongOptions):
         final strike = strikes + 1;
-        final next = _withState(state.markWrong(wrongItems, wrongOptions))._copy(
+        final next = _withBoard(board.markWrong(wrongItems, wrongOptions))._copy(
           mistakes: mistakes + 1,
           stepMistakes: {...stepMistakes, stage.id: strike},
           deadline: () => null,
@@ -227,8 +227,8 @@ class CaseSession {
   }
 
   /// The timed step's clock reached zero (`handleStepTimeout`). The cards stay where they are.
-  (CaseSession, Feedback?) timeOut() {
-    if (finished || deadline == null || state.locked) return (this, null);
+  (CaseSession, GameFeedback?) timeOut() {
+    if (finished || deadline == null || board.locked) return (this, null);
     final strike = strikes + 1;
     final next = _copy(
       mistakes: mistakes + 1,
@@ -245,12 +245,10 @@ class CaseSession {
   }
 
   /// The mercy rule (`handleMercySkip`): lay out the answer and count the step as done.
-  (CaseSession, Feedback?) showAnswer() {
+  (CaseSession, GameFeedback?) showAnswer() {
     if (finished || !canShowAnswer) return (this, null);
-    final next = _withState(state.solved(stage))._copy(
-      done: {...done, stage.id},
-      deadline: () => null,
-    );
+    final next = _withBoard(board.solved(stage))
+        ._copy(done: {...done, stage.id}, deadline: () => null);
     return (next, const AnswerShown());
   }
 
@@ -261,15 +259,15 @@ class CaseSession {
     final target = bed.stages[index];
     return _copy(
       stepIndex: index,
-      states: states.containsKey(target.id)
-          ? states
-          : {...states, target.id: StepState.fresh(target, _random)},
+      boards: boards.containsKey(target.id)
+          ? boards
+          : {...boards, target.id: StepBoard.fresh(target, _random)},
       deadline: () => _timerFor(index, done),
     );
   }
 
   /// "Go on" after a passed step or a shown answer (`handleNextStep`).
-  (CaseSession, Feedback?) next() {
+  (CaseSession, GameFeedback?) next() {
     if (finished || !isPassed) return (this, null);
     return isLastStep ? _finish() : (goTo(stepIndex + 1), null);
   }
@@ -277,10 +275,10 @@ class CaseSession {
   /// The reset button: fresh cards for an unpassed step. Mistakes stay counted.
   CaseSession resetStep() {
     if (finished || isPassed) return this;
-    return _withState(StepState.fresh(stage, _random));
+    return _withBoard(StepBoard.fresh(stage, _random));
   }
 
-  (CaseSession, Feedback) _finish() {
+  (CaseSession, GameFeedback) _finish() {
     final next = _copy(finished: true, deadline: () => null);
     return (
       next,

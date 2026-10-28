@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:criticalcare/game/case_model.dart';
-import 'package:criticalcare/game/step_state.dart';
+import 'package:criticalcare/game/step_board.dart';
 
 /// The raw JSON of bundled bed [n], read from disk (tests run in mobile/).
 Map<String, Object?> bedJson(int n) =>
@@ -19,7 +19,7 @@ Map<String, Object?> stageOf(Map<String, Object?> json, int i) =>
     (json['stageData'] as List)[i] as Map<String, Object?>;
 
 /// [s] with the right answer for [stage] put in by ordinary moves, ready for a passing check.
-StepState answered(Stage stage, StepState s) {
+StepBoard answered(Stage stage, StepBoard s) {
   for (final o in stage.choices?.options ?? const <ChoiceOption>[]) {
     if (o.correct != s.selected.contains(o.id)) s = s.toggleOption(o.id);
   }

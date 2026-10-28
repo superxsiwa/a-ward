@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:criticalcare/game/case_model.dart';
 import 'package:criticalcare/game/step_checker.dart';
-import 'package:criticalcare/game/step_state.dart';
+import 'package:criticalcare/game/step_board.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/cases.dart';
@@ -14,9 +14,9 @@ void main() {
   final ordered = b.stages[2];
   final safe = b.stages[3];
 
-  StepState fresh(Stage stage) => StepState.fresh(stage, Random(3));
+  StepBoard fresh(Stage stage) => StepBoard.fresh(stage, Random(3));
 
-  StepState fill(Stage stage, List<String> order) {
+  StepBoard fill(Stage stage, List<String> order) {
     var s = fresh(stage);
     for (final (i, id) in order.indexed) {
       s = s.move(id, SlotZone(i));
@@ -28,7 +28,10 @@ void main() {
 
   group('not ready', () {
     test('reports the first gap only: options before slots', () {
-      expect(checkStep(prep, fresh(prep)), isA<CheckIncomplete>().having((r) => r.reason, 'reason', isA<NoOptionSelected>()));
+      expect(
+        checkStep(prep, fresh(prep)),
+        isA<CheckIncomplete>().having((r) => r.reason, 'reason', isA<NoOptionSelected>()),
+      );
       final picked = fresh(prep).toggleOption('fc1');
       expect((checkStep(prep, picked) as CheckIncomplete).reason, isA<EmptySlots>());
     });
@@ -64,10 +67,12 @@ void main() {
 
   group('sequence', () {
     test('cards in the wrong slot are marked red; right ones are not', () {
-      final s = fill(prep, ['fs1', 'fs3', 'fs2', 'fs4'])
-          .toggleOption('fc1')
-          .toggleOption('fc2')
-          .toggleOption('fc3');
+      final s = fill(prep, [
+        'fs1',
+        'fs3',
+        'fs2',
+        'fs4',
+      ]).toggleOption('fc1').toggleOption('fc2').toggleOption('fc3');
       final r = done(checkStep(prep, s));
       expect(r.errors, [isA<WrongSequence>()]);
       expect(r.wrongItems, {'fs2', 'fs3'});
@@ -80,7 +85,7 @@ void main() {
   });
 
   group('trays', () {
-    StepState place(Stage stage, Map<String, List<String>> layout) {
+    StepBoard place(Stage stage, Map<String, List<String>> layout) {
       var s = fresh(stage);
       layout.forEach((tray, ids) {
         for (final id in ids) {

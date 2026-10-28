@@ -1,5 +1,5 @@
 import 'case_model.dart';
-import 'step_state.dart';
+import 'step_board.dart';
 
 /// Why a step cannot be checked yet. Only the first reason is reported, as in his code.
 sealed class Incomplete {
@@ -84,7 +84,7 @@ class CheckDone extends CheckResult {
 }
 
 /// Checks [s] against [stage] (`EvaluationStrategyContext.evaluateStep`).
-CheckResult checkStep(Stage stage, StepState s) {
+CheckResult checkStep(Stage stage, StepBoard s) {
   final choices = stage.choices;
   final slots = s.slots;
   final trayCards = s.trays;

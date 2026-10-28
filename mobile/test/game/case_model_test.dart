@@ -26,7 +26,10 @@ void main() {
   });
 
   test('tray names lose their colour marker for display', () {
-    expect(bed(1).stages[1].trays!.trays.first.displayName, 'ถาดทำแผลและกดห้ามเลือด (Sterile Tray)');
+    expect(
+      bed(1).stages[1].trays!.trays.first.displayName,
+      'ถาดทำแผลและกดห้ามเลือด (Sterile Tray)',
+    );
   });
 
   test('a type error names where it is', () {
