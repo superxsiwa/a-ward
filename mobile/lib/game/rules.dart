@@ -24,8 +24,11 @@ int? starLostAt(int mistakes) => switch (mistakes) {
 /// After this many mistakes on one step the player may see the answer and go on (mercy rule).
 const mercyStrikes = 3;
 
-/// The timed step. His code times the step at index 1 (step 2, preparing the trays), by position.
-const timedStepIndex = 1;
+/// The timed step: the equipment step, an unordered trays task. His code timed the step at
+/// position 2 (App.tsx:458), which is that step in all 8 cases; following the task instead keeps
+/// the timer right when cases are edited (decision Q-B, 2026-10-28, his commit 70f3c85 describes
+/// it as the "step 2 equipment task").
+bool isTimedStage(Stage stage) => stage.trays != null && !stage.trays!.ordered;
 
 /// Seconds allowed on the timed step, restarted on every retry.
 const timedStepSeconds = 20;

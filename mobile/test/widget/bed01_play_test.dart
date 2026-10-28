@@ -1,12 +1,14 @@
 // Plays bed 01 through the real screens with taps only, the way a player without drag would.
 
 import 'package:criticalcare/app/app.dart';
+import 'package:criticalcare/data/progress_store.dart';
 import 'package:criticalcare/data/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/cases.dart';
+import '../support/fake_store.dart';
 
 void main() {
   final b = bed(1);
@@ -15,7 +17,10 @@ void main() {
   String tray(int step, String id) =>
       b.stages[step].trays!.trays.firstWhere((t) => t.id == id).displayName;
 
+  late MemoryProgressStore store;
+
   Future<void> openBed01(WidgetTester tester) async {
+    store = MemoryProgressStore();
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
@@ -23,6 +28,7 @@ void main() {
       ProviderScope(
         overrides: [
           bundledCasesProvider.overrideWith((ref) async => [for (var n = 1; n <= 8; n++) bed(n)]),
+          progressStoreProvider.overrideWithValue(store),
         ],
         child: const CriticalCareApp(),
       ),
@@ -90,6 +96,8 @@ void main() {
 
     expect(find.text('เสร็จสิ้นเคส!'), findsOneWidget);
     expect(find.text('สุดยอด! ตอบเป๊ะทุกข้อ ได้ครบ 3 ดาวเลย'), findsOneWidget);
+    expect(store.progress.bed(1).stars, 3, reason: 'saved on the device');
+    expect(find.text('เตียงถัดไป ▶'), findsOneWidget, reason: 'bed 02 is next');
     // Behind the dialog the page keeps its height; the last step's bottom bar once took the
     // whole screen (walk finding F1).
     expect(tester.getSize(find.byType(SingleChildScrollView).first).height, greaterThan(400));
@@ -108,6 +116,29 @@ void main() {
     expect(find.text('ยังไม่ถูกน้า (ครั้งที่ 1/3)'), findsOneWidget);
     expect(find.text('มีข้อที่ไม่ควรเลือกอยู่ (ข้อสีแดง)'), findsOneWidget);
     expect(find.bySemanticsLabel('ดาวที่ได้ตอนนี้ 2 ดวง'), findsOneWidget);
+  });
+
+  testWidgets('after 3 mistakes both check and show answer are offered (Q-A)', (tester) async {
+    await openBed01(tester);
+    for (final id in ['fc1', 'fc2', 'fc3', 'fc4']) {
+      await tapText(tester, option(id));
+    }
+    for (final id in ['fs1', 'fs2', 'fs3', 'fs4']) {
+      await tapText(tester, card(0, id));
+    }
+    for (var i = 1; i <= 3; i++) {
+      await tapText(tester, 'ตรวจคำตอบ');
+      await settle(tester);
+      await tapText(tester, i < 3 ? 'ลองอีกครั้ง' : 'ลองอีกที');
+      await settle(tester);
+    }
+    expect(find.text('ตรวจคำตอบ'), findsOneWidget);
+    expect(find.text('💡 ดูเฉลย & ไปต่อ'), findsOneWidget);
+    // Fixing the pick and checking again passes: the retry is real.
+    await tapText(tester, option('fc4'));
+    await tapText(tester, 'ตรวจคำตอบ');
+    await settle(tester);
+    expect(find.text('ผ่านขั้นตอนนี้แล้ว ถูกต้องตามหลักความปลอดภัย'), findsOneWidget);
   });
 
   testWidgets('checking too early shows what is missing and counts nothing', (tester) async {
@@ -133,8 +164,15 @@ void main() {
     }
     expect(find.text('หมดเวลา 20 วินาที! (ครั้งที่ 1/3)'), findsOneWidget);
     expect(find.text('ลองอีกครั้ง (จับเวลา 20 วิ)'), findsOneWidget);
+    // The cards wait for retry (Q-C): picking a card and tapping a tray leaves both trays at 0.
+    await tapText(tester, card(1, 'fe1'));
+    await tapText(tester, tray(1, 'ftr1'));
+    expect(find.text('1'), findsNothing, reason: 'no tray count went to 1');
     await tapText(tester, 'ลองอีกครั้ง (จับเวลา 20 วิ)');
     expect(find.text('⏱️ 20s'), findsOneWidget);
+    await tapText(tester, card(1, 'fe1'));
+    await tapText(tester, tray(1, 'ftr1'));
+    expect(find.text('1'), findsOneWidget, reason: 'after retry the card lands');
     // Leave the step so its timer stops before the test ends.
     await tapText(tester, 'ย้อนกลับ');
   });

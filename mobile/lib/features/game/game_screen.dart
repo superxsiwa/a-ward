@@ -6,10 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
-import '../../data/case_repository.dart';
+import '../../data/progress_store.dart';
 import '../../data/providers.dart';
 import '../../game/case_model.dart';
 import '../../game/case_session.dart';
+import '../../game/progress.dart';
 import '../../game/rules.dart';
 import '../../game/step_checker.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -131,7 +132,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
         setState(() => _panel = _Panel(ok: true, title: l.answerTitle, sub: l.answerSub));
       case CaseFinished(:final result):
         setState(() => _panel = null);
-        _showResult(s.bed, result);
+        _finish(s.bed, result);
     }
   }
 
@@ -208,18 +209,29 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     }
   }
 
-  Future<void> _showResult(BedCase bed, CaseResult result) async {
+  /// Saves the result, then shows it with the stars gained, a level-up, and the next bed (his
+  /// `finishCase` + win modal).
+  Future<void> _finish(BedCase bed, CaseResult result) async {
     final l = AppLocalizations.of(context);
-    final hasNext = bed.bedNum < bundledCaseCount;
+    final outcome = await ref.read(progressProvider.notifier).record(result);
+    final cases = ref.read(bundledCasesProvider).value ?? const <BedCase>[];
+    final next = outcome.progress.nextBed([for (final c in cases) c.bedNum]);
+    if (!mounted) return;
     final choice = await showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _ResultDialog(bed: bed, result: result, hasNext: hasNext, l: l),
+      builder: (context) => _ResultDialog(
+        bed: bed,
+        result: result,
+        outcome: outcome,
+        hasNext: next != null && next != bed.bedNum,
+        l: l,
+      ),
     );
     if (!mounted) return;
     switch (choice) {
       case 'next':
-        context.pushReplacement('/bed/${bed.bedNum + 1}');
+        context.pushReplacement('/bed/$next');
       case 'replay':
         _replay();
         _scrollToTop();
@@ -326,6 +338,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                     board: s.board,
                     onMove: (move) => _setSession(s.update(move)),
                     drag: DragHooks(onMove: _dragMoved, onEnd: _dragEnded),
+                    enabled: !s.waitingForRetry,
                   ),
                 ],
               ),
@@ -347,7 +360,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   panel: _panel!,
                   l: l,
                   canShowAnswer: s.canShowAnswer,
-                  timed: s.stepIndex == timedStepIndex,
+                  timed: isTimedStage(s.stage),
                   onGoOn: _goOn,
                   onRetry: _retry,
                   onShowAnswer: _showAnswer,
@@ -631,20 +644,15 @@ class _Dock extends StatelessWidget {
     final s = session;
     final Widget main;
     if (!s.isPassed) {
-      main = s.canShowAnswer
-          ? GameButton(
-              label: l.showAnswerGoOn,
-              color: AppColors.gold,
-              edge: AppColors.goldEdge,
-              onTap: onShowAnswer,
-            )
-          : GameButton(
-              label: l.check,
-              icon: Icons.check_rounded,
-              color: AppColors.sky500,
-              edge: AppColors.sky700,
-              onTap: onCheck,
-            );
+      // After 3 mistakes "try again" really retries: check stays, the answer is offered above it
+      // (decision Q-A, 2026-10-28; his version replaced check with show answer).
+      main = GameButton(
+        label: l.check,
+        icon: Icons.check_rounded,
+        color: AppColors.sky500,
+        edge: AppColors.sky700,
+        onTap: onCheck,
+      );
     } else if (!s.isLastStep) {
       main = GameButton(
         label: l.goOn,
@@ -663,18 +671,33 @@ class _Dock extends StatelessWidget {
     }
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!s.isFirstStep) ...[
-            _GhostButton(icon: Icons.arrow_back_rounded, label: l.previous, onTap: onBack),
-            const SizedBox(width: 8),
+          if (s.canShowAnswer) ...[
+            GameButton(
+              label: l.showAnswerGoOn,
+              color: AppColors.gold,
+              edge: AppColors.goldEdge,
+              onTap: onShowAnswer,
+            ),
+            const SizedBox(height: 10),
           ],
-          Expanded(child: main),
-          const SizedBox(width: 8),
-          _GhostButton(
-            icon: Icons.undo_rounded,
-            tooltip: l.resetStep,
-            onTap: s.isPassed ? null : onReset,
+          Row(
+            children: [
+              if (!s.isFirstStep) ...[
+                _GhostButton(icon: Icons.arrow_back_rounded, label: l.previous, onTap: onBack),
+                const SizedBox(width: 8),
+              ],
+              Expanded(child: main),
+              const SizedBox(width: 8),
+              _GhostButton(
+                icon: Icons.undo_rounded,
+                tooltip: l.resetStep,
+                onTap: s.isPassed ? null : onReset,
+              ),
+            ],
           ),
         ],
       ),
@@ -817,11 +840,13 @@ class _ResultDialog extends StatelessWidget {
   const _ResultDialog({
     required this.bed,
     required this.result,
+    required this.outcome,
     required this.hasNext,
     required this.l,
   });
 
   final BedCase bed;
+  final RecordOutcome outcome;
   final CaseResult result;
   final bool hasNext;
   final AppLocalizations l;
@@ -884,10 +909,30 @@ class _ResultDialog extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            result.stars == 3 ? l.caseDonePerfect : l.caseDoneReplay,
+            result.stars == 3
+                ? l.caseDonePerfect
+                : outcome.gainedStars > 0
+                ? l.caseDoneGained(outcome.gainedStars)
+                : l.caseDoneReplay,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14),
           ),
+          if (outcome.levelUp case final level?) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.bubbleBorder, width: 2),
+              ),
+              child: Text(
+                l.levelUp(level, ranks[level - 1]),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.readingInk),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           if (hasNext) ...[
             GameButton(

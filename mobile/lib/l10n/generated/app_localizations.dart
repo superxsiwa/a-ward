@@ -98,12 +98,6 @@ abstract class AppLocalizations {
   /// **'Critical Care'**
   String get appTitle;
 
-  /// Ours: temporary phase-0 bed list; the ward screen replaces it in phase 1.
-  ///
-  /// In th, this message translates to:
-  /// **'เลือกเตียง'**
-  String get bedListTitle;
-
   /// Ours.
   ///
   /// In th, this message translates to:
@@ -463,6 +457,210 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'ยกเลิก'**
   String get cancel;
+
+  /// No description provided for @wardTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'วอร์ดหัวใจ {count} เตียง'**
+  String wardTitle(int count);
+
+  /// No description provided for @wardHint.
+  ///
+  /// In th, this message translates to:
+  /// **'แตะที่เตียงเพื่อเริ่มทำการพยาบาลและหัตถการ'**
+  String get wardHint;
+
+  /// No description provided for @startNow.
+  ///
+  /// In th, this message translates to:
+  /// **'เริ่มเลย'**
+  String get startNow;
+
+  /// No description provided for @continuePlay.
+  ///
+  /// In th, this message translates to:
+  /// **'เล่นต่อ'**
+  String get continuePlay;
+
+  /// No description provided for @bedPassed.
+  ///
+  /// In th, this message translates to:
+  /// **'ผ่านแล้ว'**
+  String get bedPassed;
+
+  /// No description provided for @nurseStation.
+  ///
+  /// In th, this message translates to:
+  /// **'เคาน์เตอร์พยาบาล'**
+  String get nurseStation;
+
+  /// No description provided for @passedOf.
+  ///
+  /// In th, this message translates to:
+  /// **'ผ่านแล้ว {passed}/{total} เตียง'**
+  String passedOf(int passed, int total);
+
+  /// Ours: opens the answer sheets of every case (for the clinical reviewer and instructors).
+  ///
+  /// In th, this message translates to:
+  /// **'📖 ชีทเฉลยเคส'**
+  String get caseSheets;
+
+  /// No description provided for @totalStars.
+  ///
+  /// In th, this message translates to:
+  /// **'ดาวทั้งหมด {stars}/{max}'**
+  String totalStars(int stars, int max);
+
+  /// No description provided for @levelRank.
+  ///
+  /// In th, this message translates to:
+  /// **'Lv.{level} · {rank}'**
+  String levelRank(int level, String rank);
+
+  /// No description provided for @caseDoneGained.
+  ///
+  /// In th, this message translates to:
+  /// **'ผ่านเคสสำเร็จ! ลองเล่นซ้ำเพื่อเก็บให้ครบ 3 ดาวนะ (ได้ดาวเพิ่ม +{gained})'**
+  String caseDoneGained(int gained);
+
+  /// No description provided for @levelUp.
+  ///
+  /// In th, this message translates to:
+  /// **'⬆️ เลื่อนระดับ! Lv.{level} · {rank}'**
+  String levelUp(int level, String rank);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'เกี่ยวกับ'**
+  String get about;
+
+  /// Ours: list of the answer sheets.
+  ///
+  /// In th, this message translates to:
+  /// **'ชีทเฉลยเคส'**
+  String get sheetsTitle;
+
+  /// No description provided for @sheetsIntro.
+  ///
+  /// In th, this message translates to:
+  /// **'ทุกขั้นตอนพร้อมคำตอบที่ถูกต้อง สำหรับผู้ตรวจเนื้อหาทางคลินิกและอาจารย์'**
+  String get sheetsIntro;
+
+  /// No description provided for @sheetTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'ชีทเฉลย {bedCode}'**
+  String sheetTitle(String bedCode);
+
+  /// No description provided for @sheetCorrect.
+  ///
+  /// In th, this message translates to:
+  /// **'ถูก'**
+  String get sheetCorrect;
+
+  /// No description provided for @sheetWrong.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่ควรเลือก'**
+  String get sheetWrong;
+
+  /// No description provided for @sheetOrder.
+  ///
+  /// In th, this message translates to:
+  /// **'ลำดับที่ถูกต้อง'**
+  String get sheetOrder;
+
+  /// No description provided for @sheetSafe.
+  ///
+  /// In th, this message translates to:
+  /// **'ควรทำ'**
+  String get sheetSafe;
+
+  /// No description provided for @sheetUnsafe.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่ควรทำ'**
+  String get sheetUnsafe;
+
+  /// No description provided for @sheetInOrder.
+  ///
+  /// In th, this message translates to:
+  /// **'เรียงตามลำดับ'**
+  String get sheetInOrder;
+
+  /// No description provided for @sheetAnyOrder.
+  ///
+  /// In th, this message translates to:
+  /// **'ไม่ต้องเรียงลำดับ'**
+  String get sheetAnyOrder;
+
+  /// No description provided for @sheetDoctor.
+  ///
+  /// In th, this message translates to:
+  /// **'แพทย์'**
+  String get sheetDoctor;
+
+  /// No description provided for @sheetNote.
+  ///
+  /// In th, this message translates to:
+  /// **'บันทึกทางคลินิก'**
+  String get sheetNote;
+
+  /// Ours: first-launch notice.
+  ///
+  /// In th, this message translates to:
+  /// **'สำหรับการฝึกเท่านั้น'**
+  String get noticeTitle;
+
+  /// No description provided for @noticeBody.
+  ///
+  /// In th, this message translates to:
+  /// **'เกมนี้ใช้ฝึกทักษะการพยาบาลผู้ป่วยวิกฤตเท่านั้น ไม่ใช่แนวทางเวชปฏิบัติ และห้ามใช้ประกอบการตัดสินใจดูแลผู้ป่วยจริง เนื้อหาทางคลินิกอยู่ระหว่างการตรวจทาน'**
+  String get noticeBody;
+
+  /// No description provided for @noticeOk.
+  ///
+  /// In th, this message translates to:
+  /// **'เข้าใจแล้ว'**
+  String get noticeOk;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In th, this message translates to:
+  /// **'เวอร์ชัน {version} · build {build}'**
+  String aboutVersion(String version, String build);
+
+  /// No description provided for @aboutCases.
+  ///
+  /// In th, this message translates to:
+  /// **'เคสและการออกแบบเกม: superxsiwa (A-WARD CCU)'**
+  String get aboutCases;
+
+  /// No description provided for @aboutClinical.
+  ///
+  /// In th, this message translates to:
+  /// **'ตรวจทานเนื้อหาทางคลินิก: พยาบาลวิชาชีพ (อยู่ระหว่างตรวจทาน)'**
+  String get aboutClinical;
+
+  /// No description provided for @aboutBuiltBy.
+  ///
+  /// In th, this message translates to:
+  /// **'พัฒนาแอป: ColabsCraft'**
+  String get aboutBuiltBy;
+
+  /// No description provided for @aboutOffline.
+  ///
+  /// In th, this message translates to:
+  /// **'ทำงานออฟไลน์ ไม่ส่งข้อมูลใดๆ ออกจากเครื่อง ความก้าวหน้าเก็บไว้ในเครื่องนี้เท่านั้น'**
+  String get aboutOffline;
+
+  /// No description provided for @aboutLicenses.
+  ///
+  /// In th, this message translates to:
+  /// **'สัญญาอนุญาตโอเพนซอร์ส'**
+  String get aboutLicenses;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

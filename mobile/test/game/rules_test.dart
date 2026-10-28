@@ -2,6 +2,8 @@ import 'package:criticalcare/game/case_model.dart';
 import 'package:criticalcare/game/rules.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/cases.dart';
+
 void main() {
   test('stars: no mistakes 3, one or two 2, more 1', () {
     expect([for (var m = 0; m <= 5; m++) starsForMistakes(m)], [3, 2, 2, 1, 1, 1]);
@@ -34,5 +36,10 @@ void main() {
     test('an SpO2 that is not a number does not alarm (JavaScript NaN <= 90 is false)', () {
       expect(isAlarmVitals(v(spo2: 'n/a')), isFalse);
     });
+  });
+
+  test('the timed step is the equipment step (unordered trays), wherever it sits (Q-B)', () {
+    final stages = bed(1).stages;
+    expect([for (final st in stages) isTimedStage(st)], [false, true, false, false, false, false]);
   });
 }
