@@ -14,6 +14,9 @@ import '../game/monitor.dart';
 
 /// The 8-bed CCU ward, after superxsiwa's WardPage: a banner with "start" / "continue", the bed
 /// cards with their monitor, patient, status and stars, and the nurse station between bays.
+/// The ward's column width on wide screens (the bar and the beds share it).
+const wardMaxWidth = 1000.0;
+
 class WardScreen extends ConsumerStatefulWidget {
   const WardScreen({super.key});
 
@@ -48,9 +51,13 @@ class _WardScreenState extends ConsumerState<WardScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final cases = ref.watch(bundledCasesProvider);
+    final width = MediaQuery.sizeOf(context).width;
+    final inset = width > wardMaxWidth + 24 ? (width - wardMaxWidth - 24) / 2 : 0.0;
     final progress = ref.watch(progressProvider).value ?? Progress.empty;
     return Scaffold(
       appBar: AppBar(
+        // On wide screens the bar's title and buttons line up with the ward's centred column.
+        titleSpacing: 16 + inset,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -68,6 +75,7 @@ class _WardScreenState extends ConsumerState<WardScreen> {
             icon: const Icon(Icons.settings_rounded),
             onPressed: () => context.push('/settings'),
           ),
+          SizedBox(width: inset),
         ],
       ),
       body: switch (cases) {
@@ -120,7 +128,7 @@ class _Ward extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
+              constraints: const BoxConstraints(maxWidth: wardMaxWidth),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
