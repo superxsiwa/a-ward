@@ -8,11 +8,13 @@ class MemoryProgressStore implements ProgressStore {
     this.progress = Progress.empty,
     this.seen = true,
     this.roster = Roster.empty,
+    this.importedCases,
   });
 
   Progress progress;
   bool seen;
   Roster roster;
+  String? importedCases;
   int saves = 0;
 
   @override
@@ -43,4 +45,10 @@ class MemoryProgressStore implements ProgressStore {
 
   @override
   Future<void> saveRoster(Roster r) async => roster = r;
+
+  @override
+  Future<String?> loadImportedCases() async => importedCases;
+
+  @override
+  Future<void> saveImportedCases(String? json) async => importedCases = json;
 }

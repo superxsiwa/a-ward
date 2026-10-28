@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/progress_store.dart';
 import '../data/providers.dart';
-import '../game/progress.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'theme.dart';
 
@@ -28,8 +26,8 @@ class PlayerBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final progress = ref.watch(progressProvider).value ?? Progress.empty;
-    final beds = ref.watch(bundledCasesProvider).value?.length ?? 8;
+    final progress = ref.watch(wardProgressProvider);
+    final beds = ref.watch(casesProvider).value?.length ?? 8;
     final inset = contentInset(MediaQuery.sizeOf(context).width);
     final max = beds * 3;
     final stars = progress.totalStars;

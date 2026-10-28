@@ -20,9 +20,9 @@ class ProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final progress = ref.watch(progressProvider).value ?? Progress.empty;
+    final progress = ref.watch(wardProgressProvider);
     final roster = ref.watch(rosterProvider).value ?? Roster.empty;
-    final beds = ref.watch(bundledCasesProvider).value?.length ?? 8;
+    final beds = ref.watch(casesProvider).value?.length ?? 8;
     final c = MilestoneContext(progress: progress, shiftsCleared: roster.shiftsCleared);
     final mStars = milestoneStars(c);
     return Scaffold(

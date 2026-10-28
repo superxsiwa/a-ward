@@ -6,6 +6,7 @@ import 'package:criticalcare/data/progress_store.dart';
 import 'package:criticalcare/data/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'cases.dart';
@@ -20,6 +21,7 @@ Future<void> pumpApp(
   Size size = const Size(1080, 2400),
   double pixelRatio = 2.625,
   int seed = 1,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = pixelRatio;
@@ -31,6 +33,7 @@ Future<void> pumpApp(
         progressStoreProvider.overrideWithValue(store),
         sfxProvider.overrideWithValue(sfx),
         randomProvider.overrideWithValue(Random(seed)),
+        ...overrides,
       ],
       child: const CriticalCareApp(),
     ),

@@ -53,8 +53,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(bundledCasesProvider.future).then((cases) {
+    ref.read(caseSetProvider.future).then((set) {
       if (!mounted) return;
+      final cases = set.cases;
       final bed = cases.firstWhere((c) => c.bedNum == widget.bedNum, orElse: () => cases.first);
       _setSession(CaseSession.start(bed));
     });
@@ -255,9 +256,9 @@ class _GameScreenState extends ConsumerState<GameScreen> {
   /// level-up, a cleared shift, and the next bed (his `finishCase` + win modal).
   Future<void> _finish(BedCase bed, CaseResult result) async {
     final l = AppLocalizations.of(context);
-    final outcome = await ref.read(progressProvider.notifier).record(result);
-    final cases = ref.read(bundledCasesProvider).value ?? const <BedCase>[];
+    final cases = ref.read(casesProvider).value ?? const <BedCase>[];
     final bedNums = [for (final c in cases) c.bedNum];
+    final outcome = await ref.read(progressProvider.notifier).record(result, ward: bedNums);
     final duty = ref.read(dutyProvider);
     final rosterNotifier = ref.read(rosterProvider.notifier);
     final cleared = await rosterNotifier.recordBed(bed.bedNum, bedNums);

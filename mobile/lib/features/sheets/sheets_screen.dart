@@ -15,7 +15,7 @@ class SheetsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final cases = ref.watch(bundledCasesProvider).value ?? const <BedCase>[];
+    final cases = ref.watch(casesProvider).value ?? const <BedCase>[];
     return Scaffold(
       appBar: AppBar(title: Text(l.sheetsTitle)),
       body: ListView(
@@ -57,7 +57,7 @@ class SheetScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final cases = ref.watch(bundledCasesProvider).value ?? const <BedCase>[];
+    final cases = ref.watch(casesProvider).value ?? const <BedCase>[];
     final c = cases.where((x) => x.bedNum == bedNum).firstOrNull;
     return Scaffold(
       appBar: AppBar(title: Text(c == null ? l.sheetsTitle : l.sheetTitle(c.bedCode))),

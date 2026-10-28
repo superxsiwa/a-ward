@@ -114,7 +114,7 @@ class _RosterScreenState extends ConsumerState<RosterScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final roster = ref.watch(rosterProvider).value;
-    final cases = ref.watch(bundledCasesProvider).value;
+    final cases = ref.watch(casesProvider).value;
     return Scaffold(
       appBar: const PlayerBar(),
       body: roster == null || cases == null || !roster.has(_month)

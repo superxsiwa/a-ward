@@ -74,4 +74,25 @@ void main() {
       isEmpty,
     );
   });
+
+  test('totals over the ward\'s beds ignore records of beds no longer there', () {
+    CaseResult done(int bed, int stars) => CaseResult(
+      bedNum: bed,
+      stars: stars,
+      mistakes: 3 - stars,
+      traysSorted: 0,
+      flawlessSteps: 0,
+      isEmergency: false,
+    );
+    final p = Progress.empty.record(done(1, 3)).progress.record(done(2, 2)).progress;
+    final ward = p.within([2, 3]);
+    expect(ward.totalStars, 2);
+    expect(ward.passedCount, 1);
+    expect(ward.stats.totalCompletedCases, 2, reason: 'the counters are the player\'s');
+    expect(identical(p.within([1, 2, 3]), p), isTrue);
+    // 2 stars in the ward, then 3 more: level 1 -> 2 there; over every record 5 -> 8 stars is
+    // level 2 -> 3.
+    expect(p.record(done(3, 3), ward: [2, 3]).levelUp, 2);
+    expect(p.record(done(3, 3)).levelUp, 3);
+  });
 }
