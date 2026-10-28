@@ -23,7 +23,12 @@ class CaseRepository {
   final AssetBundle _bundle;
 
   Future<List<BedCase>> loadBundled() async => [
+    for (final json in await loadBundledJson()) BedCase.fromJson(json),
+  ];
+
+  /// The shipped cases as JSON, for the export.
+  Future<List<Map<String, Object?>>> loadBundledJson() async => [
     for (var n = 1; n <= bundledCaseCount; n++)
-      BedCase.fromJson(jsonDecode(await _bundle.loadString(bundledCaseAsset(n)))),
+      jsonDecode(await _bundle.loadString(bundledCaseAsset(n))) as Map<String, Object?>,
   ];
 }

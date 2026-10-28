@@ -573,4 +573,74 @@ class AppLocalizationsTh extends AppLocalizations {
   String expBar(int percent) {
     return 'EXP สู่เลเวลถัดไป $percent%';
   }
+
+  @override
+  String get casesTitle => '📁 จัดการเคสหัตถการ';
+
+  @override
+  String casesShipped(int count) {
+    return 'ใช้เคสมาตรฐาน CCU $count เตียง';
+  }
+
+  @override
+  String casesImported(int count) {
+    return 'ใช้เคสที่นำเข้าจากไฟล์ $count เคส';
+  }
+
+  @override
+  String get exportCases => 'ส่งออกไฟล์ JSON';
+
+  @override
+  String get exported => 'ดาวน์โหลดไฟล์ JSON เรียบร้อย 📤';
+
+  @override
+  String get exportFailed => 'ส่งออกไฟล์ไม่สำเร็จ';
+
+  @override
+  String get importCases => '📥 นำเข้าไฟล์ JSON';
+
+  @override
+  String get importBadTitle => 'รูปแบบไฟล์ JSON ไม่ถูกต้อง';
+
+  @override
+  String get importReadError => 'เกิดข้อผิดพลาดในการอ่านไฟล์ JSON';
+
+  @override
+  String get importConfirmTitle => 'แทนที่เคสทั้งหมด?';
+
+  @override
+  String importConfirmBody(int count) {
+    return 'เคสในวอร์ดจะถูกแทนที่ด้วย $count เคสจากไฟล์นี้ ดาวที่ได้แล้วยังอยู่ตามหมายเลขเตียง';
+  }
+
+  @override
+  String get importConfirm => 'นำเข้า';
+
+  @override
+  String imported(int count) {
+    return 'นำเข้าเคสสำเร็จทั้งหมด $count เคส 🎉';
+  }
+
+  @override
+  String moreProblems(int count) {
+    return 'และอีก $count ข้อ';
+  }
+
+  @override
+  String get close => 'ปิด';
+
+  @override
+  String get resetCases => '🔄 คืนค่าเคสตั้งต้น';
+
+  @override
+  String get resetCasesTitle => 'คืนค่าเคสตั้งต้น?';
+
+  @override
+  String get resetCasesBody => 'เคสทั้งหมดจะถูกรีเซ็ตกลับเป็น 8 เตียงมาตรฐานของ CCU';
+
+  @override
+  String get resetCasesConfirm => 'คืนค่าเริ่มต้น';
+
+  @override
+  String get resetCasesDone => 'คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄';
 }

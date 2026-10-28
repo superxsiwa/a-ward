@@ -34,6 +34,10 @@ abstract interface class ProgressStore {
 
   Future<Roster> loadRoster();
   Future<void> saveRoster(Roster roster);
+
+  /// The imported case file, as JSON text; null when the ward plays the shipped cases.
+  Future<String?> loadImportedCases();
+  Future<void> saveImportedCases(String? json);
 }
 
 class PrefsProgressStore implements ProgressStore {
@@ -43,6 +47,7 @@ class PrefsProgressStore implements ProgressStore {
   static const _progressKey = 'progress.v${Progress.schemaVersion}';
   static const _noticeKey = 'notice.seen';
   static const _rosterKey = 'roster.v${Roster.schemaVersion}';
+  static const _casesKey = 'cases.imported.v1';
 
   @override
   Future<Progress> load() async {
@@ -75,6 +80,13 @@ class PrefsProgressStore implements ProgressStore {
       _prefs.setString(_rosterKey, jsonEncode(roster.toJson()));
 
   @override
+  Future<String?> loadImportedCases() => _prefs.getString(_casesKey);
+
+  @override
+  Future<void> saveImportedCases(String? json) =>
+      json == null ? _prefs.remove(_casesKey) : _prefs.setString(_casesKey, json);
+
+  @override
   Future<bool> noticeSeen() async => await _prefs.getBool(_noticeKey) ?? false;
 
   @override
@@ -100,10 +112,11 @@ class ProgressNotifier extends AsyncNotifier<Progress> {
   Future<Progress> build() => ref.watch(progressStoreProvider).load();
 
   /// Saves a finished case and says what it changed.
-  Future<RecordOutcome> record(CaseResult result) async {
+  /// Saves a finished case; a level up is judged on the ward's beds [ward].
+  Future<RecordOutcome> record(CaseResult result, {Iterable<int>? ward}) async {
     if (state.value == null) await future;
     final current = state.value ?? Progress.empty;
-    final outcome = current.record(result);
+    final outcome = current.record(result, ward: ward);
     state = AsyncData(outcome.progress);
     await ref.read(progressStoreProvider).save(outcome.progress);
     return outcome;

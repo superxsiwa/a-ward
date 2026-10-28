@@ -1057,6 +1057,126 @@ abstract class AppLocalizations {
   /// In th, this message translates to:
   /// **'EXP สู่เลเวลถัดไป {percent}%'**
   String expBar(int percent);
+
+  /// His '📁 จัดการเคสหัตถการ & ตารางคะแนน (Instructor Portal)', shortened: no scoreboard in v1.
+  ///
+  /// In th, this message translates to:
+  /// **'📁 จัดการเคสหัตถการ'**
+  String get casesTitle;
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้เคสมาตรฐาน CCU {count} เตียง'**
+  String casesShipped(int count);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'ใช้เคสที่นำเข้าจากไฟล์ {count} เคส'**
+  String casesImported(int count);
+
+  /// No description provided for @exportCases.
+  ///
+  /// In th, this message translates to:
+  /// **'ส่งออกไฟล์ JSON'**
+  String get exportCases;
+
+  /// No description provided for @exported.
+  ///
+  /// In th, this message translates to:
+  /// **'ดาวน์โหลดไฟล์ JSON เรียบร้อย 📤'**
+  String get exported;
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'ส่งออกไฟล์ไม่สำเร็จ'**
+  String get exportFailed;
+
+  /// No description provided for @importCases.
+  ///
+  /// In th, this message translates to:
+  /// **'📥 นำเข้าไฟล์ JSON'**
+  String get importCases;
+
+  /// No description provided for @importBadTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'รูปแบบไฟล์ JSON ไม่ถูกต้อง'**
+  String get importBadTitle;
+
+  /// No description provided for @importReadError.
+  ///
+  /// In th, this message translates to:
+  /// **'เกิดข้อผิดพลาดในการอ่านไฟล์ JSON'**
+  String get importReadError;
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'แทนที่เคสทั้งหมด?'**
+  String get importConfirmTitle;
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'เคสในวอร์ดจะถูกแทนที่ด้วย {count} เคสจากไฟล์นี้ ดาวที่ได้แล้วยังอยู่ตามหมายเลขเตียง'**
+  String importConfirmBody(int count);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'นำเข้า'**
+  String get importConfirm;
+
+  /// No description provided for @imported.
+  ///
+  /// In th, this message translates to:
+  /// **'นำเข้าเคสสำเร็จทั้งหมด {count} เคส 🎉'**
+  String imported(int count);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'และอีก {count} ข้อ'**
+  String moreProblems(int count);
+
+  /// Ours.
+  ///
+  /// In th, this message translates to:
+  /// **'ปิด'**
+  String get close;
+
+  /// No description provided for @resetCases.
+  ///
+  /// In th, this message translates to:
+  /// **'🔄 คืนค่าเคสตั้งต้น'**
+  String get resetCases;
+
+  /// No description provided for @resetCasesTitle.
+  ///
+  /// In th, this message translates to:
+  /// **'คืนค่าเคสตั้งต้น?'**
+  String get resetCasesTitle;
+
+  /// No description provided for @resetCasesBody.
+  ///
+  /// In th, this message translates to:
+  /// **'เคสทั้งหมดจะถูกรีเซ็ตกลับเป็น 8 เตียงมาตรฐานของ CCU'**
+  String get resetCasesBody;
+
+  /// No description provided for @resetCasesConfirm.
+  ///
+  /// In th, this message translates to:
+  /// **'คืนค่าเริ่มต้น'**
+  String get resetCasesConfirm;
+
+  /// No description provided for @resetCasesDone.
+  ///
+  /// In th, this message translates to:
+  /// **'คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄'**
+  String get resetCasesDone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

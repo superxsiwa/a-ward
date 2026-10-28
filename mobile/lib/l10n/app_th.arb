@@ -512,5 +512,79 @@
         "type": "int"
       }
     }
-  }
+  },
+  "casesTitle": "📁 จัดการเคสหัตถการ",
+  "@casesTitle": {
+    "description": "His '📁 จัดการเคสหัตถการ & ตารางคะแนน (Instructor Portal)', shortened: no scoreboard in v1."
+  },
+  "casesShipped": "ใช้เคสมาตรฐาน CCU {count} เตียง",
+  "@casesShipped": {
+    "description": "Ours.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "casesImported": "ใช้เคสที่นำเข้าจากไฟล์ {count} เคส",
+  "@casesImported": {
+    "description": "Ours.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportCases": "ส่งออกไฟล์ JSON",
+  "exported": "ดาวน์โหลดไฟล์ JSON เรียบร้อย 📤",
+  "exportFailed": "ส่งออกไฟล์ไม่สำเร็จ",
+  "@exportFailed": {
+    "description": "Ours."
+  },
+  "importCases": "📥 นำเข้าไฟล์ JSON",
+  "importBadTitle": "รูปแบบไฟล์ JSON ไม่ถูกต้อง",
+  "importReadError": "เกิดข้อผิดพลาดในการอ่านไฟล์ JSON",
+  "importConfirmTitle": "แทนที่เคสทั้งหมด?",
+  "@importConfirmTitle": {
+    "description": "Ours."
+  },
+  "importConfirmBody": "เคสในวอร์ดจะถูกแทนที่ด้วย {count} เคสจากไฟล์นี้ ดาวที่ได้แล้วยังอยู่ตามหมายเลขเตียง",
+  "@importConfirmBody": {
+    "description": "Ours.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importConfirm": "นำเข้า",
+  "@importConfirm": {
+    "description": "Ours."
+  },
+  "imported": "นำเข้าเคสสำเร็จทั้งหมด {count} เคส 🎉",
+  "@imported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreProblems": "และอีก {count} ข้อ",
+  "@moreProblems": {
+    "description": "Ours.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "close": "ปิด",
+  "@close": {
+    "description": "Ours."
+  },
+  "resetCases": "🔄 คืนค่าเคสตั้งต้น",
+  "resetCasesTitle": "คืนค่าเคสตั้งต้น?",
+  "resetCasesBody": "เคสทั้งหมดจะถูกรีเซ็ตกลับเป็น 8 เตียงมาตรฐานของ CCU",
+  "resetCasesConfirm": "คืนค่าเริ่มต้น",
+  "resetCasesDone": "คืนค่าเคสมาตรฐาน CCU เรียบร้อย 🔄"
 }

@@ -23,8 +23,8 @@ class WardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final cases = ref.watch(bundledCasesProvider);
-    final progress = ref.watch(progressProvider).value ?? Progress.empty;
+    final cases = ref.watch(casesProvider);
+    final progress = ref.watch(wardProgressProvider);
     final roster = ref.watch(rosterProvider).value ?? Roster.empty;
     final duty = ref.watch(dutyProvider);
     return Scaffold(

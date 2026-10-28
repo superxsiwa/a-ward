@@ -134,8 +134,23 @@ class Progress {
     return null;
   }
 
-  /// Adds a finished case (`finishCase`): the bed keeps its best stars; the counters grow.
-  RecordOutcome record(CaseResult r) {
+  /// Only the records of the ward's beds [bedNums] (his totals count the beds in the ward: after a
+  /// case file import, records of beds no longer there must not count). The counters stay.
+  Progress within(Iterable<int> bedNums) {
+    final keep = bedNums.toSet();
+    if (beds.keys.every(keep.contains)) return this;
+    return Progress(
+      beds: {
+        for (final e in beds.entries)
+          if (keep.contains(e.key)) e.key: e.value,
+      },
+      stats: stats,
+    );
+  }
+
+  /// Adds a finished case (`finishCase`): the bed keeps its best stars; the counters grow. A level
+  /// up is judged on the ward's beds [ward] when given.
+  RecordOutcome record(CaseResult r, {Iterable<int>? ward}) {
     final before = bed(r.bedNum);
     final best = r.stars > before.stars ? r.stars : before.stars;
     final s = stats;
@@ -154,10 +169,12 @@ class Progress {
         stepsWithoutMistake: s.stepsWithoutMistake + r.flawlessSteps,
       ),
     );
+    final was = ward == null ? level : within(ward).level;
+    final now = ward == null ? next.level : next.within(ward).level;
     return RecordOutcome(
       progress: next,
       gainedStars: best - before.stars,
-      levelUp: next.level > level ? next.level : null,
+      levelUp: now > was ? now : null,
     );
   }
 
